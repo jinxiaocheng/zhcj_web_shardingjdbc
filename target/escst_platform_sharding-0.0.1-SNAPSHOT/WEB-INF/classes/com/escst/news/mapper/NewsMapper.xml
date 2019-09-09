@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.news.mapper.NewsMapper">
+
+    <select id="queryAdList" parameterType="com.escst.news.entity.NewsEntity" resultType="map">
+       SELECT
+            IFNULL(TBN.id,"") id,
+            TBN.type type,
+            IFNULL(TBN.title,"") title,
+            IFNULL(TBN.content,"") content,
+            IFNULL(TBN.link,"") link,
+            IFNULL(TBF.path,"") path,
+            TBF.ID fileId,TBF.path
+       <include refid="whereCondition"></include>
+        ORDER BY
+            TBN.CREATE_TIME DESC
+    </select>
+
+    <select id="selectCount" parameterType="com.escst.news.entity.NewsEntity" resultType="Integer">
+        SELECT
+        count(1)
+        <include refid="whereCondition"></include>
+    </select>
+
+	<sql id="whereCondition">
+		FROM
+            T_BASIC_NEWS TBN
+        left JOIN T_BASIC_FILE TBF ON TBF.ID = TBN.FILE_ID
+	    WHERE 1=1
+	</sql>
+	
+    <insert id="saveNewsInfo" parameterType="com.escst.news.entity.NewsEntity">
+        INSERT INTO T_BASIC_NEWS (
+        ID,
+        TITLE,
+        CONTENT,
+        FILE_ID,
+        LINK,
+        TYPE,
+        CREATE_TIME,
+        CREATE_BY
+        )
+        VALUES
+        (#{id}, #{title}, #{content}, #{fileId},#{link},#{type},#{createTime},#{createBy})
+
+    </insert>
+
+
+</mapper>

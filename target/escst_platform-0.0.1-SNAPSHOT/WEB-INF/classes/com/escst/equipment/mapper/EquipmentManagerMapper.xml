@@ -1,0 +1,748 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.equipment.mapper.EquipmentManagerMapper">
+    <select id="queryList" parameterType="com.escst.equipment.entity.EquipmentManagerEntity" resultType="map">
+        SELECT
+        IFNULL(a.id,"") id,
+        IFNULL(a.name,"") name,
+        IFNULL(a.number,"") number,
+        IFNULL(a.model,"") model,
+        IFNULL(a.manufacturer,"") manufacturer,
+        IFNULL(a.leasing_company,"") leasingCompany,
+        IFNULL(a.create_time,"") createTime,
+        IFNULL(b.name,"") constructionName,
+        IFNULL(c.name,"") belongAreaName
+        FROM t_basic_equipment_register a
+        LEFT JOIN t_basic_construction b ON b.id=a.construction_id
+        LEFT JOIN t_sys_territory c ON c.id=b.belong_area
+        <where>
+            AND a.status =1
+            <if test="constructionId != null and constructionId != '' ">
+                AND a.construction_id = #{constructionId}
+            </if>
+
+            <if test="name != null and name != ''">
+                AND (
+                a.name LIKE CONCAT("%",#{name},"%")
+                OR a.code LIKE CONCAT("%",#{name},"%"))
+            </if>
+            <if test="userId != null and userId != ''">
+                and exists (
+                select 1
+                from t_sys_user u
+                inner join t_sys_organization p on p.id = u.org_id
+                inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                where s.construction_id = b.id and u.id = #{userId}
+                )
+            </if>
+            <if test="belongArea !=null and belongArea !=''">
+                AND b.belong_area=#{belongArea}
+            </if>
+        </where>
+        ORDER BY a.create_time DESC
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+    <select id="queryByequipemntId" parameterType="com.escst.equipment.entity.EquipmentManagerEntity" resultType="map">
+        SELECT er.* FROM t_basic_equipment_register er
+        LEFT JOIN t_basic_construction b ON b.id=er.construction_id
+        <where>
+            er.status =1
+            AND
+            er.id not in(
+            SELECT em.equipment_id FROM t_basic_equipment_maintenance em
+            )
+            <if test="constructionId !=null and constructionId !=''">
+                AND er.construction_id =#{constructionId}
+            </if>
+            <if test="name != null and name != ''">
+                AND
+                er.name LIKE CONCAT("%",#{name},"%")
+            </if>
+            AND exists (
+            select 1
+            from t_sys_user u
+            inner join t_sys_organization p on p.id = u.org_id
+            inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+            where s.construction_id = b.id and u.id =#{userId}
+            )
+        </where>
+        ORDER BY er.create_time DESC
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="selectCountByDisassembly" parameterType="com.escst.equipment.entity.EquipmentManagerEntity"
+            resultType="int">
+        SELECT COUNT(er.id) AS count FROM t_basic_equipment_register er
+        LEFT JOIN t_basic_construction b ON b.id = er.construction_id
+        <where>
+            er.id not in(
+            SELECT em.equipment_id FROM t_basic_equipment_maintenance em
+            )
+            AND
+            er.status =1
+            <if test="constructionId !=null and constructionId !=''">
+                AND er.construction_id =#{constructionId}
+            </if>
+            <if test="name != null and name != ''">
+                AND
+                er.name LIKE CONCAT("%",#{name},"%")
+            </if>
+            AND exists (
+            select 1
+            from t_sys_user u
+            inner join t_sys_organization p on p.id = u.org_id
+            inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+            where s.construction_id = b.id and u.id =#{userId}
+            )
+        </where>
+    </select>
+
+    <select id="queryMaintenanceByequipemntId" parameterType="com.escst.equipment.entity.EquipmentManagerEntity"
+            resultType="map">
+        SELECT er.* FROM t_basic_equipment_register er
+        LEFT JOIN t_basic_construction b ON b.id=er.construction_id
+        <where>
+            er.id not in(
+            SELECT em.equipment_id FROM t_basic_equipment_maintenance em
+            ) and
+            er.status =1
+            <if test="constructionId !=null and constructionId !=''">
+                AND er.construction_id =#{constructionId}
+            </if>
+            <if test="name != null and name != ''">
+                AND
+                er.name LIKE CONCAT("%",#{name},"%")
+            </if>
+
+        </where>
+        ORDER BY er.create_time DESC
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="selectCountByMaintenance" parameterType="com.escst.equipment.entity.EquipmentManagerEntity"
+            resultType="int">
+        SELECT count(er.id) AS count FROM t_basic_equipment_register er
+        LEFT JOIN t_basic_construction b ON b.id=er.construction_id
+        <where>
+            er.id not in(
+            SELECT em.equipment_id FROM t_basic_equipment_maintenance em
+            )
+            and er.status=1
+            <if test="constructionId !=null and constructionId !=''">
+                AND er.construction_id =#{constructionId}
+            </if>
+            <if test="name != null and name != ''">
+                AND
+                er.name LIKE CONCAT("%",#{name},"%")
+            </if>
+            AND exists (
+            select 1
+            from t_sys_user u
+            inner join t_sys_organization p on p.id = u.org_id
+            inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+            where s.construction_id = b.id and u.id =#{userId}
+            )
+        </where>
+    </select>
+    <select id="selectCount" parameterType="com.escst.equipment.entity.EquipmentManagerEntity" resultType="int">
+        SELECT COUNT(a.ID)
+        FROM t_basic_equipment_register a
+        LEFT JOIN t_basic_construction b ON b.id=a.construction_id
+        <where>
+            and a.status=1
+            <if test="constructionId != null and constructionId != '' ">
+                AND a.construction_id = #{constructionId}
+            </if>
+
+            <if test="name != null and name != ''">
+                AND (
+                a.name LIKE CONCAT("%",#{name},"%")
+                OR a.code LIKE CONCAT("%",#{name},"%"))
+            </if>
+            <if test="userId != null and userId != ''">
+                and exists (
+                select 1
+                from t_sys_user u
+                inner join t_sys_organization p on p.id = u.org_id
+                inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                where s.construction_id = a.construction_id and u.id = #{userId}
+                )
+            </if>
+            <if test="belongArea !=null and belongArea !=''">
+                AND b.belong_area=#{belongArea}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryListDtail" parameterType="String" resultType="map">
+        SELECT
+            IFNULL(a.id, "")           id,
+            IFNULL(a.name, "")         name,
+            IFNULL(a.number, "")       number,
+            IFNULL(a.model, "")        model,
+            IFNULL(c.type, "")         type,
+            IFNULL(a.manufacturer, "") manufacturer,
+            IFNULL(a.description, "")  description,
+            IFNULL(a.create_time, "")  createTime,
+            IFNULL(b.name, "")         personLiable,
+            IFNULL(a.remark, "")       remark
+        FROM t_basic_equipment_register a
+            LEFT JOIN t_basic_equipment_in_out_record c ON c.equipment_id = a.id
+            LEFT JOIN t_basic_person b ON b.user_id = c.person_id
+        WHERE a.id = #{equipmentId}
+    </select>
+
+
+    <select id="queryEquipmentInOutRecordList" parameterType="com.escst.equipment.entity.EquipmentInOutRecordEntity"
+            resultType="map">
+        SELECT
+        IFNULL(a.id,"") id,
+        IFNULL(d.name,"") name,
+        IFNULL(a.equipment_id,"")equipmentId,
+        IFNULL(d.number,"") number,
+        IFNULL(b.name,"") constructionName,
+        IFNULL(b.id,"") constructionId,
+        IFNULL(c.id,"") areaId,
+        IFNULL(d.model,"") model,
+        IFNULL(d.manufacturer,"") manufacturer,
+        IFNULL(d.leasing_company,"") leasingCompany,
+        IFNULL(c.name,"") belongAreaName,
+        IFNULL(a.type,"") type,
+        IFNULL(a.create_time,"") createTime,
+        IFNULL(a.remark,"") remark,
+        IFNULL(e.id,"") personId,
+        IFNULL(e.name,"")personLiable,
+        IFNULL(a.is_attach,0) isAttach
+        FROM t_basic_equipment_in_out_record a
+        LEFT JOIN t_basic_construction b ON b.id=a.construction_id
+        LEFT JOIN t_sys_territory c ON c.id=b.belong_area
+        LEFT JOIN t_basic_equipment_register d ON d.id=a.equipment_id
+        LEFT JOIN t_sys_user e ON e.id=a.person_id
+        <where>
+            d.status =1
+            <if test="constructionId != null and constructionId != '' ">
+                AND a.construction_id=#{constructionId}
+            </if>
+            <if test="name != null and name != ''">
+                AND (
+                d.name LIKE CONCAT("%",#{name},"%")
+                OR d.code LIKE CONCAT("%",#{name},"%"))
+            </if>
+            <if test="type != null and type != 0 ">
+                AND d.type = #{type}
+            </if>
+            <if test="belongArea !=null and belongArea !=''">
+                AND b.belong_area=#{belongArea}
+            </if>
+            <if test="userId != null and userId != ''">
+                and exists (
+                select 1
+                from t_sys_user u
+                inner join t_sys_organization p on p.id = u.org_id
+                inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                where s.construction_id = a.construction_id and u.id = #{userId}
+                )
+            </if>
+
+        </where>
+        ORDER BY a.create_time DESC
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="selectEquipmentInOutRecordCount" parameterType="com.escst.equipment.entity.EquipmentInOutRecordEntity"
+            resultType="int">
+        SELECT COUNT(a.ID)
+        FROM t_basic_equipment_in_out_record a
+        LEFT JOIN t_basic_equipment_register d ON d.id=a.equipment_id
+        LEFT JOIN t_basic_construction b ON b.id=a.construction_id
+        <where>
+            d.status =1
+            <if test="constructionId != null and constructionId != '' ">
+                AND a.construction_id=#{constructionId}
+            </if>
+            <if test="name != null and name != ''">
+                AND (
+                d.name LIKE CONCAT("%",#{name},"%")
+                OR d.code LIKE CONCAT("%",#{name},"%"))
+            </if>
+            <if test="type != null and type != 0 ">
+                AND d.type = #{type}
+            </if>
+            <if test="belongArea !=null and belongArea !=''">
+                AND b.belong_area=#{belongArea}
+            </if>
+            <if test="userId != null and userId != ''">
+                and exists (
+                select 1
+                from t_sys_user u
+                inner join t_sys_organization p on p.id = u.org_id
+                inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                where s.construction_id = a.construction_id and u.id = #{userId}
+                )
+            </if>
+
+        </where>
+    </select>
+
+    <select id="queryEquipmentInOutRecordDtail" parameterType="com.escst.equipment.entity.EquipmentInOutRecordEntity"
+            resultType="com.escst.equipment.entity.EquipmentInOutRecordEntity">
+        SELECT
+            IFNULL(b.id, "")          id,
+            IFNULL(a.name, "")        name,
+            IFNULL(a.number, "")      number,
+            IFNULL(c.name, "")        constructionName,
+            IFNULL(d.name, "")        personName,
+            IFNULL(b.create_time, "") createTime,
+            IFNULL(b.remark, "")      remark,
+            IFNULL(b.type, 0)         type,
+            IFNULL(b.is_attach, 0)    isAttach
+        FROM t_basic_equipment_in_out_record b
+            LEFT JOIN t_basic_equipment_register a ON b.equipment_id = a.id
+            LEFT JOIN t_basic_construction c ON c.id = b.construction_id
+            LEFT JOIN t_basic_person d ON d.user_id = b.person_id
+        WHERE b.id = #{equipmentId}
+    </select>
+
+    <select id="queryEquipmentMaintenanceList" parameterType="com.escst.equipment.entity.EquipmentMaintenanceEntity"
+            resultType="map">
+        SELECT
+        IFNULL(a.id,"") id,
+        IFNULL(d.name,"") name,
+        IFNULL(a.equipment_id,"")equipmentId,
+        IFNULL(d.number,"") number,
+        IFNULL(d.model,"") model,
+        IFNULL(d.manufacturer,"") manufacturer,
+        IFNULL(a.create_time,"") createTime,
+        IFNULL(a.remark,"") remark,
+        IFNULL(b.name,"") constructionName,
+        IFNULL(t.name,"") belongAreaName,
+        IFNULL(c.name,"")createBy,
+        IFNULL(a.type,"") type,
+        IFNULL(a.maintenance_date,"") maintenanceDate,
+        IFNULL(a.is_attach,0) isAttach
+        FROM t_basic_equipment_maintenance a
+        LEFT JOIN t_basic_construction b ON b.id=a.construction_id
+        LEFT JOIN t_basic_equipment_register d ON d.id=a.equipment_id
+        LEFT JOIN t_sys_user c on c.id=d.create_by
+        LEFT JOIN t_sys_territory t ON t.id=b.belong_area
+        <where>
+            d.status =1
+            <if test="constructionId != null and constructionId != '' ">
+                AND a.construction_id = #{constructionId}
+            </if>
+            <if test="name != null and name != ''">
+                AND (
+                d.name LIKE CONCAT("%",#{name},"%")
+                OR d.code LIKE CONCAT("%",#{name},"%"))
+            </if>
+            <if test="userId != null and userId != ''">
+                and exists (
+                select 1
+                from t_sys_user u
+                inner join t_sys_organization p on p.id = u.org_id
+                inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                where s.construction_id = a.construction_id and u.id = #{userId}
+                )
+            </if>
+            <if test="belongArea !=null and belongArea !=''">
+                AND b.belong_area=#{belongArea}
+            </if>
+        </where>
+        ORDER BY a.create_time DESC
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="selectEquipmentMaintenanceCount" parameterType="com.escst.equipment.entity.EquipmentMaintenanceEntity"
+            resultType="int">
+        SELECT COUNT(a.id)
+        FROM t_basic_equipment_maintenance a
+        LEFT JOIN t_basic_equipment_register d ON d.id=a.equipment_id
+        LEFT JOIN t_basic_construction b ON b.id=a.construction_id
+        <where>
+            b.status =1
+            <if test="constructionId != null and constructionId != '' ">
+                AND a.construction_id = #{constructionId}
+            </if>
+            <if test="name != null and name != ''">
+                AND (
+                d.name LIKE CONCAT("%",#{name},"%")
+                OR d.code LIKE CONCAT("%",#{name},"%"))
+            </if>
+            <if test="userId != null and userId != ''">
+                and exists (
+                select 1
+                from t_sys_user u
+                inner join t_sys_organization p on p.id = u.org_id
+                inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                where s.construction_id = a.construction_id and u.id = #{userId}
+                )
+            </if>
+            <if test="belongArea !=null and belongArea !=''">
+                AND b.belong_area=#{belongArea}
+            </if>
+        </where>
+    </select>
+
+    <select id="querytEquipmentMaintenanceDtail" parameterType="String"
+            resultType="com.escst.equipment.entity.EquipmentMaintenanceEntity">
+        SELECT
+            IFNULL(b.id, "")               id,
+            IFNULL(a.name, "")             name,
+            IFNULL(a.number, "")           number,
+            IFNULL(a.model, "")            model,
+            IFNULL(a.manufacturer, "")     manufacturer,
+            IFNULL(b.create_time, "")      createTime,
+            IFNULL(c.name, "")             createBy,
+            IFNULL(b.remark, "")           remark,
+            IFNULL(b.type, 0)              type,
+            IFNULL(b.maintenance_date, "") maintenanceDate,
+            IFNULL(b.is_attach, 0)         isAttach
+        FROM t_basic_equipment_maintenance b
+            LEFT JOIN t_basic_equipment_register a ON b.equipment_id = a.id
+            LEFT JOIN t_sys_user c ON c.id = b.create_by
+        WHERE b.id = #{equipmentId}
+    </select>
+
+    <select id="queryEquipmentDisassemblyList" parameterType="com.escst.equipment.entity.EquipmentDisassemblyEntity"
+            resultType="map">
+        SELECT
+        IFNULL(a.id,"") id,
+        IFNULL(d.name,"") name,
+        IFNULL(d.number,"") number,
+        IFNULL(a.equipment_id,"")equipmentId,
+        IFNULL(d.model,"") model,
+        IFNULL(d.manufacturer,"") manufacturer,
+        IFNULL(a.create_time,"") createTime,
+        IFNULL(c.name,"") createBy,
+        IFNULL(a.type,0)type,
+        IFNULL(a.remark,"") remark,
+        IFNULL(b.name,"") constructionName,
+        IFNULL(t.name,"") belongAreaName,
+        IFNULL(a.disassembly_date,"") disassemblyDate,
+        IFNULL(a.is_attach,0) isAttach
+        FROM t_basic_equipment_disassembly a
+        LEFT JOIN t_basic_equipment_register d ON d.id=a.equipment_id
+        LEFT JOIN t_basic_construction b ON b.id=d.construction_id
+        LEFT JOIN t_sys_user c ON c.id=d.create_by
+        LEFT JOIN t_sys_territory t ON t.id=b.belong_area
+        <where>
+            d.status =1
+            <if test="constructionId != null and constructionId != '' ">
+                AND a.construction_id = #{constructionId}
+            </if>
+            <if test="name != null and name != ''">
+                AND (
+                d.name LIKE CONCAT("%",#{name},"%")
+                OR d.code LIKE CONCAT("%",#{name},"%"))
+            </if>
+            <if test="userId != null and userId != ''">
+                and exists (
+                select 1
+                from t_sys_user u
+                inner join t_sys_organization p on p.id = u.org_id
+                inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                where s.construction_id = a.construction_id and u.id = #{userId}
+                )
+            </if>
+            <if test="belongArea !=null and belongArea !=''">
+                AND b.belong_area=#{belongArea}
+            </if>
+        </where>
+        ORDER BY a.create_time DESC
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="querytEquipmentDisassemblyDtail" parameterType="String"
+            resultType="com.escst.equipment.entity.EquipmentDisassemblyEntity">
+        SELECT
+            IFNULL(b.id, "")               id,
+            IFNULL(a.name, "")             name,
+            IFNULL(a.number, "")           number,
+            IFNULL(a.manufacturer, "")     manufacturer,
+            IFNULL(b.create_time, "")      createTime,
+            IFNULL(b.remark, "")           remark,
+            IFNULL(c.name, "")             createBy,
+            IFNULL(b.disassembly_date, "") disassemblyDate,
+            IFNULL(b.is_attach, 0)         isAttach
+        FROM t_basic_equipment_disassembly b
+            LEFT JOIN t_basic_equipment_register a ON b.equipment_id = a.id
+            LEFT JOIN t_sys_user c ON c.id = b.create_by
+        WHERE b.id = #{equipmentId}
+    </select>
+
+    <select id="selectEquipmentDisassemblyCount" parameterType="com.escst.equipment.entity.EquipmentDisassemblyEntity"
+            resultType="int">
+        SELECT COUNT(a.ID)
+        FROM t_basic_equipment_disassembly a
+        LEFT JOIN t_basic_equipment_register d ON d.id=a.equipment_id
+        LEFT JOIN t_basic_construction b ON b.id=a.construction_id
+        <where>
+            d.status =1
+            <if test="constructionId != null and constructionId != '' ">
+                AND a.construction_id = #{constructionId}
+            </if>
+            <if test="name != null and name != ''">
+                AND (
+                d.name LIKE CONCAT("%",#{name},"%")
+                OR d.code LIKE CONCAT("%",#{name},"%"))
+            </if>
+            <if test="userId != null and userId != ''">
+                and exists (
+                select 1
+                from t_sys_user u
+                inner join t_sys_organization p on p.id = u.org_id
+                inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                where s.construction_id = a.construction_id and u.id = #{userId}
+                )
+            </if>
+            <if test="belongArea !=null and belongArea !=''">
+                AND b.belong_area=#{belongArea}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertRegister" parameterType="com.escst.equipment.entity.EquipmentManagerEntity">
+        INSERT INTO t_basic_equipment_register (id, construction_id, name, code, number, leasing_company, model, manufacturer, description, price, is_on_construction, remark, status, create_time, create_by, update_time, update_by)
+        VALUES (#{id}, #{constructionId}, #{name}, #{code}, #{number}, #{leasingCompany}, #{model}, #{manufacturer},
+                       #{description}, #{price}, #{isOnConstruction}, #{remark}, #{status}, #{createTime}, #{createBy},
+                #{updateTime}, #{updateBy})
+    </insert>
+
+    <insert id="insetEuipmentInOutRecord" parameterType="com.escst.equipment.entity.EquipmentInOutRecordEntity">
+        INSERT INTO t_basic_equipment_in_out_record (id, construction_id, equipment_id, type, person_id, remark, create_time, create_by, update_time, update_by, is_attach)
+        VALUES (#{id}, #{constructionId}, #{equipmentId}, #{type}, #{personId}, #{remark}, #{createTime}, #{createBy},
+            #{updateTime}, #{updateBy}, #{isAttach})
+    </insert>
+    <insert id="insetEquipmentMaintenance" parameterType="com.escst.equipment.entity.EquipmentMaintenanceEntity">
+        INSERT INTO t_basic_equipment_maintenance (id, construction_id, equipment_id, type, maintenance_date, remark, create_time, create_by, is_attach)
+        VALUES (#{id}, #{constructionId}, #{equipmentId}, #{type}, #{maintenanceDate}, #{remark}, #{createTime},
+                #{createBy}, #{isAttach})
+    </insert>
+    <insert id="insetEquipmentDisassembly" parameterType="com.escst.equipment.entity.EquipmentDisassemblyEntity">
+        INSERT INTO t_basic_equipment_disassembly (id, construction_id, equipment_id, disassembly_date, remark, create_time, create_by, is_attach, type)
+        VALUES (#{id}, #{constructionId}, #{equipmentId}, #{disassemblyDate}, #{remark}, #{createTime}, #{createBy},
+                #{isAttach}, #{type})
+    </insert>
+
+
+    <update id="updateEuipmentRegister" parameterType="com.escst.equipment.entity.EquipmentManagerEntity">
+        UPDATE t_basic_equipment_register
+        <set>
+            <if test="name != null and name !=''">
+                name = #{name},
+            </if>
+            <if test="number != null and number != '' ">
+                number = #{number},
+            </if>
+            <if test="model != null and model != '' ">
+                model = #{model},
+            </if>
+            <if test="manufacturer != null and manufacturer != '' ">
+                manufacturer = #{manufacturer},
+            </if>
+            <if test="leasingCompany != null and leasingCompany != '' ">
+                leasing_company = #{leasingCompany},
+            </if>
+            <if test="remark != null and remark != '' ">
+                remark = #{remark},
+            </if>
+            <if test="createTime != null ">
+                create_time = #{createTime},
+            </if>
+            <if test="createBy != null and createBy != '' ">
+                create_by = #{createBy},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="updateBy != null and updateBy != '' ">
+                update_by = #{updateBy},
+            </if>
+            status = #{status}
+        </set>
+        WHERE id = #{equipmentId}
+    </update>
+    <select id="selectAllDeviceSN"  parameterType="com.escst.equipment.vo.QueryVO" resultType="String">
+        SELECT number
+        FROM t_basic_equipment_register
+        <where>
+            <if test="constructionId !=null and constructionId !=''">
+                construction_id = #{constructionId}
+            </if>
+            <if test="type !=null">
+               AND type =#{type}
+            </if>
+            AND is_on_construction = 1
+        </where>
+
+    </select>
+    <select id="selectByNumber" parameterType="String" resultType="map">
+        SELECT *
+        FROM t_basic_equipment_register
+        where number = #{number}
+    </select>
+    <select id="queryAuthEquipmentList" parameterType="com.escst.equipment.vo.QueryVO"
+            resultType="com.escst.equipment.vo.SimpleEquipmentVO">
+        select r.id, r.`name`,r.number,c.id constructionId,c.`name` constructionName,ar.name areaName,r.type,
+        (select count(1) from t_basic_face f where f.equipment_id=r.id) as faceCount
+        from t_basic_equipment_register r
+        inner join t_basic_construction c on c.id = r.construction_id
+        left join t_sys_territory ar on ar.id = c.belong_area
+        where exists (
+        select 1
+        from t_sys_user u
+        inner join t_sys_organization p on p.id = u.org_id
+        inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+        where s.construction_id = c.id and u.id = #{userId}
+        )
+        and c.`status` = 1
+        AND r.status =1
+        <if test="type != null">
+            and r.type = #{type}
+        </if>
+        <if test="types !='' and types !=null">
+            and FIND_IN_SET(r.type, #{types})
+        </if>
+        <if test="name != null and name != ''">
+            AND locate(#{name}, r.`name`)
+        </if>
+        <if test="number != null and number != ''">
+            AND locate(#{number}, r.`number`)
+        </if>
+        <if test="areaId != null and areaId != ''">
+            AND c.belong_area = #{areaId}
+        </if>
+        <if test="constructionId != null and constructionId != ''">
+            AND r.construction_id = #{constructionId}
+        </if>
+        order by r.type
+        <if test="status != 1">
+
+            LIMIT #{startIndex},#{rowNum}
+        </if>
+    </select>
+    <select id="getAuthEquipmentCount" parameterType="com.escst.equipment.vo.QueryVO" resultType="int">
+        select count(r.id)
+        from t_basic_equipment_register r
+        inner join t_basic_construction c on c.id = r.construction_id
+        where exists (
+        select 1
+        from t_sys_user u
+        inner join t_sys_organization p on p.id = u.org_id
+        inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+        where s.construction_id = c.id and u.id = #{userId}
+        )
+        and c.`status` = 1
+        AND r.status =1
+        <if test="type != null">
+            and r.type = #{type}
+        </if>
+        <if test="types !='' and types !=null">
+            and FIND_IN_SET(r.type, #{types})
+        </if>
+        <if test="name != null and name != ''">
+            AND locate(#{name}, r.`name`)
+        </if>
+        <if test="number != null and number != ''">
+            AND locate(#{number}, r.`number`)
+        </if>
+        <if test="areaId != null and areaId != ''">
+            AND c.belong_area = #{areaId}
+        </if>
+        <if test="constructionId != null and constructionId != ''">
+            AND r.construction_id = #{constructionId}
+        </if>
+    </select>
+    <select id="queryAuthConstructionList" parameterType="com.escst.equipment.vo.QueryVO"
+            resultType="com.escst.construction.vo.SimpleConstructionVO">
+        select c.id,c.name,c.belong_area areaId,c.is_online isOnline,c.belong_city cityId
+        from t_basic_construction c
+        where c.status = 1
+        and exists (
+        select 1
+        from t_sys_user u
+        inner join t_sys_organization p on p.id = u.org_id
+        inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+        where s.construction_id = c.id and u.id = #{userId}
+        )
+        <if test="types != null and types != '' ">
+            and exists (
+            select 1 from t_basic_equipment_register r where r.construction_id = c.id and find_in_set(r.type, #{types})
+            )
+        </if>
+        <if test="name != null and name != ''">
+            AND locate(#{name}, c.`name`)
+        </if>
+        <if test="areaId != null and areaId != ''">
+            AND c.belong_area =#{areaId}
+        </if>
+        <if test="constructionId != null and constructionId != ''">
+            AND c.id =#{constructionId}
+        </if>
+        order by c.belong_area, c.name
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+    <select id="getAuthConstructionCount" parameterType="com.escst.equipment.vo.QueryVO" resultType="int">
+        select count(c.id)
+        from t_basic_construction c
+        where c.status = 1
+        and exists (
+        select 1
+        from t_sys_user u
+        inner join t_sys_organization p on p.id = u.org_id
+        inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+        where s.construction_id = c.id and u.id = #{userId}
+        )
+        <if test="types != null and types != '' ">
+            and exists (
+            select 1 from t_basic_equipment_register r where r.construction_id = c.id and find_in_set(r.type, #{types})
+            )
+        </if>
+        <if test="name != null and name != ''">
+            AND locate(#{name}, c.`name`)
+        </if>
+        <if test="areaId != null and areaId != ''">
+            AND c.belong_area =#{areaId}
+        </if>
+        <if test="constructionId != null and constructionId != ''">
+            AND c.id =#{constructionId}
+        </if>
+    </select>
+    <select id="querySpecialEquipmentList" resultType="com.escst.equipment.vo.SimpleEquipmentVO">
+        select
+            r.id,
+            r.`name`,
+            r.number,
+            r.construction_id constructionId,
+            r.type
+        from t_basic_equipment_register r
+        where r.type is not null AND r.status = 1
+    </select>
+
+    <select id="querybyConstructionId" resultType="com.escst.equipment.entity.EquipmentManagerEntity"
+            parameterType="String">
+        select
+            id,
+            type
+        from t_basic_equipment_register
+        where construction_id = #{constructionId} AND status = 1
+    </select>
+
+    <update id="updateInOutRecord" parameterType="com.escst.equipment.entity.EquipmentInOutRecordEntity">
+        UPDATE t_basic_equipment_in_out_record
+        <set>
+            <if test="personId != null and personId !=''">
+                person_id =#{personId},
+            </if>
+            <if test="type != null and type !=0">
+                type =#{type},
+            </if>
+            update_time =#{updateTime},
+            <if test="remark !=null and remark !=''">
+                remark =#{remark}
+            </if>
+        </set>
+        WHERE equipment_id =#{equipmentId}
+    </update>
+</mapper>

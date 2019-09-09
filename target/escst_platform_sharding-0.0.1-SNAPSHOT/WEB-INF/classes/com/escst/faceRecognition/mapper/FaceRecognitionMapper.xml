@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.faceRecognition.mapper.FaceRecognitionMapper">
+
+    <!--根据工地ID，查询工地中的所有摄像头信息-->
+    <select id="listCamera" parameterType="com.escst.faceRecognition.vo.FaceRecognitionVO"
+            resultType="com.escst.faceRecognition.vo.FaceRecognitionVO">
+        SELECT
+        dfb.construction_id AS constructionId,
+        dfb.equipment_id AS equipmentId,
+        dfb.cam_name AS CamName,
+        x AS x,
+        y AS y
+        FROM
+        t_data_face_blacklist dfb
+        <where>
+            <if test="constructionId != null and constructionId != ''">
+                dfb.construction_id = #{constructionId}
+            </if>
+        </where>
+        GROUP BY
+        dfb.equipment_id
+        ORDER BY dfb.sort
+    </select>
+
+    <!--查询工地下，当日，每个摄像头下抓拍的人数-->
+    <select id="getCount" parameterType="com.escst.faceRecognition.vo.FaceRecognitionVO"
+            resultType="com.escst.faceRecognition.vo.FaceRecognitionVO">
+        SELECT
+            equipment_id          AS equipmentId,
+            cam_name              AS CamName,
+            construction_id       AS constructionId,
+            count(DISTINCT gu_id) AS count
+        FROM
+            t_data_face_blacklist
+        WHERE construction_id = #{constructionId}
+              AND equipment_id = #{equipmentId}
+              AND DATE_FORMAT(create_time, '%Y-%m-%d') = #{TimeStr}
+    </select>
+
+    <!--根据工地id 摄像头id 查询出当天内摄像头区域的人员-->
+    <select id="listFace" parameterType="com.escst.faceRecognition.vo.FaceRecognitionVO"
+            resultType="com.escst.faceRecognition.vo.FaceRecognitionVO">
+        SELECT
+            dfb.gu_id                                         AS guid,
+            dfb.name                                          AS Name,
+            p.head_portrait_id                                AS headPortraitId,
+            DATE_FORMAT(dfb.create_time, '%Y-%m-%d %H:%i:%s') AS TimeStr
+        FROM
+            t_data_face_blacklist dfb INNER JOIN t_basic_person p ON dfb.gu_id = p.gu_id
+        WHERE
+            dfb.construction_id = #{constructionId}
+            AND dfb.equipment_id = #{equipmentId}
+            AND DATE_FORMAT(dfb.create_time, '%Y-%m-%d') = #{TimeStr}
+        GROUP BY dfb.gu_id
+        ORDER BY dfb.create_time DESC
+    </select>
+
+    <!--点击人员，查询出他经过摄像头的轨迹-->
+    <select id="listFaceCount" parameterType="com.escst.faceRecognition.vo.FaceRecognitionVO"
+            resultType="com.escst.faceRecognition.vo.FaceRecognitionVO">
+        SELECT
+            id                                            AS id,
+            equipment_id                                  AS equipmentId,
+            cam_name                                      AS CamName,
+            x                                             AS x,
+            y                                             AS y,
+            DATE_FORMAT(create_time, '%Y-%m-%d %H:%i:%s') AS TimeStr
+        FROM t_data_face_blacklist
+        WHERE
+            gu_id = #{guid}
+            AND construction_id = #{constructionId}
+            AND DATE_FORMAT(create_time, '%Y-%m-%d') = #{TimeStr}
+        ORDER BY
+            create_time
+    </select>
+
+    <!--查询人脸抓拍的照片条数-->
+    <select id="getFaceCount" parameterType="com.escst.faceRecognition.vo.FaceRecognitionVO"
+            resultType="int">
+        SELECT
+        count(1)
+        from t_data_face_track dft
+        LEFT JOIN t_basic_construction bc on dft.construction_id = bc.id
+        LEFT JOIN t_sys_territory st on bc.belong_area = st.id
+        <include refid="condition"></include>
+        AND EXISTS(
+        SELECT 1
+        FROM
+        t_sys_user u
+        INNER JOIN t_sys_organization p ON p.id = u.org_id
+        INNER JOIN t_sys_organization s
+        ON locate(p.sys_code, s.sys_code) = 1
+        WHERE
+        s.construction_id = dft.construction_id
+        AND u.id = #{userId}
+        )
+        order by dft.create_time desc
+    </select>
+
+
+    <sql id="condition">
+        <where>
+            1=1
+            <if test="correctStartDate != null and correctStartDate != '' ">
+                AND dft.create_time >= #{correctStartDate}
+            </if>
+            <if test="correctEndDate != null and correctEndDate != '' ">
+                <![CDATA[
+            AND dft.create_time <= #{correctEndDate} ]]>
+            </if>
+            <if test="equipmentId != null and equipmentId != '' ">
+                AND dft.equipment_id = #{equipmentId}
+            </if>
+        </where>
+    </sql>
+
+    <!--查询人脸抓拍的照片-->
+    <select id="listPhoto" parameterType="com.escst.faceRecognition.vo.FaceRecognitionVO"
+            resultType="com.escst.faceRecognition.vo.FaceRecognitionVO">
+        SELECT
+        dft.id AS id,
+        dft.construction_id as constructionId,
+        dft.equipment_id as equipmentId,
+        dft.gu_id as guid,
+        dft.cam_name as CamName,
+        DATE_FORMAT(dft.create_time, '%Y-%m-%d %H:%i:%s') as TimeStr,
+        dft.image_url as ImageUrl
+        from t_data_face_track dft
+        LEFT JOIN t_basic_construction bc on dft.construction_id = bc.id
+        LEFT JOIN t_sys_territory st on bc.belong_area = st.id
+        <include refid="condition"></include>
+        AND EXISTS(
+        SELECT 1
+        FROM
+        t_sys_user u
+        INNER JOIN t_sys_organization p ON p.id = u.org_id
+        INNER JOIN t_sys_organization s
+        ON locate(p.sys_code, s.sys_code) = 1
+        WHERE
+        s.construction_id = dft.construction_id
+        AND u.id = #{userId}
+        )
+        order by dft.create_time desc
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <!--查询一个人所有的抓拍轨迹-->
+    <select id="listTrack" parameterType="com.escst.faceRecognition.vo.FaceRecognitionVO"
+            resultType="com.escst.faceRecognition.vo.FaceRecognitionVO">
+        SELECT
+        id AS id,
+        gu_id AS guid,
+        cam_name AS CamName,
+        DATE_FORMAT(create_time, '%Y-%m-%d %H:%i:%s') AS TimeStr,
+        image_url AS ImageUrl
+        FROM t_data_face_track
+        WHERE gu_id = #{guid} AND construction_id = #{constructionId}
+        <if test="correctStartDate != null and correctStartDate != '' ">
+            AND create_time >= #{correctStartDate}
+        </if>
+        <if test="correctEndDate != null and correctEndDate != '' ">
+            AND create_time &lt;= #{correctEndDate}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+
+    <!--人证对比查询条数-->
+    <select id="getFaceContrastCount" parameterType="com.escst.faceRecognition.vo.FaceRecognitionVO"
+            resultType="int">
+        SELECT count(*)
+        FROM
+        (
+        SELECT
+        b.gu_id AS guid,
+        concat(TRUNCATE(b.score * 100, 2), '%') AS score,
+        b.NAME AS NAME,
+        b.card AS idCard,
+        DATE_FORMAT(b.create_time, '%Y-%m-%d %H:%i:%s') AS TimeStr,
+        b.image_path AS ImageUrl,
+        b.construction_id AS constructionId,
+        b.equipment_id AS equipmentId,
+        b.cam_name AS CamName,
+        f.path AS cardImagePath
+        FROM
+        t_data_face_blacklist b
+        LEFT JOIN t_basic_construction bc ON b.construction_id = bc.id
+        LEFT JOIN t_sys_territory st ON bc.belong_area = st.id
+        INNER JOIN t_basic_person p ON b.gu_id = p.gu_id
+        INNER JOIN t_basic_file f ON p.id_card_front_id = f.id
+        <include refid="contrastCondition"></include>
+        AND EXISTS(
+        SELECT 1
+        FROM
+        t_sys_user u
+        INNER JOIN t_sys_organization p ON p.id = u.org_id
+        INNER JOIN t_sys_organization s
+        ON locate(p.sys_code, s.sys_code) = 1
+        WHERE
+        s.construction_id = b.construction_id
+        AND u.id = #{userId}
+        )
+        GROUP BY
+        DATE_FORMAT(b.create_time, '%Y-%m-%d %H:%i'),
+        b.gu_id
+        ORDER BY
+        b.create_time DESC
+        ) bc
+    </select>
+
+    <sql id="contrastCondition">
+        <where>
+            1=1
+            <if test="correctStartDate != null and correctStartDate != '' ">
+                AND b.create_time >= #{correctStartDate}
+            </if>
+            <if test="correctEndDate != null and correctEndDate != '' ">
+                <![CDATA[
+            AND b.create_time <= #{correctEndDate} ]]>
+            </if>
+            <if test="equipmentId != null and equipmentId != '' ">
+                AND equipment_id = #{equipmentId}
+            </if>
+            <if test="Name != null and Name != '' ">
+                AND b.name like CONCAT('%',#{Name},'%')
+            </if>
+            <if test="idCard != null and idCard != '' ">
+                AND b.card = #{idCard}
+            </if>
+        </where>
+    </sql>
+
+
+    <!--人证对比查询-->
+    <select id="listFaceContrast" parameterType="com.escst.faceRecognition.vo.FaceRecognitionVO"
+            resultType="com.escst.faceRecognition.vo.FaceRecognitionVO">
+        SELECT
+        b.gu_id AS guid,
+        concat( TRUNCATE ( b.score * 100, 2 ), '%' ) AS score,
+        b.NAME AS Name,
+        b.card AS idCard,
+        DATE_FORMAT( b.create_time, '%Y-%m-%d %H:%i:%s' ) AS TimeStr,
+        b.image_path AS ImageUrl,
+        b.construction_id as constructionId,
+        b.equipment_id as equipmentId,
+        b.cam_name as CamName,
+        f.path as cardImagePath,
+        count(distinct DATE_FORMAT(b.create_time, '%Y-%m-%d %H:%i'),
+        b.gu_id)
+        FROM
+        t_data_face_blacklist b
+        LEFT JOIN t_basic_construction bc on b.construction_id = bc.id
+        LEFT JOIN t_sys_territory st on bc.belong_area = st.id
+        INNER JOIN t_basic_person p ON b.gu_id = p.gu_id
+        INNER JOIN t_basic_file f ON p.id_card_front_id = f.id
+        <include refid="contrastCondition"></include>
+        AND EXISTS(
+        SELECT 1
+        FROM
+        t_sys_user u
+        INNER JOIN t_sys_organization p ON p.id = u.org_id
+        INNER JOIN t_sys_organization s
+        ON locate(p.sys_code, s.sys_code) = 1
+        WHERE
+        s.construction_id = b.construction_id
+        AND u.id = #{userId}
+        )
+        GROUP BY
+        DATE_FORMAT(b.create_time, '%Y-%m-%d %H:%i'),
+        b.gu_id
+        ORDER BY b.create_time DESC
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <!--查询人证对比的历史轨迹条数-->
+    <select id="getContrastTrackCount" parameterType="com.escst.faceRecognition.vo.FaceRecognitionVO"
+            resultType="int">
+        SELECT
+        count(1)
+        FROM t_data_face_blacklist
+        WHERE gu_id = #{guid} AND construction_id = #{constructionId}
+        <if test="correctStartDate != null and correctStartDate != '' ">
+            AND create_time >= #{correctStartDate}
+        </if>
+        <if test="correctEndDate != null and correctEndDate != '' ">
+            AND create_time &lt;= #{correctEndDate}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+
+    <!--查询人证对比的历史轨迹-->
+    <select id="listContrastTrack" parameterType="com.escst.faceRecognition.vo.FaceRecognitionVO"
+            resultType="com.escst.faceRecognition.vo.FaceRecognitionVO">
+        SELECT
+        id AS id,
+        gu_id AS guid,
+        cam_name AS CamName,
+        name AS Name,
+        DATE_FORMAT(create_time, '%Y-%m-%d %H:%i:%s') AS TimeStr,
+        image_path AS ImageUrl
+        FROM t_data_face_blacklist
+        WHERE gu_id = #{guid} AND construction_id = #{constructionId}
+        <if test="correctStartDate != null and correctStartDate != '' ">
+            AND create_time >= #{correctStartDate}
+        </if>
+        <if test="correctEndDate != null and correctEndDate != '' ">
+            AND create_time &lt;= #{correctEndDate}
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+</mapper>    

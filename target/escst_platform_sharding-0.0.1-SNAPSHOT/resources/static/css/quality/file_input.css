@@ -1,0 +1,17 @@
+.kv-file-upload,
+.fileinput-upload-button,
+.file-upload-indicator > i {
+  display: none;
+}
+.kv-upload-progress {
+  display: none;
+}
+.kv-fileinput-error {
+  display: none !important;
+}
+.submit_img .file-caption {
+  padding: 0 12px;
+}
+.has-error .form-control {
+  border: 1px solid #ccc !important;
+}

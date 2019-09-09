@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>    
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.escst.user.mapper.UserMapper">
+    <resultMap id="userResultMap" type="com.escst.user.entity.UserEntity">
+        <id column="ID" property="id"/>
+        <result column="ORG_ID" property="orgId"/>
+        <result column="USER_NAME" property="userName"/>
+        <result column="USER_PASSWORD" property="userPassword"/>
+        <result column="STATUS" property="status" />
+        <result column="NAME" property="name" />
+        <result column="SEX" property="sex" />
+        <result column="AGE" property="age" />
+        <result column="MOBILE" property="mobile" />
+        <result column="EMAIL" property="email" />
+        <result column="ID_CARD" property="idCard" />
+        <result column="CREATE_TIME" property="createTime" />
+        <result column="CREATE_BY" property="createBy" />
+        <result column="UPDATE_TIME" property="updateTime" />
+        <result column="UPDATE_BY" property="updateBy" />
+    </resultMap>
+
+    <select id="selectUserMap" parameterType="String" resultType="map" >
+        SELECT
+        IFNULL(TSU.id,"") userId,
+        IFNULL(TSU.user_password,"") password,
+        IFNULL(TSU.org_id,"") orgId,
+        IFNULL(TSU.user_name,"") userName,
+        IFNULL(TSU.name,"") realName,
+        IFNULL(TSO.level,0) level
+        FROM
+        T_SYS_USER TSU
+        INNER JOIN T_SYS_ORGANIZATION TSO ON TSU.ORG_ID = TSO.ID
+        WHERE
+        USER_NAME = #{userName}
+    </select>
+
+    <select id="selectOrgInfoById" parameterType="String" resultType="map" >
+        SELECT
+        IFNULL(TSU.org_id,"") orgId,
+        IFNULL(TSU.id,"") id,
+        IFNULL(TSU.name,"") name,
+        IFNULL(TSO.level,0) level,
+		IFNULL(c.id,"") as constructionId,
+		IFNULL(c.belong_area,"") areaId,
+		ifnull(c.name,"") constructionName,
+		ifnull(t.name,"") areaName
+        FROM T_SYS_USER TSU
+        INNER JOIN T_SYS_ORGANIZATION TSO ON TSU.ORG_ID = TSO.ID
+        LEFT JOIN t_basic_construction c on TSO.construction_id=c.id
+        left join t_sys_territory t on c.belong_area=t.id
+        WHERE TSU.ID = #{userId}
+    </select>
+
+    <select id="getUserByUserNameAndPasswordExits" parameterType="map" resultMap="userResultMap">
+          SELECT * FROM T_SYS_USER WHERE USER_NAME = #{username} and USER_PASSWORD = #{password}
+    </select>
+
+    <select id="selectUserById" parameterType="String" resultMap="userResultMap">
+        SELECT * FROM T_SYS_USER WHERE ID = #{id}  
+    </select>
+    
+	<select id="selectCount" parameterType="String" resultType="Integer">
+         SELECT
+			count(DISTINCT a.id)
+		FROM
+			T_SYS_USER a
+		LEFT JOIN t_sys_user_role b ON a.id = b.user_id
+		LEFT JOIN t_sys_role c on b.role_id = c.id  
+        <include refid="userWhere"></include>
+    </select>
+	<select id="selectByCondition" parameterType="com.escst.user.entity.UserEntity" resultType="map">
+        SELECT
+			a.id as id,
+			a.name as name,
+			a.user_name as userName,
+			a.sex as sex,
+			a.age as age,
+			a.mobile as mobile,
+			a.id_card as idCard,
+			a.email as email,
+			a.status as status,
+            a.create_time as createTime,
+			group_concat(c.name) as roleName
+		FROM
+			T_SYS_USER a
+		LEFT JOIN t_sys_user_role b ON a.id = b.user_id
+		LEFT JOIN t_sys_role c on b.role_id = c.id
+        <include refid="userWhere"></include>
+        group by a.id,a.name,a.user_name,a.sex,a.age,a.mobile,a.id_card,a.email,a.status
+        order by a.create_time desc
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+    <sql id="userWhere">
+    	<where>
+            	a.status=1
+	    	<if test="userName!=null and userName!=''">
+	    		and a.user_name like '%${userName}%'
+	    	</if>
+	    	<if test="name!=null and name!=''">
+	    		and a.name like '%${name}%'
+	    	</if>
+	    	<if test="mobile!=null and mobile!=''">
+	    		and a.mobile like '%${mobile}%'
+	    	</if>
+	    	<if test="idCard!=null and idCard!=''">
+	    		and a.id_card like '%${idCard}%'
+	    	</if>
+	    	<choose>
+	    		<when test="constructionId!=null and constructionId!=''">
+	    			and EXISTS (select 1 from t_sys_organization d where a.org_id=d.id and d.construction_id=#{constructionId})
+	    		</when>
+	    		<otherwise>
+	    			and a.org_id=#{orgId}
+	    		</otherwise>
+	    	</choose>
+    	</where>
+    </sql>
+    
+    <insert id="insert" parameterType="com.escst.user.entity.UserEntity">
+        INSERT INTO T_SYS_USER(ID,ORG_ID,USER_NAME,USER_PASSWORD,STATUS,NAME,SEX,AGE,MOBILE,email,ID_CARD,CREATE_TIME,CREATE_BY)
+        VALUES (#{id},#{orgId},#{userName},#{userPassword},#{status},#{name},#{sex},#{age},#{mobile},#{email},#{idCard},current_timestamp(),#{createBy})
+    </insert>
+
+    <select id="selectConstructByUserId" parameterType="String" resultType="map">
+        SELECT
+			IFNULL(t3.id,"") constructionId,
+			IFNULL(t3.`name`,"") constructionName
+			FROM
+				T_SYS_USER t
+			INNER JOIN t_basic_user_construction t2 ON t.id = t2.user_id
+			INNER JOIN t_basic_construction t3 ON t2.construction_id = t3.id 
+			where t.id=#{id }
+    </select>
+
+    <select id="selectUserByUserName" parameterType="String" resultMap="userResultMap">
+        SELECT * FROM T_SYS_USER WHERE USER_NAME = #{userName} and status=1
+    </select>
+    
+   <select id="selectRoleById" parameterType="String" resultType="com.escst.role.entity.RoleEntity">
+       SELECT
+			t3.*
+		FROM
+			T_SYS_USER t
+		INNER JOIN t_sys_user_role t2 ON t.id = t2.user_id
+		INNER JOIN t_sys_role t3 ON t2.role_id = t3.id
+		where t.id=#{id }
+    </select>
+
+    <select id="selectMenuById" parameterType="String" resultType="map">
+        SELECT DISTINCT(t3.menu_id) as menuId
+        FROM T_SYS_USER t1
+        LEFT JOIN T_SYS_USER_ROLE t2 on t2.user_id = t1.id
+        LEFT JOIN T_SYS_ROLE_MENU t3 on t3.role_id = t2.role_id
+        where t1.id = #{id}
+    </select>
+    
+    <insert id="insertUserRole" parameterType="com.escst.user.entity.UserEntity">
+    INSERT INTO t_sys_user_role(ID,user_id,role_id) values(#{id},#{userId},#{roleId})
+    </insert>
+    <update id="updateStatus">
+		update T_SYS_USER set status = 0 where id = #{id}
+    </update>
+    <delete id="deleteByUserId" parameterType="string">
+    	delete from t_sys_user_role where user_id = #{userId}
+    </delete>
+    <update id="resetPassword" parameterType="map">
+		update T_SYS_USER set user_password = #{userPassword} where id = #{id}
+    </update>
+    <update id="updateBaseInfo" parameterType="map">
+		update T_SYS_USER set name = #{name}, sex=#{sex}, mobile=#{mobile} where id = #{id}
+    </update>
+	<insert id="batchInsert" parameterType="list">
+        INSERT INTO T_SYS_USER(ID,ORG_ID,USER_NAME,USER_PASSWORD,STATUS,NAME,SEX,MOBILE,ID_CARD,CREATE_TIME,CREATE_BY)
+        VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (#{item.id},#{item.orgId},#{item.userName},#{item.userPassword},#{item.status},#{item.name},#{item.sex},#{item.mobile},
+            #{item.idCard},current_timestamp(),#{item.createBy})
+        </foreach>
+    </insert>
+    <update id="updatePassword" parameterType="map">
+        UPDATE t_sys_user set user_password= #{userPassword} WHERE  id = #{id}
+    </update>
+    <update id="update" parameterType="com.escst.user.entity.UserEntity">
+        UPDATE t_sys_user 
+        <set>
+        	<if test="userName!=null and userName!=''">
+        		user_name=#{userName},
+        	</if>
+        	<if test="name!=null and name!=''">
+        		name=#{name},
+        	</if>
+        	<if test="userPassword!=null and userPassword!=''">
+        		user_password=#{userPassword},
+        	</if>
+        	<if test="mobile!=null and mobile!=''">
+        		mobile=#{mobile},
+        	</if>
+        	<if test="idCard!=null and idCard!=''">
+        		id_card=#{idCard},
+        	</if>
+        	<if test="sex!=null and sex!=''">
+        		sex=#{sex},
+        	</if>
+        	<if test="email!=null and email!=''">
+        		email=#{email},
+        	</if>
+        	<if test="age!=null and age!=''">
+        		age=#{age},
+        	</if>
+        	update_time = #{updateTime},update_by=#{updateBy}
+        </set>
+        WHERE  id = #{id}
+    </update>
+
+    <select id="getOrgId" parameterType="string" resultType="string">
+        SELECT org_id FROM t_sys_user WHERE id = #{userId}
+    </select>
+
+
+    <select id="selectByUser" parameterType="map" resultType="com.escst.user.entity.UserEntity">
+
+    SELECT  id, name ,user_name as userName  FROM t_sys_user WHERE org_id =#{orgId} AND user_name !=#{userName} AND  status =1
+    </select>
+</mapper>

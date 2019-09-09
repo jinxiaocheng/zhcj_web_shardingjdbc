@@ -1,0 +1,96 @@
+.biyue-bg {
+  width: 100%;
+  padding: 15px;
+  box-sizing: border-box;
+  padding-bottom: 50px;
+}
+.detail-block {
+  border-radius: 3px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  margin: 0 18px 13px;
+}
+.detail-infos {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+.detail-infos .info-item {
+  display: table-cell;
+  vertical-align: top;
+  width: 33.3333%;
+  padding: 6px 17px;
+  line-height: 30px;
+  border-right: 1px solid #ececec;
+}
+.detail-infos .info-item dt {
+  color: #666;
+  float: left;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 30px;
+  width: 80px;
+}
+.detail-infos .info-item dd {
+  margin-left: 90px;
+  position: relative;
+}
+.detail-infos .info-item dd p {
+  word-break: break-all;
+  line-height: 30px;
+  margin: 0px ;
+}
+.detail-infos .info-item dd img {
+  width: 120px;
+  height: 100px;
+  margin-bottom: 10px;
+  margin-right: 10px;
+  cursor: pointer;
+  display: inline-block;
+}
+.remark,
+.com-textarea {
+  white-space: pre-line;
+}
+.com-fileDown .downSize {
+  margin-left: 20px;
+}
+.com-fileDown .downBtn {
+  margin-left: 20px;
+  cursor: pointer;
+  text-decoration: underline;
+  color: #2c7bdf;
+}
+.biyue_footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  box-shadow: 0 -1px 4px #dfdfdf;
+  background: #fff;
+  z-index: 10000;
+}
+.biyue_footer .control-btn {
+  position: absolute;
+  right: 6px;
+  bottom: 8px;
+}
+.biyue_footer .control-btn button {
+  letter-spacing: 3px;
+  height: 34px;
+  line-height: 34px;
+}
+h2.view_title {
+  border-bottom: 1px solid #dfdfdf;
+  font-size: 16px;
+  position: relative;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+h2.view_title p {
+  border-left: 3px solid #36a1da;
+  margin: 5px 0;
+  text-indent: 0.5em;
+  line-height: 24px;
+}

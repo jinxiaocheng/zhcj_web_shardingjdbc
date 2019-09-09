@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.equipment.mapper.FaceMapper">
+    <select id="selectByEquipmentId" parameterType="String" resultType="map">
+		SELECT
+			c.`name` AS constructionName,
+			r.`name` as equipmentName,
+			f.user_id userId,
+			f.user_name userName,
+			f.id_card AS idCard,
+			f.result as result,
+			f.score as score,
+			f.collection_time AS collectionTime
+		FROM
+			t_basic_face f
+		LEFT JOIN t_basic_construction c ON c.id = f.construction_id
+		left JOIN t_basic_equipment_register r on f.equipment_id=r.id
+		where f.equipment_id=#{equipmentId}
+		order by f.create_time desc
+    </select>
+    
+    <select id="selectCount" parameterType="String" resultType="int">
+    		SELECT count(1)
+		FROM
+			t_basic_face f
+		LEFT JOIN t_basic_construction c ON c.id = f.construction_id
+		left JOIN t_basic_equipment_register r on f.equipment_id=r.id
+		where f.equipment_id=#{equipmentId}
+    </select>
+</mapper>

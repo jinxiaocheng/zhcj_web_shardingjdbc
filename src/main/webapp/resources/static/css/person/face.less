@@ -1,0 +1,142 @@
+@themeColor:#ff9966;
+@lineColor:#cfcfcf;
+.ui-report{
+  position: absolute;
+  left: 0;
+  top:0;
+  right: 0;
+  bottom: 0;
+  .wrapper{
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 70px;
+    bottom: 50px;
+    border: 1px solid @lineColor;
+    background: #fff;
+    border-radius: 0 0 5px 5px;
+    overflow: hidden;
+    padding: 10px;
+    box-sizing: border-box;
+    ul{
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      li{
+        width: 100%;
+        &>h2{
+          height: 18px;
+          line-height: 18px;
+          font-size: 16px;
+          font-weight: bold;
+          position: relative;
+          text-indent: 15px;
+          i{
+            position: absolute;
+            left: 0;
+            top:0;
+            display: block;
+            width: 4px;
+            height: 100%;
+            border-radius: 4px;
+            background: #ff9966;
+          }
+        }
+      }
+    }
+  }
+}
+.laypage{
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom:0;
+  background: #fff;
+  height: 40px;
+  border: 1px solid #cfcfcf;
+  border-radius: 5px 5px 0 0;
+  &>div{
+    margin: 5px;
+  }
+}
+.popoverBox{
+  position: absolute;
+  left:0;
+  top:0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  display: none;
+  padding: 10px;
+  box-sizing:border-box;
+  &>h2{
+    height: 18px;
+    line-height: 18px;
+    font-size: 16px;
+    font-weight: bold;
+    position: relative;
+    text-indent: 15px;
+    margin-top: 0;
+    i{
+      position: absolute;
+      left: 0;
+      top:0;
+      display: block;
+      width: 4px;
+      height: 100%;
+      border-radius: 4px;
+      background: #ff9966;
+    }
+  }
+}
+.aisle-box{
+  position: absolute;
+  width: 100%;
+  top:30px;
+  bottom: 50px;
+  overflow: auto;
+  .face-img-box{
+    display: inline-block;
+    width: 150px;
+    height: 270px;
+    margin: 10px;
+    .face-img{
+      width: 100%;
+      height: 230px;
+      box-shadow: 0 0 5px rgba(207, 207, 207, 0.9);
+      border: 1px solid @lineColor;
+      padding:0 4px;
+      box-sizing: border-box;
+      border-radius: 2px;
+      .img-time,.aisle-name{
+        height: 20px;
+        line-height: 20px;
+        font-size: 12px;
+        color: #8b8b8b;
+        margin: 0;
+        text-align:left;
+      }
+      .aisle-name{
+        height: 30px;
+        line-height: 30px;
+      }
+      img{
+        width: 100%;
+        height: 180px;
+      }
+    }
+    .historical-route-btn{
+      display: block;
+      height: 24px;
+      line-height: 24px;
+      width: 60%;
+      border-radius: 30px;
+      text-align: center;
+      color: #fff;
+      background: #ff9966;
+      font-size: 12px;
+      letter-spacing: 2px;
+      margin: 15px auto 0;
+    }
+  }
+}

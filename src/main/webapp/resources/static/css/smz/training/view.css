@@ -1,0 +1,848 @@
+.com-l-ztree .menu-left-tree {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 10px;
+  padding: 5px 0px;
+  width: 280px;
+  overflow: auto;
+  border: 1px solid #cfcfcf;
+  border-radius: 6px;
+  box-sizing: border-box;
+  box-shadow: 0 0 4px #dfdfdf;
+  background: #fff;
+}
+.com-l-ztree .l-r-content {
+  position: absolute;
+  height: 100%;
+  overflow: hidden;
+  left: 300px;
+  right: 0;
+}
+.com-l-ztree .container-full {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background: #fff;
+}
+.com-l-ztree .ui-filter label {
+  padding-left: 10px;
+}
+.com-l-ztree .well-block {
+  min-height: 20px;
+  padding-bottom: 15px;
+  border: 1px solid #cfcfcf;
+  border-bottom: none;
+  border-top: none;
+}
+.com-l-ztree .queryCondition .btn {
+  padding: 3px 12px!important;
+}
+.com-l-ztree .w-110 {
+  width: 110px!important;
+  height: 28px;
+}
+.com-l-ztree .h-28 {
+  height: 28px;
+}
+.com-l-ztree #listTools,
+.com-l-ztree #chartTools {
+  position: relative;
+}
+.com-l-ztree .openSearchBtn,
+.com-l-ztree #tools-btn,
+.com-l-ztree #tools-btn-e {
+  position: absolute;
+  top: 10px;
+}
+.com-l-ztree .openSearchBtn {
+  left: 10px;
+  background: none;
+  border: 1px solid #00a0e9;
+  color: #00a0e9;
+}
+.com-l-ztree .openSearchBtn:hover,
+.com-l-ztree .openSearchBtn:focus {
+  color: #0281e9;
+}
+.com-l-ztree #tools-btn,
+.com-l-ztree #tools-btn-e {
+  right: 10px;
+}
+.com-l-ztree #search-input,
+.com-l-ztree #search-input-e {
+  position: absolute;
+  width: 100%;
+  top: 60px;
+  background: #f8f8f8;
+  box-sizing: border-box;
+  padding: 0 10px;
+  z-index: 1000;
+  border-bottom: 1px solid #cfcfcf;
+  box-shadow: 0px 2px 10px #e4e4e4;
+}
+.com-l-ztree #search-input > div,
+.com-l-ztree #search-input-e > div {
+  margin: 10px 0;
+}
+.com-l-ztree .dropdown-menu {
+  max-height: 300px;
+}
+.com-l-ztree .queryCondition .btn {
+  padding: 3px 12px!important;
+}
+.com-l-ztree .w-110 {
+  width: 110px!important;
+  height: 28px;
+}
+.com-l-ztree .h-28 {
+  height: 28px;
+}
+.com-l-ztree .ui-report {
+  width: 100%;
+  position: absolute;
+  padding: 10px 10px 0px 10px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+}
+.com-l-ztree .ui-report .jqGrid_wrapper {
+  position: absolute;
+  top: 70px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 1px solid #ddd;
+}
+.com-l-ztree .ui-report .titlePanel {
+  border-radius: 6px 6px 0px 0px;
+  -webkit-border-radius: 6px 6px 0px 0px;
+  width: 100%;
+  margin: 0px;
+  border: 1px solid #cfcfcf;
+  border-bottom: 0px;
+  padding: 15px 0px;
+  height: 60px;
+  background: #fff;
+}
+.com-l-ztree .ui-report .ui-report-head {
+  color: #3897d9;
+}
+.com-l-ztree .titlePanel .title-search {
+  padding-left: 15px;
+}
+.com-l-ztree .ui-filter {
+  display: inline-block;
+}
+.com-l-ztree .ui-filter .form-control {
+  display: inline-block;
+}
+.com-l-ztree .search-more {
+  min-width: 108px!important;
+}
+.com-l-ztree .w-120 {
+  width: 120px!important;
+  height: 28px;
+}
+.com-l-ztree .w-200 {
+  width: 200px;
+  height: 28px;
+}
+.com-l-ztree .titlePanel .toolbar {
+  float: right;
+  padding-right: 15px;
+}
+.com-l-ztree .win-box {
+  float: right;
+  padding-right: 15px;
+}
+.com-l-ztree .ui-jqgrid-bdiv table {
+  width: 100% !important;
+  overflow: hidden;
+}
+.com-l-ztree .ui-jqgrid-bdiv table td {
+  overflow: hidden;
+  /* 内容超出宽度时隐藏超出部分的内容 */
+  text-overflow: ellipsis;
+  /* 当对象内文本溢出时显示省略标记(...);需与overflow:hidden;一起使用。*/
+}
+.com-l-ztree .ui-jqgrid-bdiv {
+  height: 100% !important;
+}
+.com-l-ztree .group-box {
+  width: 100%;
+  padding: 0px 10px 15px;
+  border-left: 1px solid #cfcfcf;
+  border-right: 1px solid #cfcfcf;
+  background: #fff;
+}
+.com-l-ztree .ui-jqgrid tr.ui-row-ltr td {
+  text-align: center !important;
+  font-size: 13px;
+  padding: 0;
+}
+.com-l-ztree #gbox_gridTable {
+  height: 100%;
+}
+.com-l-ztree #gridPager {
+  position: fixed;
+  bottom: 10px;
+}
+.com-l-ztree .ui-jqgrid tr.jqgrow td:last-child {
+  border-right: none;
+}
+.com-l-ztree .ui-jqgrid .ui-pg-selbox {
+  display: block;
+  font-size: 1em;
+  height: 25px;
+  line-height: 18px;
+  margin: 0;
+  width: auto;
+}
+.com-l-ztree .ui-jqgrid .ui-pg-selbox {
+  border: 1px solid #ccc;
+  margin: 0 6px;
+  width: auto;
+  height: 22px;
+  border-radius: 5px;
+}
+.com-l-ztree .ui-jqgrid .ui-pg-input {
+  font-weight: normal;
+  border: 1px solid #ccc;
+  margin: 0 4px;
+  padding-right: 2px;
+  width: 30px;
+  height: 20px;
+  line-height: 10px;
+  text-align: center;
+  -moz-border-radius: 5px 5px 5px 5px;
+  -webkit-border-radius: 5px 5px 5px 5px;
+  border-radius: 5px 5px 5px 5px;
+}
+.com-l-ztree .ui-icon-seek-prev {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  color: #666;
+  padding-right: 3px;
+}
+.com-l-ztree .ui-icon-seek-first {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-right: 5px;
+  color: #666;
+}
+.com-l-ztree .ui-icon-seek-next {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  color: #666;
+  padding-left: 2px;
+}
+.com-l-ztree .ui-icon-seek-end {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-right: 5px;
+  color: #666;
+}
+.com-l-ztree .ui-jqgrid .ui-pg-table td {
+  font-weight: normal;
+  vertical-align: middle;
+  padding: 1px;
+}
+.com-list #listTools,
+.com-list #chartTools {
+  position: relative;
+}
+.com-list .openSearchBtn,
+.com-list #tools-btn,
+.com-list #tools-btn-e {
+  position: absolute;
+  top: 10px;
+}
+.com-list .openSearchBtn {
+  left: 10px;
+  background: none;
+  border: 1px solid #00a0e9;
+  color: #00a0e9;
+}
+.com-list .openSearchBtn:hover,
+.com-list .openSearchBtn:focus {
+  color: #0281e9;
+}
+.com-list #tools-btn,
+.com-list #tools-btn-e {
+  right: 10px;
+}
+.com-list #search-input,
+.com-list #search-input-e {
+  position: absolute;
+  width: 100%;
+  top: 60px;
+  background: #f8f8f8;
+  box-sizing: border-box;
+  padding: 0 10px;
+  z-index: 1000;
+  border-bottom: 1px solid #cfcfcf;
+  box-shadow: 0px 2px 10px #e4e4e4;
+}
+.com-list #search-input > div,
+.com-list #search-input-e > div {
+  margin: 10px 0;
+}
+.com-list .dropdown-menu {
+  max-height: 300px;
+}
+.com-list .queryCondition .btn {
+  padding: 3px 12px!important;
+}
+.com-list .w-110 {
+  width: 110px!important;
+  height: 28px;
+}
+.com-list .h-28 {
+  height: 28px;
+}
+.com-list .ui-report {
+  width: 100%;
+  position: absolute;
+  padding: 10px 10px 0px 10px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+}
+.com-list .ui-report .jqGrid_wrapper {
+  position: absolute;
+  top: 70px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 1px solid #ddd;
+}
+.com-list .ui-report .titlePanel {
+  border-radius: 6px 6px 0px 0px;
+  -webkit-border-radius: 6px 6px 0px 0px;
+  width: 100%;
+  margin: 0px;
+  border: 1px solid #cfcfcf;
+  border-bottom: 0px;
+  padding: 15px 0px;
+  height: 60px;
+  background: #fff;
+}
+.com-list .ui-report .ui-report-head {
+  color: #3897d9;
+}
+.com-list .titlePanel .title-search {
+  padding-left: 15px;
+}
+.com-list .ui-filter {
+  display: inline-block;
+}
+.com-list .ui-filter .form-control {
+  display: inline-block;
+}
+.com-list .search-more {
+  min-width: 108px!important;
+}
+.com-list .w-120 {
+  width: 120px!important;
+  height: 28px;
+}
+.com-list .w-200 {
+  width: 200px;
+  height: 28px;
+}
+.com-list .titlePanel .toolbar {
+  float: right;
+  padding-right: 15px;
+}
+.com-list .win-box {
+  float: right;
+  padding-right: 15px;
+}
+.com-list .ui-jqgrid-bdiv table {
+  width: 100% !important;
+  overflow: hidden;
+}
+.com-list .ui-jqgrid-bdiv table td {
+  overflow: hidden;
+  /* 内容超出宽度时隐藏超出部分的内容 */
+  text-overflow: ellipsis;
+  /* 当对象内文本溢出时显示省略标记(...);需与overflow:hidden;一起使用。*/
+}
+.com-list .ui-jqgrid-bdiv {
+  height: 100% !important;
+}
+.com-list .group-box {
+  width: 100%;
+  padding: 0px 10px 15px;
+  border-left: 1px solid #cfcfcf;
+  border-right: 1px solid #cfcfcf;
+  background: #fff;
+}
+.com-list .ui-jqgrid tr.ui-row-ltr td {
+  text-align: center !important;
+  font-size: 13px;
+  padding: 0;
+}
+.com-list #gbox_gridTable {
+  height: 100%;
+}
+.com-list #gridPager {
+  position: fixed;
+  bottom: 10px;
+}
+.com-list .ui-jqgrid tr.jqgrow td:last-child {
+  border-right: none;
+}
+.com-list .ui-jqgrid .ui-pg-selbox {
+  display: block;
+  font-size: 1em;
+  height: 25px;
+  line-height: 18px;
+  margin: 0;
+  width: auto;
+}
+.com-list .ui-jqgrid .ui-pg-selbox {
+  border: 1px solid #ccc;
+  margin: 0 6px;
+  width: auto;
+  height: 22px;
+  border-radius: 5px;
+}
+.com-list .ui-jqgrid .ui-pg-input {
+  font-weight: normal;
+  border: 1px solid #ccc;
+  margin: 0 4px;
+  padding-right: 2px;
+  width: 30px;
+  height: 20px;
+  line-height: 10px;
+  text-align: center;
+  -moz-border-radius: 5px 5px 5px 5px;
+  -webkit-border-radius: 5px 5px 5px 5px;
+  border-radius: 5px 5px 5px 5px;
+}
+.com-list .ui-icon-seek-prev {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  color: #666;
+  padding-right: 3px;
+}
+.com-list .ui-icon-seek-first {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-right: 5px;
+  color: #666;
+}
+.com-list .ui-icon-seek-next {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  color: #666;
+  padding-left: 2px;
+}
+.com-list .ui-icon-seek-end {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-right: 5px;
+  color: #666;
+}
+.com-list .ui-jqgrid .ui-pg-table td {
+  font-weight: normal;
+  vertical-align: middle;
+  padding: 1px;
+}
+.com-searchList #listTools,
+.com-searchList #chartTools {
+  position: relative;
+}
+.com-searchList .openSearchBtn,
+.com-searchList #tools-btn,
+.com-searchList #tools-btn-e {
+  position: absolute;
+  top: 10px;
+}
+.com-searchList .openSearchBtn {
+  left: 10px;
+  background: none;
+  border: 1px solid #00a0e9;
+  color: #00a0e9;
+}
+.com-searchList .openSearchBtn:hover,
+.com-searchList .openSearchBtn:focus {
+  color: #0281e9;
+}
+.com-searchList #tools-btn,
+.com-searchList #tools-btn-e {
+  right: 10px;
+}
+.com-searchList #search-input,
+.com-searchList #search-input-e {
+  position: absolute;
+  width: 100%;
+  top: 60px;
+  background: #f8f8f8;
+  box-sizing: border-box;
+  padding: 0 10px;
+  z-index: 1000;
+  border-bottom: 1px solid #cfcfcf;
+  box-shadow: 0px 2px 10px #e4e4e4;
+}
+.com-searchList #search-input > div,
+.com-searchList #search-input-e > div {
+  margin: 10px 0;
+}
+.com-searchList .dropdown-menu {
+  max-height: 300px;
+}
+.com-searchList .queryCondition .btn {
+  padding: 3px 12px!important;
+}
+.com-searchList .w-110 {
+  width: 110px!important;
+  height: 28px;
+}
+.com-searchList .h-28 {
+  height: 28px;
+}
+.com-page #gbox_gridTable {
+  height: 100%;
+}
+.com-page #gridPager {
+  position: fixed;
+  bottom: 10px;
+}
+.com-page .ui-jqgrid tr.jqgrow td:last-child {
+  border-right: none;
+}
+.com-page .ui-jqgrid .ui-pg-selbox {
+  display: block;
+  font-size: 1em;
+  height: 25px;
+  line-height: 18px;
+  margin: 0;
+  width: auto;
+}
+.com-page .ui-jqgrid .ui-pg-selbox {
+  border: 1px solid #ccc;
+  margin: 0 6px;
+  width: auto;
+  height: 22px;
+  border-radius: 5px;
+}
+.com-page .ui-jqgrid .ui-pg-input {
+  font-weight: normal;
+  border: 1px solid #ccc;
+  margin: 0 4px;
+  padding-right: 2px;
+  width: 30px;
+  height: 20px;
+  line-height: 10px;
+  text-align: center;
+  -moz-border-radius: 5px 5px 5px 5px;
+  -webkit-border-radius: 5px 5px 5px 5px;
+  border-radius: 5px 5px 5px 5px;
+}
+.com-page .ui-icon-seek-prev {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  color: #666;
+  padding-right: 3px;
+}
+.com-page .ui-icon-seek-first {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-right: 5px;
+  color: #666;
+}
+.com-page .ui-icon-seek-next {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  color: #666;
+  padding-left: 2px;
+}
+.com-page .ui-icon-seek-end {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-right: 5px;
+  color: #666;
+}
+.com-page .ui-jqgrid .ui-pg-table td {
+  font-weight: normal;
+  vertical-align: middle;
+  padding: 1px;
+}
+body #listTools,
+body #chartTools {
+  position: relative;
+}
+body .openSearchBtn,
+body #tools-btn,
+body #tools-btn-e {
+  position: absolute;
+  top: 10px;
+}
+body .openSearchBtn {
+  left: 10px;
+  background: none;
+  border: 1px solid #00a0e9;
+  color: #00a0e9;
+}
+body .openSearchBtn:hover,
+body .openSearchBtn:focus {
+  color: #0281e9;
+}
+body #tools-btn,
+body #tools-btn-e {
+  right: 10px;
+}
+body #search-input,
+body #search-input-e {
+  position: absolute;
+  width: 100%;
+  top: 60px;
+  background: #f8f8f8;
+  box-sizing: border-box;
+  padding: 0 10px;
+  z-index: 1000;
+  border-bottom: 1px solid #cfcfcf;
+  box-shadow: 0px 2px 10px #e4e4e4;
+}
+body #search-input > div,
+body #search-input-e > div {
+  margin: 10px 0;
+}
+body .dropdown-menu {
+  max-height: 300px;
+}
+body .queryCondition .btn {
+  padding: 3px 12px!important;
+}
+body .w-110 {
+  width: 110px!important;
+  height: 28px;
+}
+body .h-28 {
+  height: 28px;
+}
+body .ui-report {
+  width: 100%;
+  position: absolute;
+  padding: 10px 10px 0px 10px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+}
+body .ui-report .jqGrid_wrapper {
+  position: absolute;
+  top: 70px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 1px solid #ddd;
+}
+body .ui-report .titlePanel {
+  border-radius: 6px 6px 0px 0px;
+  -webkit-border-radius: 6px 6px 0px 0px;
+  width: 100%;
+  margin: 0px;
+  border: 1px solid #cfcfcf;
+  border-bottom: 0px;
+  padding: 15px 0px;
+  height: 60px;
+  background: #fff;
+}
+body .ui-report .ui-report-head {
+  color: #3897d9;
+}
+body .titlePanel .title-search {
+  padding-left: 15px;
+}
+body .ui-filter {
+  display: inline-block;
+}
+body .ui-filter .form-control {
+  display: inline-block;
+}
+body .search-more {
+  min-width: 108px!important;
+}
+body .w-120 {
+  width: 120px!important;
+  height: 28px;
+}
+body .w-200 {
+  width: 200px;
+  height: 28px;
+}
+body .titlePanel .toolbar {
+  float: right;
+  padding-right: 15px;
+}
+body .win-box {
+  float: right;
+  padding-right: 15px;
+}
+body .ui-jqgrid-bdiv table {
+  width: 100% !important;
+  overflow: hidden;
+}
+body .ui-jqgrid-bdiv table td {
+  overflow: hidden;
+  /* 内容超出宽度时隐藏超出部分的内容 */
+  text-overflow: ellipsis;
+  /* 当对象内文本溢出时显示省略标记(...);需与overflow:hidden;一起使用。*/
+}
+body .ui-jqgrid-bdiv {
+  height: 100% !important;
+}
+body .group-box {
+  width: 100%;
+  padding: 0px 10px 15px;
+  border-left: 1px solid #cfcfcf;
+  border-right: 1px solid #cfcfcf;
+  background: #fff;
+}
+body .ui-jqgrid tr.ui-row-ltr td {
+  text-align: center !important;
+  font-size: 13px;
+  padding: 0;
+}
+body #gbox_gridTable {
+  height: 100%;
+}
+body #gridPager {
+  position: fixed;
+  bottom: 10px;
+}
+body .ui-jqgrid tr.jqgrow td:last-child {
+  border-right: none;
+}
+body .ui-jqgrid .ui-pg-selbox {
+  display: block;
+  font-size: 1em;
+  height: 25px;
+  line-height: 18px;
+  margin: 0;
+  width: auto;
+}
+body .ui-jqgrid .ui-pg-selbox {
+  border: 1px solid #ccc;
+  margin: 0 6px;
+  width: auto;
+  height: 22px;
+  border-radius: 5px;
+}
+body .ui-jqgrid .ui-pg-input {
+  font-weight: normal;
+  border: 1px solid #ccc;
+  margin: 0 4px;
+  padding-right: 2px;
+  width: 30px;
+  height: 20px;
+  line-height: 10px;
+  text-align: center;
+  -moz-border-radius: 5px 5px 5px 5px;
+  -webkit-border-radius: 5px 5px 5px 5px;
+  border-radius: 5px 5px 5px 5px;
+}
+body .ui-icon-seek-prev {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  color: #666;
+  padding-right: 3px;
+}
+body .ui-icon-seek-first {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-right: 5px;
+  color: #666;
+}
+body .ui-icon-seek-next {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  color: #666;
+  padding-left: 2px;
+}
+body .ui-icon-seek-end {
+  display: block;
+  height: 20px;
+  line-height: 18px;
+  width: 22px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-right: 5px;
+  color: #666;
+}
+body .ui-jqgrid .ui-pg-table td {
+  font-weight: normal;
+  vertical-align: middle;
+  padding: 1px;
+}
+body .ui-report .jqGrid_wrapper {
+  top: 20px;
+}

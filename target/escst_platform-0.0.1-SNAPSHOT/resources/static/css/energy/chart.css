@@ -1,0 +1,28 @@
+body {
+  background: #f4f4f4;
+  padding: 15px;
+}
+.mainPart {
+  position: relative;
+  border: 1px solid #cfcfcf;
+  border-radius: 10px;
+  background: #fff;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding-top: 60px;
+  overflow: hidden;
+}
+.mainPart .titlePanel {
+  padding: 15px 0px;
+  height: 60px;
+  width: 100%;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.mainPart #chart {
+  width: 100%;
+  height: 100%;
+}

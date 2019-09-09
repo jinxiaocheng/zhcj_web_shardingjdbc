@@ -1,0 +1,119 @@
+.transtion(@prop){
+  -webkit-transition: @prop;
+  -moz-transition: @prop;
+  -ms-transition: @prop;
+  -o-transition: @prop;
+  transition: @prop;
+}
+
+.transform(@prop){
+  -webkit-transform: @prop;
+  -moz-transform: @prop;
+  -ms-transform: @prop;
+  -o-transform: @prop;
+  transform: @prop;
+}
+
+.biyue-box{
+  border-radius: 2px;
+  background-color: #fff;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,.05);
+}
+.biyue_body{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top:0;
+  background: #f2f2f2;
+
+  @toolHeight: 60px;
+  .biyue_search{
+    position: absolute;
+    left: 0;
+    top:0;
+    right: 0;
+    height:@toolHeight;
+    line-height: 60px;
+    box-shadow: 0 3px 6px #dfdfdf;
+    z-index: 1000;
+    background: #fff;
+    &>label{
+      height: 60px;
+      line-height: 60px;
+      padding: 0 15px;
+    }
+    .layui-input-inline{
+      width: 200px;
+    }
+    #search{
+      margin-left: 20px;
+    }
+
+    .search-more-box{
+      position: absolute;
+      top: @toolHeight + 10px;
+      box-shadow: 0 0 6px #dfdfdf;
+      padding: 15px 0 0 0;
+      box-sizing: border-box;
+      width: 334px;
+      z-index: 2000;
+      background: #fff;
+      display: none;
+    }
+
+    #search-more{
+      .fa-angle-double-down{
+        .transtion(all 0.2s ease-out);
+      }
+      .fa-angle-double-down.active{
+        .transform(rotate(-180deg));
+      }
+    }
+  }
+
+  .biyue_tool{
+    position: absolute;
+    top:0;
+    right: 0;
+    line-height:@toolHeight ;
+    z-index: 1100;
+    background: #fff;
+    padding-right: 20px;
+    //display: none;
+
+    button{
+      i{
+        margin-right: 5px;
+      }
+    }
+  }
+
+  .biyue_main{
+    position: absolute;
+    top:@toolHeight;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px;
+
+    .main_table{
+    }
+    &>.layui-border-box{
+      background: #fff;
+      thead{
+        span{
+          font-weight: bold;
+          letter-spacing: 1px;
+        }
+      }
+    }
+  }
+}
+
+.layui-table-view .layui-table{
+  width: 100%;
+}
+.layui-laypage .layui-laypage-curr .layui-laypage-em {
+  background-color: #1e88e5;
+}

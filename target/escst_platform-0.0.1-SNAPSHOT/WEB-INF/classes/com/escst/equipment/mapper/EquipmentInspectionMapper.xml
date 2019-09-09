@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.equipment.mapper.EquipmentInspectionMapper">
+	 <select id="queryEquipmentInspectionList" parameterType="com.escst.equipment.vo.InspectionQueryVO" resultType="com.escst.equipment.vo.InspectionVO">
+	 	select i.id,i.current_location currentLocation,i.results,i.remark,i.is_attach isAttach,c.`name` constructionName
+	 		  ,t.`name` areaName,r.`name` equipmentName,r.number equipmentNumber,r.model equipmentModel,r.manufacturer
+	 		  ,r.leasing_company leasingCompany
+		from t_basic_equipment_inspection i 
+		inner join t_basic_construction c on c.id = i.construction_id
+		inner join t_basic_equipment_register r on r.id = i.equipment_id
+		left join t_sys_territory t on t.id = c.belong_area
+		where
+		  r.status =1
+		 AND  exists (
+						select 1
+						from t_sys_user u
+						inner join t_sys_organization p on p.id = u.org_id
+						inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+						where s.construction_id = c.id and u.id = #{userId}
+			)
+		<if test="results != null and results != '' ">
+			and i.results = #{results}
+		</if>
+		<if test="constructionId != null and constructionId != '' ">
+			and c.id = #{constructionId}
+		</if>
+		<if test="constructionName != null and constructionName != ''">
+       		<![CDATA[
+       			AND locate(#{constructionName}, c.`name`) > 0
+       		]]>
+        </if>
+		<if test="number != null and number != ''">
+       		<![CDATA[
+       			AND locate(#{number}, r.`number`) > 0
+       		]]>
+        </if>
+		<if test="startDate != null and startDate != ''">
+			<![CDATA[
+			AND i.create_time > str_to_date(#{startDate}, '%Y-%m-%d')
+			]]>
+		</if>
+		<if test="endDate != null and endDate != ''">
+			<![CDATA[
+			AND i.create_time < date_add(str_to_date(#{endDate}, '%Y-%m-%d'), interval 1 day)
+			]]>
+		</if>
+		order by i.create_time desc
+		LIMIT #{startIndex},#{rowNum}
+	 </select>
+	 <select id="getEquipmentInspectionCount" parameterType="com.escst.equipment.vo.InspectionQueryVO" resultType="int">
+	 	select count(i.id)
+		from t_basic_equipment_inspection i 
+		inner join t_basic_construction c on c.id = i.construction_id
+		inner join t_basic_equipment_register r on r.id = i.equipment_id
+		where
+		 r.status =1
+		 AND exists (
+						select 1
+						from t_sys_user u
+						inner join t_sys_organization p on p.id = u.org_id
+						inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+						where s.construction_id = c.id and u.id = #{userId}
+			)
+		<if test="results != null and results != '' ">
+			and i.results = #{results}
+		</if>
+		<if test="constructionId != null and constructionId != '' ">
+			and c.id = #{constructionId}
+		</if>
+		<if test="constructionName != null and constructionName != ''">
+       		<![CDATA[
+       			AND locate(#{constructionName}, c.`name`) > 0
+       		]]>
+        </if>
+		<if test="startDate != null and startDate != ''">
+			<![CDATA[
+			AND i.create_time > str_to_date(#{startDate}, '%Y-%m-%d')
+			]]>
+		</if>
+		<if test="endDate != null and endDate != ''">
+			<![CDATA[
+			AND i.create_time < date_add(str_to_date(#{endDate}, '%Y-%m-%d'), interval 1 day)
+			]]>
+		</if>
+	 </select>
+	 <select id="getEquipmentInspection" parameterType="string" resultType="com.escst.equipment.vo.InspectionVO">
+	 	select i.id,i.current_location currentLocation,i.results,i.remark,i.is_attach isAttach,c.`name` constructionName
+	 		  ,t.`name` areaName,r.`name` equipmentName,r.number equipmentNumber,r.model equipmentModel,r.manufacturer
+	 		  ,r.leasing_company leasingCompany
+		from t_basic_equipment_inspection i 
+		inner join t_basic_construction c on c.id = i.construction_id
+		inner join t_basic_equipment_register r on r.id = i.equipment_id
+		inner join t_sys_territory t on t.id = c.belong_area
+		where i.id = #{id}
+	 </select>
+</mapper>

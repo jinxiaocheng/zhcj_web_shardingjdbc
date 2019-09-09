@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.orgMenu.mapper.OrgMenuMapper">
+
+    <!--添加机构菜单表中的数据-->
+    <insert id="insert" parameterType="com.escst.orgMenu.entity.OrgMenuEntity">
+        INSERT INTO t_sys_org_menu (
+            `id`,
+            `org_id`,
+            `menu_id`,
+            menu_name,
+            `operation_authority`,
+            sort_num
+        )
+        VALUES
+            (
+                #{id},
+                #{orgId},
+                #{menuId},
+                #{name},
+                #{operationAuthority},
+                #{sortNum}
+            );
+    </insert>
+
+    <!--批量添加机构菜单表中的数据-->
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into t_sys_org_menu
+        (
+        `id`,
+        `org_id`,
+        `menu_id`,
+        menu_name,
+        `operation_authority`,
+        sort_num
+        )
+        values
+        <foreach collection="list" item="org" index="index" separator=",">
+            (
+            #{org.id},
+            #{org.orgId},
+            #{org.menuId},
+            #{org.name},
+            #{org.operationAuthority},
+            #{org.sortNum}
+            )
+        </foreach>
+    </insert>
+
+    <!--根据机构id，查询出机构菜单表中的数据-->
+    <select id="selectByOrgId" parameterType="String" resultType="com.escst.orgMenu.entity.OrgMenuEntity">
+        SELECT
+            t.id                              AS id,
+            t.org_id                          AS orgId,
+            t.menu_id                         AS menuId,
+            t.menu_name                       as name,
+            t.sort_num                        as sortNum,
+            ifnull(t.operation_authority, "") AS operationAuthority
+        FROM
+            t_sys_org_menu t
+        WHERE t.org_id = #{orgId}
+    </select>
+
+    <!--修改机构对应的权限-->
+    <update id="update" parameterType="com.escst.orgMenu.entity.OrgMenuEntity">
+        UPDATE t_sys_org_menu
+        SET operation_authority = #{operationAuthority}
+        WHERE ID = #{id}
+    </update>
+
+    <!--批量删除机构对应的权限-->
+    <delete id="batchRemove" parameterType="java.util.List">
+        delete from t_sys_org_menu where id in
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="removeById" parameterType="String">
+        DELETE FROM `t_sys_org_menu`
+        WHERE org_id = #{org_id}
+    </delete>
+
+    <delete id="removeByIdAndOrgId" parameterType="com.escst.menu.entity.MenuEntity">
+        DELETE FROM `t_sys_org_menu`
+        WHERE org_id = #{orgId} and menu_id = #{id}
+    </delete>
+</mapper>

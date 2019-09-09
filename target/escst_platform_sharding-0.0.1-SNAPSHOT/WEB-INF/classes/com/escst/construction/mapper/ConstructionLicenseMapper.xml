@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>    
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.escst.construction.mapper.ConstructionLicenseMapper">
+<insert id="insert" parameterType="com.escst.construction.entity.ConstructionLicenseEntity">
+	INSERT INTO t_basic_construction_license (
+		`id`,
+		`construct_license_no`,
+		`project_name`,
+		`develope_site`,
+		`development`,
+		`building`,
+		`designing`,
+		`supervision`,
+		`prospecting`,
+		`prospecting_header`,
+		`designing_header`,
+		`project_manager`,
+		`supervise_director`,
+		`develope_scale`,
+		`contract_price`,
+		`license_issue`,
+		`license_date`,
+		`remark`,
+		`contract_start_date`,
+		`contract_end_date`,
+		`create_time`,
+		`create_by`,
+		`update_time`,
+		`update_by`
+	)
+	VALUES
+		(
+			#{id},
+		#{constructLicenseNo},
+		#{projectName},
+		#{developeSite},
+		#{development},
+		#{building},
+		#{designing},
+		#{supervision},
+		#{prospecting},
+		#{prospectingHeader},
+		#{designingHeader},
+		#{projectManager},
+		#{superviseDirector},
+		#{developeScale},
+		#{contractPrice},
+		#{licenseIssue},
+		#{licenseDate},
+		#{remark},
+		#{contractStartDate},
+		#{contractEndDate},
+		#{createTime},
+		#{createBy},
+		#{updateTime},
+		#{updateBy}
+		)
+</insert>
+
+   <select id="selectConstructionLicenseById" parameterType="String" resultType="com.escst.construction.entity.ConstructionLicenseEntity">
+    	SELECT
+		 t.id  as id,
+		t.construct_license_no as constructLicenseNo,
+		tbc.name as projectName,
+		t.develope_site as developeSite,
+		tbc.id as construcitonId,
+		(select c.name from t_sys_territory c where c.id = tbc.belong_city) AS cityName,
+		(select d.name from t_sys_territory d where d.id = tbc.belong_area) AS areaName,
+	    tbc.belong_city as cityId,
+	    tbc.belong_area as areaId,
+		tbc.development as development,
+		tbc.building as building,
+		t.designing as designing,
+		tbc.supervision as supervision,
+		t.prospecting as prospecting,
+		t.prospecting_header as prospectingHeader,
+		t.designing_header as designingHeader,
+		tbc.project_manager as projectManager,
+		t.supervise_director as superviseDirector,
+		t.develope_scale as developeScale,
+		t.contract_price as contractPrice,
+		t.license_issue as licenseIssue,
+		 DATE_FORMAT(t.license_date,'%Y-%m-%d') as licenseDate,
+		t.remark as remark,
+		 DATE_FORMAT(tbc.contract_start_date,'%Y-%m-%d') as contractStartDate,
+		 DATE_FORMAT(tbc.contract_end_date,'%Y-%m-%d') as contractEndDate,
+		 tbc.icon_id as iconId,
+		 tbc.lng as lng,
+		 tbc.lat as lat,
+		 DATE_FORMAT(tbc.plan_contract_start_date,'%Y-%m-%d') as planContractStartDate,
+		 DATE_FORMAT(tbc.plan_contract_end_date,'%Y-%m-%d') as planContractEndDate
+		FROM
+			t_basic_construction tbc
+	    LEFT JOIN t_basic_construction_license t ON  t.id = tbc.construct_license_id
+		where tbc.id = #{id}
+    </select>
+
+	<update id="update" parameterType="com.escst.construction.entity.ConstructionLicenseEntity">
+		UPDATE t_basic_construction_license
+	     SET construct_license_no =#{constructLicenseNo},
+		   project_name = #{projectName},
+		   develope_site = #{developeSite},
+		   development = #{development},
+		   building = #{building},
+		   designing = #{designing},
+		   supervision = #{supervision},
+		   prospecting = #{prospecting},
+		   prospecting_header = #{prospectingHeader},
+		   designing_header = #{designingHeader},
+		   project_manager = #{projectManager},
+		   supervise_director = #{superviseDirector},
+		   develope_scale = #{developeScale},
+		   contract_price = #{contractPrice},
+		   license_issue = #{licenseIssue},
+		   license_date = #{licenseDate},
+		   remark= #{remark},
+		   contract_start_date = #{contractStartDate},
+		   contract_end_date = #{contractEndDate},
+		   	update_time = #{updateTime}
+		   WHERE  id=#{id}
+	</update>
+
+
+</mapper>

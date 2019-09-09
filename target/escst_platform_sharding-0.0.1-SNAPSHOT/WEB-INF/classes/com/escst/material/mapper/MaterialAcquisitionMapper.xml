@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.material.mapper.MaterialAcquisitionMapper">
+
+	<select id="selectUseMaterialList" parameterType="com.escst.material.entity.MaterialAcquisitionEntity"
+		resultType="map">
+		SELECT
+		a.id acquisitionId,
+		b.construction_id constructionId,
+		IFNULL(a.recipients_date, "") recipientsDate,
+		IFNULL(a.remark, "") remark,
+		IFNULL(a.quantity, 0) quantity,
+		IFNULL(a.`status`, 0) STATUS,
+		IFNULL(a.create_time, "") createTime,
+		IFNULL(a.create_by, "") userId,
+		IFNULL(g.name, "") name,
+		IFNULL(c.`name`, "") usePerson,
+		IFNULL(a.is_attach, 0) isAttach,
+		IFNULL(c.mobile, '') mobile,
+		IFNULL(b.use_position,"") usePosition,
+		IFNULL(b.manufacturer, '') manufacturer,
+		IFNULL(b.available_quantity, 0) availableQuantity,
+		IFNULL(d.name, "") laborCompany,
+		e.name as constructionName,
+		f.name as areaName,
+		g.unit as unit,
+		mm.name as model
+		<include refid="userMaterialWhere"></include>
+		ORDER BY a.create_time DESC
+		LIMIT #{startIndex},#{rowNum}
+	</select>
+
+	<select resultType="Integer" parameterType="com.escst.material.entity.MaterialAcquisitionEntity" id="selectAcquisitionCount">
+	SELECT count(1) 
+	<include refid="userMaterialWhere"/>
+	</select>
+
+	<sql id="userMaterialWhere">
+		FROM
+        	t_basic_material_acquisition a
+        	inner join t_basic_material g on a.material_id = g.id
+	        LEFT JOIN t_basic_material_approach b ON a.material_approach_id = b.id
+	        LEFT JOIN t_sys_user c ON c.id = a.person_id
+	        left join t_basic_construction_person cp on cp.person_id = c.id and cp.construction_id = a.construction_id
+	        LEFT JOIN t_basic_project_company d ON d.id = cp.project_company_id
+	        left join T_BASIC_CONSTRUCTION e on b.construction_id = e.id
+	        left join t_sys_territory f on e.belong_area = f.id
+			left join t_basic_material_model mm on mm.id = b.model_id
+        WHERE 1=1
+        <if test="constructionId!=null and constructionId!=''">
+			and a.construction_id = #{constructionId}
+		</if>
+      	<if test="name!=null and name!=''">
+			and g.name=#{name}
+		</if>
+		and exists (
+						select 1
+						from t_sys_user u
+						inner join t_sys_organization p on p.id = u.org_id
+						inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+						where s.construction_id = a.construction_id and u.id = #{userId}
+					)
+	</sql>
+	
+	<insert id="insertUseMatInfo" parameterType="com.escst.material.entity.MaterialAcquisitionEntity">
+		INSERT INTO t_basic_material_acquisition
+		(id,construction_id,material_approach_id,material_id,recipients_date,quantity,person_id,
+		remark,is_attach,status,create_time,create_by)
+		VALUES
+		(#{id},#{constructionId},#{approachId},#{materialId},#{recipientsDate},#{quantity},#{personId},
+		#{remark},#{isAttach},#{status},#{createTime},#{createBy})
+	</insert>
+
+	<update id="updateStatus" parameterType="com.escst.material.entity.MaterialAcquisitionEntity">
+		UPDATE T_BASIC_MATERIAL_ACQUISITION SET `status`=#{status} WHERE id =#{id}
+	</update>
+
+	<select id="selectApproachId" parameterType="String" resultType="String">
+		SELECT IFNULL(material_approach_id,"") approachId FROM
+		t_basic_material_acquisition WHERE id=#{id}
+	</select>
+
+
+	<select id="queryAcquisitionDetailInfo" parameterType="com.escst.material.entity.MaterialAcquisitionEntity"
+		resultType="map">
+		SELECT
+		a.id,a.recipientsDate,a.remark,a.quantity,a.status,a.createTime,
+		a.name,a.usePerson,a.isAttach,a.mobile,a.model,a.measurementUnit,a.manufacturer,
+		a.availableQuantity,a.laborCompany,IFNULL(d.`name`,"") createBy
+		FROM
+		(
+		SELECT
+		a.id,
+		b.use_position usePosition,
+		IFNULL(a.recipients_date, "") recipientsDate,
+		IFNULL(a.remark, "") remark,
+		IFNULL(a.quantity, 0) quantity,
+		IFNULL(a.`status`, 0) STATUS,
+		IFNULL(a.create_time, "") createTime,
+		IFNULL(a.create_by, "") userId,
+		IFNULL(b.`name`, "") NAME,
+		IFNULL(c.`name`, "") usePerson,
+		IFNULL(a.is_attach, 0) isAttach,
+		IFNULL(c.mobile, 0) mobile,
+		IFNULL(b.model, 0) model,
+		IFNULL(b.measurement_unit, "") measurementUnit,
+		IFNULL(b.manufacturer, 0) manufacturer,
+		IFNULL(b.available_quantity, 0) availableQuantity,
+		IFNULL(d.name, "") laborCompany
+		FROM
+		t_basic_material_acquisition a
+		LEFT JOIN t_basic_material_approach b ON a.material_approach_id = b.id
+		LEFT JOIN t_basic_person c ON c.id = a.person_id
+		LEFT JOIN t_basic_project_company d ON d.id = c.project_company_id
+		WHERE
+		a.id = #{id}
+		<if test="name !='' and name !=null ">
+			AND b.NAME LIKE CONCAT("%",#{name},"%")
+			OR b.CODE LIKE CONCAT("%",#{name},"%")
+		</if>
+		) a
+		LEFT JOIN t_basic_person d ON a.userId = d.id ORDER BY a.createTime DESC
+	</select>
+
+	<update id="batchUpdateId" parameterType="map">
+		UPDATE t_basic_material_acquisition a
+		SET a.material_id = (
+			SELECT
+				b.material_id
+			FROM
+				t_basic_material_approach b
+			WHERE
+			a.material_approach_id = b.id
+		)
+	</update>
+</mapper>

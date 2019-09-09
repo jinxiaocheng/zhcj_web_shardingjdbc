@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.projectCompany.mapper.ProjectCompanyMapper">
+
+    <select id="selectList" parameterType="com.escst.projectCompany.entity.ProjectCompanyEntity" resultType="map">
+        SELECT
+			a.id as id,
+		a.name as name,
+		a.type as type,
+		b.name as constructionName,
+		c.name as terrName,
+        c.id as areaId
+		FROM
+			T_BASIC_PROJECT_COMPANY a
+		INNER JOIN t_basic_construction b ON a.construction_id=b.id
+		INNER JOIN t_sys_territory c on b.belong_area = c.id
+		<include refid="conditionWhere"></include>
+        ORDER BY a.create_time desc,a.construction_id
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="selectCount" parameterType="com.escst.projectCompany.entity.ProjectCompanyEntity" resultType="Integer">
+      SELECT count(1)
+		FROM
+			T_BASIC_PROJECT_COMPANY a
+		INNER JOIN t_basic_construction b ON a.construction_id=b.id
+		INNER JOIN t_sys_territory c on b.belong_area = c.id
+		<include refid="conditionWhere"></include>
+     </select>
+
+	<sql id="conditionWhere">
+		<where>
+			1=1
+			<if test="name!=null and name!=''">
+	    		and a.name like CONCAT('%',#{name},'%')
+	    	</if>
+    		<if test="type!=null and type!=''">
+	    		and a.type=#{type}
+	    	</if>
+            <if test="areaId!=null and areaId!=''">
+                and c.id=#{areaId}
+            </if>
+            <if test="constructionId!=null and constructionId!=''">
+                and a.construction_id=#{constructionId}
+            </if>
+            and exists (
+					select 1
+						from t_sys_user u
+						inner join t_sys_organization p on p.id = u.org_id
+						inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+						where s.construction_id = b.id and u.id = #{userId}
+					)
+		</where>
+	</sql>
+	
+    <insert id="insert" parameterType="com.escst.projectCompany.entity.ProjectCompanyEntity">
+        INSERT INTO T_BASIC_PROJECT_COMPANY (ID,CONSTRUCTION_ID,TYPE,NAME,CREATE_TIME,CREATE_BY) VALUES (#{id},#{constructionId},#{type},#{name},#{createTime},#{createBy})
+    </insert>
+
+    <update id="update" parameterType="com.escst.projectCompany.entity.ProjectCompanyEntity">
+        UPDATE T_BASIC_PROJECT_COMPANY
+        <set>
+            <if test="type != null and type != 0 ">
+                TYPE = #{type},
+            </if>
+            <if test="name != null and name != '' ">
+                NAME = #{name},
+            </if>
+            <if test="updateTime != null ">
+                UPDATE_TIME = #{updateTime},
+            </if>
+            <if test="updateBy != null ">
+                UPDATE_BY = #{updateBy},
+            </if>
+        </set>
+        WHERE ID = #{id}
+    </update>
+
+    <select id="listByConstructionId" parameterType="String" resultType="map">
+        select id,name,type from t_basic_project_company t where 1=1
+        <if test="constructionId != null and constructionId != '' ">
+            AND t.CONSTRUCTION_ID = #{constructionId}
+        </if>
+        AND EXISTS (
+			SELECT
+				1
+			FROM
+				t_sys_user u
+			INNER JOIN t_sys_organization p ON p.id = u.org_id
+			INNER JOIN t_sys_organization s ON locate(p.sys_code, s.sys_code) = 1
+			WHERE
+				s.construction_id = t.construction_id
+			AND u.id = #{userId} and s.status = 1
+		)
+    </select>
+
+    <select id="queryByProjectStructionId" parameterType="com.escst.task.entity.ProjectTaskEntity" resultType="map">
+        SELECT B.ID AS projectCompanyId,
+        B.TYPE AS projectCompanyType,
+        B.NAME AS projectCompanyName,
+        E.ID as teamId,
+        E.NAME as teamName,
+        C.USER_ID AS userId,
+        C.NAME AS personName,
+        C.MOBILE AS personMobile
+        FROM T_BASIC_PROJECT_TASK A
+        LEFT JOIN T_BASIC_PERSON C ON C.USER_ID = A.person_id
+        LEFT JOIN T_BASIC_PROJECT_COMPANY B ON B.ID = A.PROJECT_COMPANY_ID
+        LEFT JOIN T_BASIC_CONSTRUCTION_PERSON F ON F.PERSON_ID = C.ID
+        LEFT JOIN T_BASIC_TEAM E ON E.ID = F.TEAM_ID
+        WHERE F.STATUS = 1
+        <if test="constructionId != null and constructionId != '' ">
+            AND A.CONSTRUCTION_ID = #{constructionId}
+        </if>
+        <if test="projectStructureId != null and projectStructureId != '' ">
+            AND A.PROJECT_STRUCTURE_ID = #{projectStructureId}
+        </if>
+        <if test="status != null and status != 0 ">
+            AND A.STATUS = #{status}
+        </if>
+        group by B.ID,B.TYPE, B.NAME, E.ID, E.NAME, C.USER_ID, C.NAME, C.MOBILE
+    </select>
+	<select id="selectCompanyList" parameterType="map" resultType="com.escst.projectCompany.entity.ProjectCompanyEntity">
+		SELECT id,name,type,construction_id constructionId
+		FROM T_BASIC_PROJECT_COMPANY A
+		where A.construction_id = #{constructionId} AND A.name = #{fullName}
+     </select>
+
+    <select id="queryCompanyDetail" parameterType="String" resultType="map">
+        select p.id,p.`name`,p.type, t.id teamId,t.`name` teamName
+        from t_basic_project_company p
+        left join t_basic_team t on t.project_company_id = p.id
+        WHERE p.construction_id = #{constructionId}
+        order by p.name,t.name
+    </select>
+
+     <select id="selectById" parameterType="string" resultType="com.escst.projectCompany.entity.ProjectCompanyEntity">
+		SELECT id,name,type,construction_id constructionId
+		FROM T_BASIC_PROJECT_COMPANY A
+		where id = #{id}
+     </select>
+
+    <select id="selectDetailInfoById" parameterType="string" resultType="map">
+        SELECT a.id as id,a.name as name,a.type as type,a.construction_id as constructionId,
+        b.name as constructionName,c.id as areaId,c.name as areaName
+		FROM T_BASIC_PROJECT_COMPANY a
+		INNER JOIN t_basic_construction b ON a.construction_id=b.id
+		INNER JOIN t_sys_territory c on b.belong_area = c.id
+		where a.id = #{id}
+    </select>
+	<insert id="batchInsert" parameterType="list">
+        INSERT INTO T_BASIC_PROJECT_COMPANY(ID,CONSTRUCTION_ID,TYPE,NAME,CREATE_TIME,CREATE_BY)
+        VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (#{item.id},#{item.constructionId},#{item.type},#{item.name},#{item.createTime},#{item.createBy})
+        </foreach>
+    </insert>
+
+    <select id="selectCompanyByUserId" parameterType="com.escst.commons.vo.PageAuthVO" resultType="com.escst.commons.vo.BaseVO">
+        SELECT tbpc.id as id , tbpc.name as name  FROM   t_basic_project_company tbpc
+        LEFT JOIN t_basic_construction_person tbcp ON tbcp.project_company_id =tbpc.id
+        LEFT JOIN t_basic_construction  tbc ON tbc.id = tbpc.construction_id
+
+        <where>
+        <choose>
+            <when test="constructionId != null and constructionId != '' ">
+                tbpc.construction_id = #{constructionId}
+            </when>
+            <otherwise>
+                 exists (
+                select 1
+                from t_sys_user u
+                inner join t_sys_organization p on p.id = u.org_id
+                inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                where s.construction_id = tbpc.construction_id  and u.id = #{userId}
+                )
+            </otherwise>
+        </choose>
+            AND tbcp.status =1
+        </where>
+
+        GROUP BY tbpc.id
+        ORDER BY  tbpc.create_time DESC
+    </select>
+
+</mapper>

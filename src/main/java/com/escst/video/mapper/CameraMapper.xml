@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>    
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.escst.video.mapper.CameraMapper">
+    <resultMap id="cameraResultMap" type="com.escst.video.entity.CameraEntity">
+        <id column="ID" property="id"/>
+        <result column="CONSTRUCTION_ID" property="constructionId"/>
+        <result column="CONSTRUCTION_NAME" property="constructionName"/>
+        <result column="NAME" property="name" />
+        <result column="SUPPLIER" property="supplier" />
+        <result column="FLAG" property="flag" />
+        <result column="CHANNEL_NO" property="channelNo" />
+        <result column="STATUS" property="status" />
+        <result column="HIK_XML" property="hikXml" />
+        <result column="HIK_CAMERA_ID" property="hikCameraId" />
+        <result column="HIK_SYS_CODE" property="hikSysCode" />
+        <result column="HIK_GB_INDEXCODE" property="hikGbIndexcode" />
+        <result column="HIK_OUTSIDE_IP" property="hikOutsideIp" />
+        <result column="HIK_CAMERA_USERNAME" property="hikCameraUsername" />
+        <result column="HIK_CAMERA_PASSWORD" property="hikCameraPassword" />
+    </resultMap>
+
+    <select id="selectList" parameterType="com.escst.video.entity.CameraEntity" resultMap="cameraResultMap">
+        SELECT * FROM T_BASIC_CAMERA
+        <where>
+            <if test="constructionId!=null and constructionId!='' ">
+                AND CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="status!=null and status!='' ">
+                AND STATUS = #{status}
+            </if>
+        </where>
+        ORDER BY CHANNEL_NO
+    </select>
+
+    <select id="selectCount" parameterType="com.escst.video.entity.CameraEntity" resultType="int">
+        SELECT COUNT(ID) FROM T_BASIC_CAMERA
+        <where>
+            <if test="constructionId!=null and constructionId!='' ">
+                AND CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="status!=null">
+                AND STATUS = #{status}
+            </if>
+        </where>
+    </select>
+    <select id="selectById" parameterType="string" resultMap="cameraResultMap">
+        SELECT * FROM T_BASIC_CAMERA WHERE ID = #{id}
+    </select>
+    <select id="selectCameraList" parameterType="map" resultMap="cameraResultMap">
+        select * from t_basic_camera c
+		where exists (
+					select 1 from t_basic_construction t
+					where t.id = c.construction_id and t.status = 1
+					)
+			AND NOT EXISTS (
+			SELECT 1 FROM  t_basic_role_camera tbrc
+			 WHERE  tbrc.role_id  = #{roleId} AND  tbrc.camera_id =c.id
+			)
+		order by c.construction_id,channel_no
+    </select>
+
+    <select id="getNvr" parameterType="com.escst.video.entity.NvrDeployEntity" resultType="com.escst.video.vo.NvrVO">
+        select tbn.id as id,tbn.ip ip,tbn.port as port,tbn.app_port as appPort,tbn.user_name userName,tbn.USER_password password ,tbn.name as constructionName,tbn.construction_id as constructionId from t_basic_nvr tbn
+        LEFT JOIN t_basic_construction tbc ON tbc.id = tbn.construction_id
+        <where>
+            <if test="constructionId !=null and constructionId !=''">
+            tbn.construction_id = #{constructionId}
+            </if>
+            <if test="areaId !=null and areaId !=''">
+            AND  tbc.belong_area =#{areaId}
+            </if>
+        </where>
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="getCountNvr" parameterType="com.escst.video.entity.NvrDeployEntity" resultType="Integer">
+        select count(tbn.id) count from t_basic_nvr tbn
+        LEFT JOIN t_basic_construction tbc ON tbc.id = tbn.construction_id
+        <where>
+            <if test="constructionId !=null and constructionId !=''">
+                tbn.construction_id = #{constructionId}
+            </if>
+            <if test="areaId !=null and areaId !=''">
+               AND tbc.belong_area =#{areaId}
+            </if>
+        </where>
+    </select>
+    <select id="selectNvr" resultType="com.escst.video.vo.NvrVO">
+        select ip,web_port as port,user_name userName,USER_password password,construction_id constructionId
+        from t_basic_nvr
+        where construction_id is not null
+    </select>
+
+    <select id="selectExistsNvrList" resultType="com.escst.video.vo.NvrVO" >
+        select ip,web_port as port,user_name userName,user_password password,construction_id constructionId,name constructionName
+        from t_basic_nvr n
+        where exists (
+        select 1 from t_sys_organization o where o.construction_id = n.construction_id and locate('1_01',o.sys_code)
+        )
+        and not exists (
+        select 1 from t_basic_camera c where c.construction_id = n.construction_id
+        )
+    </select>
+
+    <insert id="batchSave" parameterType="com.escst.video.entity.CameraEntity">
+        insert into T_BASIC_CAMERA(id,construction_id,construction_name,name,supplier,flag,channel_no,status)
+        values
+        <foreach collection="list" item="item" open="" separator="," close="">
+            (replace(uuid(),'-',''),#{item.constructionId},#{item.constructionName},#{item.name},#{item.supplier},#{item.flag},#{item.channelNo},#{item.status})
+        </foreach>
+    </insert>
+
+    <insert id="save" parameterType="com.escst.video.entity.NvrDeployEntity">
+        INSERT INTO t_basic_nvr(id,name,model,ip,web_port,app_port,user_name,user_password,construction_id,port)
+         VALUES (#{id},#{name},#{model},#{ip},#{webPort},#{appPort},#{userName},#{password},#{constructionId},#{port})
+    </insert>
+
+    <update id="updateNvr" parameterType="com.escst.video.vo.NvrVO">
+        UPDATE t_basic_nvr
+        <set>
+            <if test="ip !=null and ip != ''">
+                ip =#{ip},
+            </if>
+            <if test="port !=null and port !=0">
+                port =#{port},
+            </if>
+            <if test="appPort !=null and appPort !=0">
+                app_port =#{appPort},
+            </if>
+            <if test="userName !=null and userName !=''">
+                user_name =#{userName},
+            </if>
+            <if test="password !=null and password !=''">
+                user_password =#{password}
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+
+    <update id="updateCamera" parameterType="com.escst.video.entity.CameraEntity">
+        UPDATE t_basic_camera
+        <set>
+            <if test="name !=null and name !=''">
+                name = #{name},
+            </if>
+            <if test="flag !=null">
+                flag =#{flag},
+            </if>
+            <if test="channelNo !=0 and channelNo !=''">
+                channel_no =#{channelNo}
+            </if>
+        </set>
+        WHERE id =#{id}
+    </update>
+
+    <select id="queryById" parameterType="com.escst.video.entity.NvrDeployEntity" resultType="com.escst.video.vo.NvrVO">
+    SELECT a.ip as ip ,a.user_name as userName,a.`port` as port,a.app_port as appPort  ,a.user_password as password ,b.name as constructionName ,b.id as constructionId ,d.name as areaName,d.id as areaId  FROM t_basic_nvr a
+      LEFT JOIN t_basic_construction b ON b.id =a.construction_id
+      LEFT JOIN t_sys_territory d ON d.id = b.belong_area
+      WHERE a.id=#{id}
+    </select>
+
+    <select id="queryCameraById" parameterType="String" resultType="com.escst.video.vo.CameraVo">
+        SELECT id ,name ,flag , status,channel_no as channelNo FROM t_basic_camera WHERE  construction_id = #{constructionId} ORDER  BY channel_no
+    </select>
+
+    <select id="delete" parameterType="com.escst.video.entity.CameraEntity">
+        delete from t_basic_camera where id in
+        <foreach collection="list" item="arr" index="no" open="("
+                 separator="," close=")">
+            #{arr}
+        </foreach>
+    </select>
+
+    <select id="selectCameraByConstructionId" parameterType="String" resultType="String">
+    SELECT id  FROM t_basic_camera WHERE  construction_id = #{constructionId}
+    </select>
+
+    <insert id="saveRoleCamera" parameterType="com.escst.video.entity.RoleCameraEntity">
+        INSERT INTO t_basic_role_camera (id,role_id,camera_id,create_time) VALUE (#{id},#{roleId},#{cameraId},#{createTime})
+     </insert>
+
+    <update id="deleteRoleCamera" parameterType="Map">
+        DELETE FROM  t_basic_role_camera
+        WHERE  camera_id  in
+        <foreach collection="list" item="arr" index="no" open="("
+                 separator="," close=")">
+        #{arr}
+    </foreach>
+        AND role_id = #{roleId}
+    </update>
+
+    <select id="selectCameraByUser" parameterType="String" resultType="com.escst.video.entity.CameraEntity">
+      select  c.id as id , c.construction_id as constructionId,c.construction_name as constructionName , c.name as name ,c.flag as flag,c.channel_no as channelNo
+         from t_basic_camera c
+		where
+		   exists (
+						select 1
+						from t_sys_user u
+						inner join t_sys_organization p on p.id = u.org_id
+						inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+						where s.construction_id = c.construction_id and u.id = #{userId}
+			)
+		  ORDER BY c.channel_no
+    </select>
+
+    <select id="selectRoleCameraList" parameterType="String" resultType="String">
+        SELECT camera_id as cameraId FROM  t_basic_role_camera WHERE role_id = #{roleId}
+    </select>
+</mapper>

@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.highformwork.mapper.HighformworkRealTimeMapper">
+    <select id="getRealTimeDataByConstructionId" parameterType="map" resultType="com.escst.highformwork.vo.HighformworkRealTimeVo">
+	    SELECT
+			a.constructionId,
+			a.constructionName,
+			a.flowId,
+			a.flowName,
+			a.type,
+			a.xType,
+			a.yType,
+			a.kpaType,
+			a.displaceType,
+			a.temperatureType,
+			a.electricType,
+			a.number,
+			a.xAngle,
+			a.yAngle,
+			a.kpa,
+			a.displace,
+			a.temperature,
+			a.electric,
+			a.acquisitionTime,
+			a.equipmentId,
+			a.equipmentName
+		FROM
+			(
+				SELECT
+					r.construction_id as constructionId,
+					r.construction_name as constructionName,
+					f.id as flowId,
+					f.`name` as flowName,
+					r.type,
+					r.x_type as xType,
+					r.y_type as yType,
+					r.kpa_type as kpaType,
+					r.displace_type as displaceType,
+					r.temperature_type as temperatureType,
+					r.electric_type as electricType,
+					e.number,
+					r.x_angle as xAngle,
+					r.y_angle as yAngle,
+					r.kpa,
+					r.displace,
+					r.temperature,
+					r.electric,
+					DATE_FORMAT(r.acquisition_time,'%Y-%m-%d %H:%i') as acquisitionTime,
+					r.equipment_id as equipmentId,
+					e.`name` AS equipmentName
+				FROM
+					t_highformwork_realtime r
+				LEFT JOIN t_highformwork_equipment e ON r.equipment_id = e.id
+				LEFT JOIN t_highformwork_flow_equipment fe on fe.equipment_id=e.id
+				LEFT JOIN t_highformwork_flow f ON f.id=fe.flow_id
+				WHERE
+					r.construction_id = #{constructionId}
+				 and fe.flow_status=1
+				ORDER BY
+					r.acquisition_time DESC
+			) a
+		GROUP BY
+		a.equipmentId
+    </select>
+	
+	<select id="getAlarmInfo" parameterType="String" resultType="com.escst.highformwork.entity.HighformworkThresholdValueEntity">
+		select a.* from (
+		SELECT
+			v.id AS id,
+			v.construction_id AS constructionId,
+			v.construction_name AS constructionName,
+			v.equipment_id AS equipmentId,
+			v.type AS type,
+			v.x_angle AS xAngle,
+			v.y_angle AS yAngle,
+			v.kpa,
+			v.displace,
+			v.temperature,
+			v.electric,
+			CONCAT(e.name,'(',e.number,')') flowName,
+			e.number
+		FROM
+			t_highformwork_threshold_value v
+			LEFT JOIN t_highformwork_flow_equipment fe on v.equipment_id = fe.equipment_id
+			LEFT JOIN t_highformwork_flow f on fe.flow_id = f.id
+			LEFT JOIN t_highformwork_equipment e on e.id=fe.equipment_id
+			WHERE
+			f.id = #{equipmentId}) a
+		group by a.equipmentId,a.type
+		order by a.number asc
+	</select>
+	
+	<select id="selectAlarmDetail" parameterType="map" resultType="com.escst.highformwork.vo.HighformworkRealTimeVo">
+		SELECT
+			r.x_type AS xType,
+			r.y_type yType,
+			r.x_angle as xAngle,
+			r.y_angle as yAngle,
+			r.kpa,
+			r.kpa_type kpaType,
+			r.displace,
+			r.displace_type displaceType,
+			r.temperature_type temperatureType,
+			r.temperature,
+			r.electric,
+			r.electric_type electricType,
+			r.create_time as createTime,
+			r.type,
+			e.id as equipmentId,
+			e.`name` as equipmentName,
+			e.number,
+			f.file_id as fileId,
+			f.name flowName
+		FROM
+			t_highformwork_realtime r
+		LEFT JOIN t_highformwork_equipment e ON r.equipment_id = e.id
+		LEFT JOIN t_highformwork_flow_equipment fe on fe.equipment_id=e.id
+		LEFT JOIN t_highformwork_flow f ON f.id=fe.flow_id
+		WHERE
+			f.id = #{flowId} and r.create_time > #{createTime}
+		AND (
+			r.x_type = #{type}
+			OR r.y_type = #{type}
+			OR r.kpa_type = #{type}
+			OR r.displace_type = #{type}
+			OR r.temperature_type = #{type}
+			OR r.electric_type = #{type}
+		)
+	</select>
+	
+	<!-- <select id="selectTrend" parameterType="com.escst.highformwork.vo.TrendRequestVo" resultType="com.escst.highformwork.vo.TrendResultVo">
+			SELECT
+				DATE_FORMAT(
+					r.acquisition_time,
+					'%Y-%m-%d %H:%i'
+				) acquisitionTime,
+				e.id AS equipmentId,
+				e.name AS equipmentName,
+				r.x_angle AS xAngle,
+				r.y_angle AS yAngle,
+				r.displace,
+				r.kpa
+			FROM
+				t_highformwork_realtime r
+			LEFT JOIN t_highformwork_equipment e ON r.equipment_id = e.id
+			LEFT JOIN t_highformwork_flow_equipment fe on fe.equipment_id=e.id
+			LEFT JOIN t_highformwork_flow f on f.id=fe.flow_id
+			WHERE
+				r.construction_id = #{constructionId}
+				AND f.id = #{flowId}
+			ORDER BY
+				r.acquisition_time asc
+ 	</select> -->
+ 	
+ 	<select id="selectTrend" parameterType="com.escst.highformwork.vo.TrendRequestVo" resultType="com.escst.highformwork.vo.TrendResultVo">
+		select * from (
+		SELECT
+		CONCAT(DATE_FORMAT(r.acquisition_time,'%Y-%m-%d %H'),':00') acquisitionTime,
+		e.id AS equipmentId,
+		e.name AS equipmentName,
+		round(avg(r.x_angle),2) AS xAngle,
+		round(avg(r.y_angle),2) AS yAngle,
+		round(avg(r.displace),2) AS displace,
+		round(avg(r.kpa),2) AS kpa
+		FROM
+		t_highformwork_realtime r
+		LEFT JOIN t_highformwork_equipment e ON r.equipment_id = e.id
+		LEFT JOIN t_highformwork_flow_equipment fe on fe.equipment_id=e.id
+		LEFT JOIN t_highformwork_flow f on f.id=fe.flow_id
+		WHERE
+		r.construction_id = #{constructionId}
+		AND f.id = #{flowId}
+		GROUP BY DATE_FORMAT(
+		r.acquisition_time,
+		'%Y-%m-%d %H'
+		),e.id, e.name
+		union all
+		select DATE_FORMAT(
+		r.acquisition_time,
+		'%Y-%m-%d %H:%i'
+		) acquisitionTime,
+		e.id AS equipmentId,
+		e.name AS equipmentName,
+		r.x_angle AS xAngle,
+		r.y_angle AS yAngle,
+		r.displace AS displace,
+		r.kpa AS kpa
+		from t_highformwork_realtime r
+		LEFT JOIN t_highformwork_equipment e ON r.equipment_id = e.id
+		LEFT JOIN t_highformwork_flow_equipment fe on fe.equipment_id=e.id
+		LEFT JOIN t_highformwork_flow f on f.id=fe.flow_id
+		where r.type in(2,3,4) AND r.construction_id = #{constructionId}
+		AND f.id = #{flowId}
+		) t
+		order by t.acquisitionTime
+ 	</select>
+ 	
+ 	<select id="selectConstructionFlowList" parameterType="String" resultType="com.escst.highformwork.vo.ConstructionFlowVo">
+ 		SELECT
+			f.construction_id constructionId,
+			f.construction_name constructionName,
+			f.id flowId,
+			f.name as flowName
+		FROM
+			t_highformwork_flow f
+		LEFT JOIN t_highformwork_flow_equipment fe on fe.flow_id=f.id
+		LEFT JOIN t_highformwork_equipment e ON e.id=fe.equipment_id
+		WHERE
+			f.construction_id = #{constructionId} and fe.flow_status=1
+			group by f.id
+ 	</select>
+ 	
+ 	<select id="selectEquipment" parameterType="com.escst.highformwork.vo.TrendRequestVo" resultType="com.escst.highformwork.vo.EquipmentVo">
+		SELECT
+			e.id,
+			e.name
+		FROM
+			t_highformwork_equipment e
+		LEFT JOIN t_highformwork_flow_equipment fe on fe.equipment_id=e.id
+		LEFT JOIN t_highformwork_flow f ON f.id=fe.flow_id
+		WHERE
+		fe.flow_status=1 and f.construction_id = #{constructionId} and fe.flow_id=#{flowId}
+ 	</select>
+ 	
+ 	<select id="selectByFlowId" parameterType="com.escst.highformwork.bean.RealTimeRequestBean" resultType="com.escst.highformwork.vo.HighformworkRealTimeVo">
+ 		select 
+				a.id,
+				a.equipmentName,
+				a.number,
+				a.acquisitionTime,
+				a.xAngle,
+				a.yAngle,
+				a.kpa,
+				a.displace,
+				a.temperature,
+				a.electric,
+				a.equipmentId,
+				a.flowId
+			from (
+			SELECT
+					r.id,
+					e.id as  equipmentId,
+					e.name equipmentName,
+					e.number,
+					DATE_FORMAT(r.acquisition_time,'%Y-%m-%d %H:%i') as acquisitionTime,
+					r.x_angle as xAngle,
+					r.y_angle as yAngle,
+					r.kpa,
+					r.displace,
+					r.temperature,
+					r.electric,
+					f.id as flowId
+			FROM
+				t_highformwork_realtime r
+			LEFT JOIN t_highformwork_flow f on r.flow_id=f.id
+				LEFT JOIN t_highformwork_equipment e on r.equipment_id=e.id
+				LEFT JOIN t_highformwork_flow_equipment fe on  f.id=fe.flow_id
+			WHERE
+				r.construction_id = f.construction_id
+			AND r.flow_id = #{flowId} 
+			order by r.acquisition_time desc) a
+			group by a.equipmentId order by number asc
+		LIMIT #{startIndex},#{rowNum}
+ 	</select>
+ 	
+ 	<select id="selectCount" parameterType="com.escst.highformwork.bean.RealTimeRequestBean" resultType="int">
+ 		select count(1) from (select 
+				a.id,
+				a.equipmentName,
+				a.number,
+				a.acquisitionTime,
+				a.xAngle,
+				a.yAngle,
+				a.kpa,
+				a.displace,
+				a.temperature,
+				a.electric,
+				a.equipmentId,
+				a.flowId
+			from (
+			SELECT
+					r.id,
+					e.id as  equipmentId,
+					e.name equipmentName,
+					e.number,
+					DATE_FORMAT(r.acquisition_time,'%Y-%m-%d %H:%i') as acquisitionTime,
+					r.x_angle as xAngle,
+					r.y_angle as yAngle,
+					r.kpa,
+					r.displace,
+					r.temperature,
+					r.electric,
+					f.id as flowId
+			FROM
+				t_highformwork_realtime r
+			LEFT JOIN t_highformwork_flow f on r.flow_id=f.id
+				LEFT JOIN t_highformwork_equipment e on r.equipment_id=e.id
+				LEFT JOIN t_highformwork_flow_equipment fe on  f.id=fe.flow_id
+			WHERE
+				r.construction_id = f.construction_id
+			AND r.flow_id = #{flowId} 
+			order by r.acquisition_time desc) a
+			group by a.equipmentId) t
+ 	</select>
+ 	
+</mapper>

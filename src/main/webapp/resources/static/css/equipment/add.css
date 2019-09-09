@@ -1,0 +1,13 @@
+.dropdown-toggle {
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+}
+.dropdown-toggle > span {
+    float: right;
+    margin-top: 9px;
+    margin-left: 0;
+    position: absolute;
+    right: 5px;
+}

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.message.mapper.MessageMapper">
+    
+     <insert id="insertMaterialModel" parameterType="com.escst.message.entity.MessageEntity">
+		INSERT INTO t_basic_message (
+			`id`,
+			`title`,
+			`content`,
+			`type`,
+			`is_read`,
+			`create_time`,
+			`create_by`,
+			`construction_id`,
+			`bill_id`
+		)
+		VALUES
+			(
+				#{id},
+				#{title},
+				#{content},
+				#{type},
+				#{isRead},
+				#{createTime},
+				#{createBy},
+				#{constructionId},
+				#{billId}
+			)
+
+	</insert>
+	
+	 <insert id="batchInsert" parameterType="com.escst.message.entity.MessageEntity">
+        INSERT INTO t_basic_message (
+			`id`,
+			`title`,
+			`content`,
+			`type`,
+			`is_read`,
+			`create_time`,
+			`create_by`,
+			`construction_id`,
+			`bill_id`
+		)
+		VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (
+            	#{item.id},
+				#{item.title},
+				#{item.content},
+				#{item.type},
+				#{item.isRead},
+				#{item.createTime},
+				#{item.createBy},
+				#{item.constructionId},
+				#{item.billId}
+            )
+        </foreach>
+    </insert>
+    
+	<sql id="selectSql">
+		id,
+		title,
+		content,
+		type,
+		is_read as isRead,
+		create_time as createTime,
+		construction_id as constructionId,
+		bill_id as billId
+	</sql>
+	<select id="selectMapList" parameterType="com.escst.message.entity.MessageEntity" resultType="map">
+		select 
+			t.id,
+			t.bill_id as billId,
+			t.title,
+			t.content,
+			t.type,
+			t.is_read AS isRead,
+		DATE_FORMAT(t.create_time,'%Y-%m-%d %H:%i:%S') AS createTime,
+			t.construction_id AS constructionId,
+			t.bill_id AS billId,
+			t.accept_id acceptId,
+			t.create_by createBy,
+			count(1) as acceptNum,
+			tsu.name as createName
+		from t_basic_message t
+		LEFT JOIN t_sys_user tsu ON tsu.id = t.create_by
+		<where>
+			t.type=0
+			<if test="type !=0">
+				AND t.is_read=0
+			</if>
+			AND (t.create_by = #{createBy} OR t.accept_id =#{createBy})
+
+			<!--<if test="constructionId!=null and constructionId!=''">-->
+				<!--and t.construction_id=#{constructionId}-->
+			<!--</if>-->
+			<!--and exists (-->
+						<!--select 1-->
+						<!--from t_sys_user u-->
+						<!--inner join t_sys_organization p on p.id = u.org_id-->
+						<!--inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1-->
+						<!--where s.construction_id = t.construction_id and u.id = #{userId}-->
+					<!--)-->
+		</where>
+			group by t.bill_id
+			ORDER BY t.create_time desc
+	</select>
+	<select id="selectCount" parameterType="map" resultType="int">
+		select
+		COUNT(DISTINCT t.bill_id) as count
+		from t_basic_message t
+		<where>
+			t.type=0
+			<if test="type !=0 ">
+				t.is_read=0
+			</if>
+			AND (t.create_by = #{createBy} OR t.accept_id =#{createBy})
+		</where>
+
+		<!--<if test="constructionId!=null and constructionId!=''">-->
+			<!--and t.construction_id=#{constructionId}-->
+		<!--</if>-->
+		<!--and exists (-->
+		<!--select 1-->
+		<!--from t_sys_user u-->
+		<!--inner join t_sys_organization p on p.id = u.org_id-->
+		<!--inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1-->
+		<!--where s.construction_id = t.construction_id and u.id = #{userId}-->
+		<!--)-->
+	</select>
+	
+	<select id="selectById" parameterType="com.escst.message.entity.MessageEntity">
+		select <include refid="selectSql"></include> 
+		from t_basic_message where id = #{id}
+	</select>	
+	
+	<select id="selectByBillId" parameterType="String" resultType="String">
+		select accept_id as acceptId
+		from t_basic_message where bill_id = #{billId}
+	</select>
+
+	<select id="selectByIdDetail" parameterType="String" resultType="com.escst.message.entity.MessageEntity">
+		SELECT a.title as title,a.content as content , DATE_FORMAT(a.create_time,'%Y-%m-%d %H:%i:%S') AS createTime,b.name as createBy,a.bill_id as billId,a.accept_id as acceptId FROM  t_basic_message a
+		LEFT JOIN t_sys_user b ON b.id=a.create_by
+		WHERE a.id =#{id}
+	</select>
+
+	<select id="batchUpdate" parameterType="list">
+		UPDATE t_basic_message SET is_read=1
+		WHERE id in
+		<foreach collection="list" item="item" index="index" open="("
+					   separator="," close=")">
+		#{item}
+	</foreach>
+	</select>
+</mapper>

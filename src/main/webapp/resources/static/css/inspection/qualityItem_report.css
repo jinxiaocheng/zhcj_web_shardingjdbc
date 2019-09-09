@@ -1,0 +1,87 @@
+.ui-filter {
+  margin-top: 6px;
+}
+.ui-report {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.ui-report .jqGrid_wrapper {
+  position: absolute;
+  top: 90px;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  border: 1px solid #e6e6e6;
+  border-left: none;
+  overflow: hidden;
+}
+.ui-report .jqGrid_wrapper .error {
+  position: absolute;
+  top: 46px;
+  left: 10px;
+  color: red;
+  display: none;
+}
+.ui-report .tab-content {
+  width: 100%;
+  height: 100%;
+}
+.ui-report .tableBox {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.ui-report .tableBox .tableBody {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.ui-report .tableBox .tableHeader table th[data-head="1"],
+.ui-report .tableBox .tableBody table th[data-head="1"] {
+  padding-left: 10px;
+}
+.ui-report .tableBox .tableHeader table th,
+.ui-report .tableBox .tableBody table th,
+.ui-report .tableBox .tableHeader table td,
+.ui-report .tableBox .tableBody table td {
+  padding: 5px 10px;
+}
+.ui-report .tableBox .tableHeader table th > span,
+.ui-report .tableBox .tableBody table th > span,
+.ui-report .tableBox .tableHeader table td > span,
+.ui-report .tableBox .tableBody table td > span {
+  display: block;
+  text-align: left;
+  word-break: keep-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+}
+.ui-report .tableBox .tableHeader table thead > tr th[data-head="1"],
+.ui-report .tableBox .tableBody table thead > tr th[data-head="1"] {
+  width: 30%;
+}
+.ui-report .tableBox .tableHeader table thead > tr th[data-head="2"],
+.ui-report .tableBox .tableBody table thead > tr th[data-head="2"] {
+  width: 50%;
+}
+.ui-report .tableBox .tableHeader table thead > tr th[data-head="3"],
+.ui-report .tableBox .tableBody table thead > tr th[data-head="3"] {
+  width: 20%;
+  border-right: none;
+}
+.ui-report .tableBox .tableBody td[data-index="1"] {
+  width: 30%;
+}
+.ui-report .tableBox .tableBody td[data-index="2"] {
+  width: 50%;
+}
+.ui-report .tableBox .tableBody td[data-index="3"] {
+  width: 20%;
+  border-right: none;
+}

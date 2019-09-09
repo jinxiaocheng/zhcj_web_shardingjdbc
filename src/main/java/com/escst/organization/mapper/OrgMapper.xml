@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.organization.mapper.OrgMapper">
+
+    <resultMap id="orgResultMap" type="com.escst.organization.entity.OrgEntity">
+        <id column="ID" property="id"/>
+        <result column="PARENT_ID" property="parentId"/>
+        <result column="NAME" property="name"/>
+        <result column="level" property="level"/>
+        <result column="SYS_CODE" property="sysCode"/>
+        <result column="SORT_NUM" property="sortNum"/>
+        <result column="STATUS" property="status"/>
+        <result column="logo_name" property="logoName"/>
+        <result column="construction_id" property="constructionId"/>
+        <result column="CREATE_TIME" property="createTime"/>
+        <result column="CREATE_BY" property="createBy"/>
+        <result column="UPDATE_TIME" property="updateTime"/>
+        <result column="UPDATE_BY" property="updateBy"/>
+    </resultMap>
+
+    <select id="selectByParentId" parameterType="string" resultMap="orgResultMap">
+        SELECT *
+        FROM t_sys_organization
+        WHERE status = 1 AND PARENT_ID = #{parentId}
+    </select>
+
+
+    <select id="selectBypId" parameterType="com.escst.organization.entity.OrgEntity" resultMap="orgResultMap">
+        SELECT *
+        FROM t_sys_organization
+        WHERE status = 1 AND PARENT_ID = #{parentId}
+        UNION
+        SELECT *
+        FROM t_sys_organization
+        WHERE status = 1 AND id = #{parentId}
+        ORDER BY sys_code
+        limit #{startIndex}, #{rowNum}
+    </select>
+
+
+    <select id="selectByParentIdCount" parameterType="String" resultType="Integer">
+        SELECT count(1)
+        FROM t_sys_organization
+        WHERE status = 1 AND PARENT_ID = #{parentId}
+    </select>
+
+    <select id="selectById" parameterType="String" resultMap="orgResultMap">
+        SELECT *
+        FROM t_sys_organization
+        WHERE ID = #{id}
+    </select>
+
+    <select id="selectLevelOne" parameterType="String" resultMap="orgResultMap">
+        SELECT * FROM t_sys_organization WHERE level=1 and status=1
+        <if test="id!=null and id!=''">
+            and id=#{id};
+        </if>
+    </select>
+
+    <select id="selectMaxSortNum" parameterType="String" resultType="String">
+        SELECT MAX(sort_num) AS sort_num
+        FROM t_sys_organization
+        WHERE status = 1 AND parent_id = #{parentId};
+    </select>
+
+    <insert id="insert" parameterType="com.escst.organization.entity.OrgEntity">
+        INSERT INTO t_sys_organization (
+            `id`,
+            `parent_id`,
+            `name`,
+            `level`,
+            `sys_code`,
+            `sort_num`,
+            `status`,
+            construction_id,
+            `create_time`,
+            `create_by`
+        )
+        VALUES
+            (
+                #{id},
+                #{parentId},
+                #{name},
+                #{level},
+                #{sysCode},
+                #{sortNum},
+                #{status},
+                #{constructionId},
+                #{createTime},
+                #{createBy}
+            )
+    </insert>
+
+
+    <delete id="batchRemove" parameterType="java.util.List">
+        delete from t_sys_organization where id in
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <update id="update" parameterType="com.escst.organization.entity.OrgEntity">
+        update t_sys_organization
+        <set>
+            <if test="name!=null and name!=''">
+                name=#{name},
+            </if>
+            <if test="status!=null">
+                status=#{status},
+            </if>
+            <if test="sortNum!=null">
+                sort_num=#{sortNum},
+            </if>
+            update_time=#{updateTime},update_by=#{updateBy}
+        </set>
+        where id=#{id}
+    </update>
+
+    <select id="selectByconstructionId" parameterType="String" resultMap="orgResultMap">
+        SELECT *
+        FROM t_sys_organization
+        WHERE construction_id = #{constructionId};
+    </select>
+
+
+    <insert id="insertOrgBatch" parameterType="java.util.List">
+        insert into t_sys_organization
+        (
+        `id`,
+        `parent_id`,
+        `name`,
+        `level`,
+        `sys_code`,
+        `sort_num`,
+        `status`,
+        construction_id,
+        `create_time`,
+        `create_by`,
+        `update_time`,
+        `update_by`
+        )
+        values
+        <foreach collection="list" item="org" index="index" separator=",">
+            (
+            #{org.id},
+            #{org.parentId},
+            #{org.name},
+            #{org.level},
+            #{org.sysCode},
+            #{org.sortNum},
+            #{org.status},
+            #{org.constructionId},
+            current_timestamp(),
+            #{org.createBy},
+            current_timestamp(),
+            #{org.updateBy}
+            )
+        </foreach>
+    </insert>
+    <select id="getSysCodeByLevel" parameterType="int" resultType="String">
+        SELECT max(RIGHT(sys_code, 2)) AS sysCode
+        FROM t_sys_organization
+        WHERE status = 1 AND level = #{level};
+    </select>
+    <select id="getSysCodeAndChildrenNum" parameterType="String" resultType="map">
+        SELECT
+            p.sys_code,
+            count(s.id) num
+        FROM t_sys_organization p
+            LEFT JOIN t_sys_organization s ON s.parent_id = p.id
+        WHERE p.id = #{parentId}
+        GROUP BY p.sys_code
+    </select>
+
+    <select id="selectParentIdByArea" parameterType="String" resultType="String">
+        SELECT DISTINCT t.parent_id
+        FROM
+            t_sys_organization t
+        WHERE
+            EXISTS(
+                    SELECT 1
+                    FROM
+                        t_basic_construction a
+                    WHERE
+                        t.construction_id = a.id
+                        AND a.belong_area = #{areaId}
+            )
+    </select>
+
+    <select id="checkIsExsit" parameterType="String" resultType="int">
+        SELECT DISTINCT count(1)
+        FROM
+            t_sys_organization t
+        WHERE t.construction_id = #{constructionId} AND t.parent_id = #{parentId} AND t.status =1
+    </select>
+
+    <select id="selectMapById" parameterType="String" resultType="map">
+        SELECT
+            t.id                       AS id,
+            t.name                     AS name,
+            (SELECT name
+             FROM t_sys_organization a
+             WHERE a.id = t.parent_id) AS fName
+        FROM
+            t_sys_organization t
+        WHERE
+            t.id = #{id}
+    </select>
+
+    <select id="selectOrgByUserId" parameterType="String" resultMap="orgResultMap">
+        SELECT *
+        FROM t_sys_organization o
+        WHERE exists(
+                      SELECT 1
+                      FROM t_sys_user u
+                          INNER JOIN t_sys_organization p ON u.org_id = p.id
+                      WHERE u.id = #{id}
+                            AND locate(p.sys_code, o.sys_code)
+              ) AND status = 1
+        ORDER BY sys_code
+    </select>
+    <select id="selectByConstructionId" parameterType="String" resultMap="orgResultMap">
+        SELECT
+            id,
+            parent_id,
+            name,
+            level,
+            sys_code,
+            sort_num,
+            status,
+            construction_id
+        FROM t_sys_organization
+        WHERE status = 1 AND construction_id = #{constructionId}
+    </select>
+    <select id="selectParentBySysCode" parameterType="String" resultMap="orgResultMap">
+        SELECT *
+        FROM t_sys_organization
+        WHERE status = 1 AND locate(sys_code, #{sysCode})
+        ORDER BY sys_code DESC
+    </select>
+    <select id="queryRoleByOrgId" parameterType="string" resultType="com.escst.role.entity.RoleEntity">
+        SELECT
+            id,
+            name
+        FROM `t_sys_role`
+        WHERE org_id = #{orgId};
+    </select>
+
+    <select id="getParentOrgId" parameterType="string" resultType="string">
+        select parent_id as parentOrgId
+        from t_sys_organization
+        where id = #{orgId}
+    </select>
+</mapper>

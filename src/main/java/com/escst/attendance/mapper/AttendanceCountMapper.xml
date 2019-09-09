@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.attendance.mapper.AttendanceCountMapper">
+
+    <select id="queryList" parameterType="map" resultType="map">
+        SELECT tbac.id AS id,tbc.name AS constructionName,tst.name AS areaName,tbac.team_name AS teamName,tbac.count AS count, tbac.attendance_date AS attendanceDate,tbac.create_time AS createTime
+        FROM  t_basic_attendance_count tbac
+        LEFT JOIN t_basic_construction tbc ON tbac.construction_id = tbc.id
+        LEFT JOIN t_sys_territory tst ON tbc.belong_area = tst.id
+        <where>
+        <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+             and tbac.construction_id IN
+            <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                (#{constructionVo.id})
+            </foreach>
+        </if>
+        <if test="belongArea != null and belongArea != ''">
+            AND tbc.belong_area = #{belongArea}
+        </if>
+        <if test="startDate != null and startDate != ''">
+           AND <![CDATA[
+           DATE_FORMAT(tbac.attendance_date,'%Y-%m-%d') >= #{startDate}
+            ]]>
+        </if>
+        <if test="endDate != null and endDate != ''">
+           AND <![CDATA[
+          DATE_FORMAT(tbac.attendance_date,'%Y-%m-%d') <=  #{endDate}
+            ]]>
+        </if>
+        <if test="constructionId != null and constructionId !=''">
+              and tbac.construction_id = #{constructionId}
+        </if>
+        <if test="date != null and date !=''">
+           AND DATE_FORMAT(tbac.attendance_date,'%Y-%m') = #{date}
+        </if>
+        </where>
+        ORDER BY tbac.attendance_date DESC
+        LIMIT #{offset},#{rows}
+    </select>
+
+    <select id="selectCount" parameterType="map" resultType="Integer">
+        SELECT count(*) FROM t_basic_attendance_count tbac
+        left JOIN t_basic_construction tbc ON tbac.construction_id = tbc.id
+        <where>
+        <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+            and  tbac.CONSTRUCTION_ID IN
+            <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                (#{constructionVo.id})
+            </foreach>
+        </if>
+        <if test="belongArea != null and belongArea != ''">
+            AND tbc.belong_area = #{belongArea}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND <![CDATA[
+           DATE_FORMAT(tbac.attendance_date,'%Y-%m-%d') >= #{startDate}
+            ]]>
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND <![CDATA[
+          DATE_FORMAT(tbac.attendance_date,'%Y-%m-%d') <=  #{endDate}
+            ]]>
+        </if>
+        <if test="constructionId != null and constructionId !=''">
+         and tbac.construction_id = #{constructionId}
+        </if>
+        <if test="date != null and date !=''">
+         AND DATE_FORMAT(tbac.attendance_date,'%Y-%m') = #{date}
+        </if>
+        </where>
+        </select>
+
+    <insert id="batchSave" parameterType="com.escst.attendance.bean.AttendanceCountBean">
+      INSERT INTO t_basic_attendance_count
+        (id,construction_id,team_name,attendance_date,count,create_time)
+      VALUES<foreach collection="list" item="item" index="" separator=",">
+        (
+        #{item.id},
+        #{item.constructionId},
+        #{item.teamName},
+        #{item.attendanceDate},
+        #{item.count},
+        #{item.createTime}
+        )
+    </foreach>
+    </insert>
+    <update id="update" parameterType="com.escst.attendance.entity.AttendanceCountEntity">
+        UPDATE t_basic_attendance_count
+        <set>
+           <if test="constructionId != null and constructionId != ''">
+            construction_id = #{constructionId},
+           </if>
+           <if test="teamName != null and teamName != ''">
+             team_name = #{teamName},
+           </if>
+           <if test="count != null and count !=''">
+             count = #{count},
+           </if>
+           <if test="attendanceDate != null and attendanceDate != ''">
+              attendance_date = #{attendanceDate}
+           </if>
+        </set>
+        where id=#{id}
+    </update>
+    <select id="queryById" parameterType="com.escst.attendance.entity.AttendanceCountEntity" resultType="com.escst.attendance.entity.AttendanceCountEntity">
+       SELECT tbac.id AS id,tbc.belong_area AS areaId,tbc.id as constructionId, tbc.name AS constructionName,tst.name AS areaName,tbac.team_name AS teamName,tbac.count AS count, tbac.attendance_date AS attendanceDate,tbac.create_time AS createTime
+        FROM  t_basic_attendance_count tbac
+        LEFT JOIN t_basic_construction tbc ON tbac.construction_id = tbc.id
+        LEFT JOIN t_sys_territory tst ON tbc.belong_area = tst.id
+        <where>
+            <if test="id != null and id !=''">
+                 tbac.id = #{id}
+            </if>
+        </where>
+    </select>
+	<select id="queryAuthWorkTypePersonQty" parameterType="com.escst.commons.vo.BaseAuthVO" resultType="com.escst.commons.vo.QtyVO">
+		SELECT a.team_name name, sum(a.count) qty
+		from t_basic_attendance_count a
+		where exists (
+						select 1
+						from t_sys_user u
+						inner join t_sys_organization p on p.id = u.org_id
+						inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+						inner join t_basic_construction c on c.id = s.construction_id
+						where s.construction_id = a.construction_id and u.id = #{userId}
+			            <if test="areaId != null and areaId !=''">
+			                 and c.belong_area = #{areaId}
+			            </if>
+			            <if test="constructionId != null and constructionId !=''">
+			                 and c.id = #{constructionId}
+			            </if>
+		)
+		group by a.team_name
+	</select>
+	
+	<select id="queryAttendanceNumQty" parameterType="com.escst.attendance.vo.AttendanceNumQueryVO" resultType="com.escst.attendance.vo.AttendanceNumVO">
+			SELECT
+				tbac.attendance_date AS date,
+				sum(tbac.count) count,
+				tbac.team_name teamName
+			FROM
+				t_basic_attendance_count tbac 
+			left JOIN t_basic_construction c on tbac.construction_id=c.id
+			where exists (
+					select 1
+							from t_sys_user u
+							inner join t_sys_organization p on p.id = u.org_id
+							inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+							where s.construction_id = c.id and u.id = #{userId}
+						)
+				<![CDATA[
+					and  tbac.attendance_date>=#{startDate} and tbac.attendance_date<=#{endDate}
+					]]>
+					<if test="constructionId!=null and constructionId!=''">
+					 and c.id=#{constructionId}
+					  </if>
+			group by tbac.attendance_date,tbac.team_name
+			ORDER BY
+			tbac.attendance_date ASC
+	</select>
+
+    <select id="queryTeamNameList" parameterType="map" resultType="String">
+     SELECT   DISTINCT(team_name ) AS teamName FROM t_basic_attendance_count
+      <where>
+          <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+               construction_id IN
+              <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                  (#{constructionVo.id})
+              </foreach>
+          </if>
+          <if test="constructionId != null and constructionId !=''">
+              and  construction_id =#{constructionId}
+          </if>
+          <if test="time !=null and time !=''">
+              AND <![CDATA[
+           DATE_FORMAT(attendance_date,'%Y-%m') >= #{time}
+            ]]>
+          </if>
+      </where>
+    </select>
+
+    <select id="queryAttendaceQty" parameterType="map" resultType="com.escst.attendance.bean.AttendanceVo">
+    SELECT  count,  DATE_FORMAT(attendance_date,'%d') AS date FROM  t_basic_attendance_count
+     <where>
+         <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+             and construction_id IN
+             <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                 (#{constructionVo.id})
+             </foreach>
+         </if>
+        <if test="constructionId != null and constructionId !=''">
+            construction_id =#{constructionId}
+        </if>
+        <if test="startDate !=null and startDate !=''">
+            AND <![CDATA[
+           DATE_FORMAT(attendance_date,'%Y-%m-%d') >= #{startDate}
+            ]]>
+        </if>
+        <if test="endDate !=null and endDate !=''">
+             AND <![CDATA[
+           DATE_FORMAT(attendance_date,'%Y-%m-%d') <= #{endDate}
+            ]]>
+        </if>
+        <if test="teamName !=null and teamName !=''">
+            AND  team_name =#{teamName}
+        </if>
+     </where>
+        ORDER BY attendance_date
+    </select>
+    <select id="queryCount" parameterType="map" resultType="com.escst.attendance.bean.AttendanceVo">
+        SELECT  SUM(count) AS count, DATE_FORMAT(attendance_date,'%d') AS date FROM t_basic_attendance_count
+         <where>
+             <if test="startDate !=null and startDate !=''">
+                 AND <![CDATA[
+           DATE_FORMAT(attendance_date,'%Y-%m-%d') >= #{startDate}
+            ]]>
+             </if>
+             <if test="endDate !=null and endDate !=''">
+                 AND <![CDATA[
+           DATE_FORMAT(attendance_date,'%Y-%m-%d') <= #{endDate}
+            ]]>
+             </if>
+             <if test="constructionId != null and constructionId !=''">
+                AND construction_id =#{constructionId}
+             </if>
+             <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                 and construction_id IN
+                 <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                     (#{constructionVo.id})
+                 </foreach>
+             </if>
+         </where>
+        GROUP BY attendance_date
+        ORDER BY attendance_date
+    </select>
+    <select id="queryCountByAttendanceDate" parameterType="com.escst.attendance.entity.AttendanceCountEntity" resultType="String">
+        SELECT team_Name AS  teamName  FROM t_basic_attendance_count
+        <where>
+            <if test="constructionId != null and constructionId != '' ">
+                construction_id = #{constructionId}
+            </if>
+            <if test="attendanceDate != null and attendanceDate != '' ">
+                and DATE_FORMAT(attendance_date,'%Y-%m-%d') = #{attendanceDate}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateCount" parameterType="com.escst.attendance.entity.AttendanceCountEntity">
+        UPDATE t_basic_attendance_count SET COUNT =#{count} WHERE  team_name =#{teamName} AND
+        construction_id =#{constructionId} AND  attendance_date =#{attendanceDate}
+    </update>
+</mapper>

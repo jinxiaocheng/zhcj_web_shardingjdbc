@@ -1,0 +1,206 @@
+*{
+	padding:0;
+	margin:0;
+}
+
+img,input{
+	border:1px solid transparent;
+	outline: none!important;
+	vertical-align:middle;
+}
+html,body{
+	min-width: 800px;
+	height: 100%;
+	background: url("../../images/login/bg.png") no-repeat 0 0;
+	background-size: 100% 100%;
+	font-family: "Microsoft YaHei";
+	background-size: cover;
+}
+.content{
+	min-width: 800px;
+	height: 100%;
+	text-align: center;
+	overflow: hidden;
+}
+.logo{
+	position: absolute;
+	top:2%;
+	left: 2%;
+}
+/*二维码*/
+/*.ewm{
+	position: fixed;
+	top:20px;
+	right: 20px;
+	display: block;
+}*/
+/*.ewm .android,
+.ewm .ios{
+	width: 30%;
+}*/
+.android {
+	width: 135px;
+	position: absolute;
+	top: 20px;
+	right: 250px;
+}
+.ios {
+	width: 135px;
+	position: absolute;
+	top: 20px;
+	right: 70px;
+}
+.ewm .ios{
+	margin-left: 20px;
+}
+.ewm img{
+	width: 100%;
+}
+.ewm > div {
+	float: left;
+}
+.ewm p{
+	color: #fff;
+	font-size: 14px;
+}
+@media(max-width:1024px){
+	.android {
+	width: 70px;
+	position: absolute;
+	top: 10px;
+	right: 90px;
+}
+.ios {
+	width: 70px;
+	position: absolute;
+	top: 10px;
+	right: 10px;
+}
+	.ewm p{
+		color: #fff;
+		font-size: 12px;
+	}
+}
+/*大logo*/
+.login-t{
+	margin-top: 5%;
+}
+.login-t img{
+	width: 120px;
+}
+.login-t div{
+	color: #fff;
+	position: relative;
+}
+.login-t > div > span{
+	background-color: #fff;
+	display: inline-block;
+	width: 35px;
+	height:2px;
+	position: relative;
+	top:-12px;
+	font-family: "SimSun";
+}
+.title {
+	font-weight: normal;
+	margin-top: 30px;
+	font-size: 4vh;
+}
+/*登录*/
+.form_c {
+	width: 230px;
+	text-align: center;
+	position: absolute;
+	top:40%;
+	left: 50%;
+	margin-left: -130px;
+	margin-top: 3%;
+}
+form{
+	font-size: 0;
+}
+form input{
+	width: 230px;
+	height: 54px;
+	line-height: 54px;
+	padding: 0 15px;
+	font-size: 16px;
+	color: #999;
+	border:1px solid transparent;
+	
+}
+input:-moz-placeholder,   
+textarea:-moz-placeholder {   
+    color: #999999;   
+}   
+  
+input:-ms-input-placeholder,   
+textarea:-ms-input-placeholder {   
+    color: #999999;   
+}   
+  
+input::-webkit-input-placeholder,   
+textarea::-webkit-input-placeholder {   
+    color: #999999;   
+} 
+.uname{
+	border-radius: 10px 10px 0 0;
+}
+.pwd{
+	border-radius: 0 0 10px 10px;
+	margin-top:-1px;
+}
+::-ms-clear,::-ms-reveal{display:none;}
+.line{
+	width: 230px;
+	height: 1px;
+	background-color: #62a8cc;
+	position: absolute;
+	top: -57px;
+	left: 15px;
+}
+.ckbox{
+	height: 60px;
+	line-height: 60px;
+	text-align: left;
+	position: relative;
+}
+.ckbox input{
+	width: 16px;
+	height: 16px;
+	margin-top: -10px;
+	color:#999;
+}
+.ckbox label{
+	color: #fff;
+	font-size: 16px; 
+	margin-left:10px;
+	cursor: pointer;
+}
+.form_c .prompt {
+	font-size:16px;
+	color:#f00;
+	text-align:left;
+}
+.btn{
+	width: 270px;
+	height: 45px;
+	background: url("../../images/login/login1.png") no-repeat ;
+	background-size: 270px 45px;
+	line-height: 45px;
+	position: absolute;
+	left: 50%;
+	margin-left: -120px;
+	cursor: pointer;
+	font-size: 18px;
+	color: #d6e8f6;
+	border:1px solid transparent;
+	padding-bottom: 34px;
+	outline:none;
+	margin-top: 20px;
+	opacity: .9;
+}
+.btn:hover {
+	background: url("../../images/login/login2.png") no-repeat ;
+	background-size: 270px 45px;
+}

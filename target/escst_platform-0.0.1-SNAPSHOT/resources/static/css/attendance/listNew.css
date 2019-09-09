@@ -1,0 +1,127 @@
+.biyue_body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  background: #fff;
+}
+.biyue_body .biyue_search {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 60px;
+  line-height: 60px;
+  box-shadow: 0 3px 6px #dfdfdf;
+  z-index: 1000;
+  background: #fff;
+}
+.biyue_body .biyue_search > label {
+  height: 60px;
+  line-height: 60px;
+  padding: 0 15px;
+}
+.biyue_body .biyue_search .layui-input-inline {
+  width: 200px;
+}
+.biyue_body .biyue_search #search {
+  margin-left: 20px;
+}
+.biyue_body .biyue_search .search-more-box {
+  position: absolute;
+  top: 70px;
+  box-shadow: 0 0 6px #dfdfdf;
+  padding: 15px 0 0 0;
+  box-sizing: border-box;
+  width: 334px;
+  z-index: 2000;
+  background: #fff;
+  display: none;
+}
+.biyue_body .biyue_search #search-more .fa-angle-double-down {
+  -webkit-transition: all 0.2s ease-out;
+  -moz-transition: all 0.2s ease-out;
+  -ms-transition: all 0.2s ease-out;
+  -o-transition: all 0.2s ease-out;
+  transition: all 0.2s ease-out;
+}
+.biyue_body .biyue_search #search-more .fa-angle-double-down.active {
+  -webkit-transform: rotate(-180deg);
+  -moz-transform: rotate(-180deg);
+  -ms-transform: rotate(-180deg);
+  -o-transform: rotate(-180deg);
+  transform: rotate(-180deg);
+}
+.biyue_body .biyue-main-box {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.biyue_body .biyue-main-box .title-box {
+  display: block;
+  box-shadow: 0 0 1px #dfdfdf;
+  border: 1px solid #efefef;
+  position: relative;
+  text-indent: 15px;
+  height: 50px;
+  line-height: 50px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  letter-spacing: 2px;
+}
+.biyue_body .biyue-main-box .title-box .layui-form-label {
+  line-height: 30px;
+  width: 70px;
+  padding-left: 0;
+}
+.biyue_body .biyue-main-box .title-box .layui-form-select {
+  top: -2px;
+}
+.biyue_body .biyue-main-box .lineData {
+  width: 100%;
+  margin-top: 20px;
+  background: #fff;
+}
+.biyue_body .biyue-main-box .lineDataEcharts {
+  width: 100%;
+  position: relative;
+  height: 300px;
+  box-sizing: border-box;
+  display: block;
+  box-shadow: 0 0 1px #dfdfdf;
+  border: 1px solid #efefef;
+}
+.biyue_body .biyue-main-box .lineDataEcharts > div {
+  width: 100%;
+  height: 100%;
+}
+.biyue_body .biyue-main-box .tableData {
+  width: 100%;
+  margin-top: 20px;
+  background: #fff;
+}
+.biyue_body .biyue-main-box .table-box {
+  width: 100%;
+  margin-top: 15px;
+  position: relative;
+  font-size: 0;
+  letter-spacing: 0;
+  display: block;
+  box-shadow: 0 0 1px #dfdfdf;
+  border: 1px solid #efefef;
+}
+.biyue_body .biyue-main-box .table-box .layui-table-view {
+  margin: 0;
+}
+.layui-table-view .layui-table {
+  width: 100%;
+}
+.layui-laypage .layui-laypage-curr .layui-laypage-em {
+  background-color: #1e88e5;
+}

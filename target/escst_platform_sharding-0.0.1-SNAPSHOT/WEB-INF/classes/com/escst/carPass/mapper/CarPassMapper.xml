@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.carPass.mapper.CarPassMapper">
+    <select id="selectList" parameterType="com.escst.carPass.entity.CarPassEntity" resultType="com.escst.carPass.entity.CarPassEntity">
+		SELECT
+			t.id AS id,
+			t.construction_id AS constructionId,
+			t.plate_no AS plateNo,
+			t.direction,
+			t.pass_time AS passTime,
+			t.file_id AS fileId,
+			t.create_time AS createTime
+		FROM
+			t_car_pass_record t
+			<include refid="whereSql"></include>
+			order by t.pass_time desc
+			LIMIT #{startIndex},#{rowNum}
+	</select>
+	<select id="selectCount" parameterType="com.escst.carPass.entity.CarPassEntity" resultType="int">
+		SELECT
+			count(1)
+		FROM
+			t_car_pass_record t
+			<include refid="whereSql"></include>
+	</select>
+	
+	<sql id="whereSql">
+		<where>
+			construction_id = #{constructionId}
+			<if test="startTime != null and startTime != ''">
+           		 <![CDATA[
+				AND t.pass_time >= #{startTime}
+				]]>
+            </if>
+            <if test="endTime != null and endTime != ''">
+                <![CDATA[
+				AND t.pass_time <= #{endTime}
+				]]>
+            </if>
+			<if test="plateNo!=null and plateNo!=''">
+				and t.plate_no like '%${plateNo}%'
+			</if>
+		</where>
+	</sql>
+	
+	<select id="selectDetail" parameterType="String" resultType="com.escst.carPass.vo.CarPassVo">
+		SELECT
+			t.id AS id,
+			t.construction_id AS constructionId,
+			t.plate_no AS plateNo,
+			t.direction,
+			t.pass_time AS passTime,
+			t.file_id AS fileId,
+			t.create_time AS createTime
+		FROM
+			t_car_pass_record t
+			where id=#{id}
+	</select>
+</mapper>

@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.menu.mapper.MenuMapper">
+
+    <resultMap id="menuResultMap" type="com.escst.menu.entity.MenuEntity">
+        <id column="ID" property="id"/>
+        <result column="NAME" property="name"/>
+        <result column="URL" property="url"/>
+        <result column="PARENT_ID" property="parentId"/>
+        <result column="ICON" property="icon"/>
+        <result column="FLAG" property="flag"/>
+        <result column="SORT_NUM" property="sortNum"/>
+        <result column="operation_authority" property="operationAuthority"/>
+        <result column="CREATE_TIME" property="createTime"/>
+        <result column="CREATE_BY" property="createBy"/>
+        <result column="UPDATE_TIME" property="updateTime"/>
+        <result column="UPDATE_BY" property="updateBy"/>
+    </resultMap>
+
+    <select id="selectCount" parameterType="com.escst.menu.entity.MenuEntity" resultType="Integer">
+        SELECT count(1)
+        FROM T_SYS_org_menu om inner join t_sys_menu m on m.id = om.menu_id
+        WHERE m.flag = 1 AND m.PARENT_ID = #{parentId} and om.org_id = #{orgId}
+    </select>
+
+    <select id="selectByParentId" parameterType="String" resultMap="menuResultMap">
+        SELECT * FROM T_SYS_MENU
+        <where>
+            PARENT_ID = #{parentId}
+            <if test="flag!=null and flag!=''">
+                and flag=#{flag}
+            </if>
+        </where>
+        order by sort_num asc
+    </select>
+
+    <!--selectByPId-->
+    <select id="selectByPId" parameterType="com.escst.menu.entity.MenuEntity"
+            resultType="com.escst.menu.entity.MenuEntity">
+        SELECT
+            om.menu_id   as id,
+            m.parent_id  as parentId,
+            om.menu_name as name,
+            om.sort_num  as sortNum
+        FROM T_SYS_org_menu om inner join t_sys_menu m on m.id = om.menu_id
+        where
+            m.PARENT_ID = #{parentId}
+            and om.org_id = #{orgId}
+        order by om.sort_num asc
+    </select>
+
+    <select id="selectById" parameterType="com.escst.menu.entity.MenuEntity" resultMap="menuResultMap">
+        SELECT
+            om.menu_id   as id,
+            om.menu_name as name,
+            om.sort_num  as sortNum
+        FROM T_SYS_MENU m inner join t_sys_org_menu om on m.id = om.menu_id
+        WHERE om.menu_id = #{id} and om.org_id = #{orgId}
+    </select>
+
+    <select id="selectByFlag" parameterType="String" resultMap="menuResultMap">
+        SELECT * FROM T_SYS_MENU
+        <where>
+            1=1
+            <if test="flag!=null and flag!=''">
+                and flag=#{flag}
+            </if>
+        </where>
+        order by flag,sort_num
+    </select>
+
+    <select id="listMenuByRoleId" parameterType="string" resultType="com.escst.commons.tree.TreeEntity">
+        SELECT
+            t.menu_id             as id,
+            t.menu_name           as name,
+            a.parent_id           as pId,
+            t.operation_authority as operationAuthority
+        FROM
+            t_sys_role_menu t
+            INNER JOIN t_sys_menu a
+                ON
+                    t.menu_id = a.id
+        WHERE
+            t.role_id = #{roleId}
+        ORDER BY a.flag ASC, a.parent_id ASC
+    </select>
+
+    <insert id="insertMenu" parameterType="com.escst.menu.entity.MenuEntity">
+        INSERT INTO t_sys_menu (
+            `id`,
+            `name`,
+            `url`,
+            `parent_id`,
+            `icon`,
+            `flag`,
+            `sort_num`,
+            `create_time`,
+            `create_by`,
+            `update_time`,
+            `update_by`
+        )
+        VALUES
+            (
+                #{id},
+                #{name},
+                #{url},
+                #{parentId},
+                #{icon},
+                #{flag},
+                #{sortNum},
+                current_timestamp(),
+                #{createBy},
+                current_timestamp(),
+                #{updateBy}
+            )
+    </insert>
+
+    <update id="update" parameterType="map">
+        update t_sys_menu
+        <set>
+            <if test="name!=null and name!=''">
+                name=#{name},
+            </if>
+            <if test="icon!=null and icon!=''">
+                icon=#{icon},
+            </if>
+            <if test="url!=null and url!=''">
+                url=#{url},
+            </if>
+            <if test="sortNum!=null and sortNum!=''">
+                sort_num=#{sortNum},
+            </if>
+            update_time=current_timestamp()
+        </set>
+        where id=#{id}
+    </update>
+
+    <delete id="batchRemove" parameterType="java.util.List">
+        delete from t_sys_menu where id in
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="selectMaxSortNum" parameterType="String" resultType="String">
+        SELECT MAX(sort_num) AS sort_num
+        FROM t_sys_menu
+        WHERE parent_id = #{parentId};
+    </select>
+    <select id="listMenu" parameterType="com.escst.menu.vo.MenuVO" resultMap="menuResultMap">
+        select id,name,url,parent_id,icon,flag,sort_num,GROUP_CONCAT(DISTINCT operation_authority) operation_authority
+        from t_sys_menu m
+        where 1 = 1
+        <if test="userId != null and userId != ''">
+            and exists (
+            select 1
+            from t_sys_role_menu rm
+            inner join t_sys_user_role ur on ur.role_id = rm.role_id
+            where rm.menu_id = m.id
+            and ur.user_id = #{userId}
+            )
+        </if>
+        <if test="parentId != null and parentId != ''">
+            and m.parent_id = #{parentId}
+        </if>
+        <if test="flag != null and flag != ''">
+            and m.flag = #{flag}
+        </if>
+        group by id,name,url,parent_id,icon,flag,sort_num
+        order by flag, sort_num
+    </select>
+
+    <select id="selectAuthAllMenu" parameterType="com.escst.menu.vo.MenuVO" resultMap="menuResultMap">
+        SELECT
+            m.id,
+            rm.menu_name as                               name,
+            m.url,
+            m.parent_id,
+            m.icon,
+            m.flag,
+            rm.sort_num,
+            GROUP_CONCAT(DISTINCT rm.operation_authority) operation_authority
+        FROM t_sys_menu m
+            INNER JOIN t_sys_role_menu rm ON rm.menu_id = m.id
+            INNER JOIN t_sys_user_role ur ON ur.role_id = rm.role_id
+        WHERE ur.user_id = #{userId} AND m.flag = #{flag}
+        GROUP BY m.id, rm.menu_name, m.url, m.parent_id, m.icon, m.flag, rm.sort_num
+        ORDER BY rm.sort_num
+    </select>
+
+    <select id="queryAllMenu" resultMap="menuResultMap">
+        SELECT
+            id,
+            name,
+            url,
+            parent_id,
+            operation_authority
+        FROM t_sys_menu
+        WHERE flag > 0
+        ORDER BY flag, sort_num
+    </select>
+
+    <select id="selectMenuIdByRoleId" parameterType="String" resultType="String">
+        SELECT t.menu_id menuId
+        FROM
+            t_sys_role_menu t
+            INNER JOIN t_sys_menu a
+                ON
+                    t.menu_id = a.id
+        WHERE
+            t.role_id = #{roleId}
+    </select>
+
+    <!--查询机构已选中的菜单id-->
+    <select id="selectMenuIdByOrgId" parameterType="String" resultType="String">
+        SELECT om.menu_id menuId
+        FROM
+            t_sys_org_menu om
+            INNER JOIN t_sys_menu m
+                ON
+                    om.menu_id = m.id
+        WHERE
+            om.org_id = #{orgId}
+    </select>
+
+    <!--根据机构id查出菜单-->
+    <select id="queryMenuByOrgId" parameterType="String" resultType="com.escst.menu.entity.MenuEntity">
+        SELECT
+            om.menu_id                         as id,
+            m.parent_id                        as parentId,
+            om.menu_name                       as name,
+            ifnull(om.operation_authority, "") as operationAuthority,
+            om.sort_num                        as sortNum
+        FROM
+            t_sys_org_menu om inner join t_sys_menu m on om.menu_id = m.id
+        WHERE
+            om.org_id = #{orgId}
+        ORDER BY
+            m.flag, om.sort_num
+    </select>
+
+    <!--根据机构id,查询机构对应的菜单id，操作权限-->
+    <select id="selectOperationByOrgId" parameterType="String" resultType="com.escst.menu.entity.MenuEntity">
+        SELECT
+            som.menu_id                         AS id,
+            ifnull(som.operation_authority, "") AS operationAuthority
+        FROM `t_sys_org_menu` som
+        WHERE som.org_id = #{orgId}
+    </select>
+
+    <!--根据机构id 查询机构菜单关系集合-->
+    <select id="listMenuByOrgId" parameterType="String" resultType="com.escst.commons.tree.TreeEntity">
+        SELECT
+            som.menu_id             AS id,
+            sm.parent_id            AS pId,
+            som.menu_name           as name,
+            som.operation_authority AS operationAuthority,
+            som.sort_num            as sortNum
+        FROM
+            `t_sys_org_menu` som
+            INNER JOIN t_sys_menu sm on som.menu_id = sm.id
+        WHERE som.org_id = #{orgId}
+        ORDER BY sm.flag, som.sort_num
+    </select>
+
+    <!--修改机构的个性化菜单-->
+    <update id="updateOrgMenu" parameterType="com.escst.menu.entity.MenuEntity">
+        update t_sys_org_menu
+        set menu_name = #{name}, sort_num = #{sortNum}
+        where menu_id = #{id} and org_id = #{orgId}
+    </update>
+
+    <!--修改角色的个性化菜单-->
+    <update id="updateRoleMenu" parameterType="com.escst.menu.entity.MenuEntity">
+        update t_sys_Role_menu
+        set menu_name = #{name}, sort_num = #{sortNum}
+        where menu_id = #{id} and role_id = #{roleId}
+
+    </update>
+
+    <select id="selectMenuByUserId" parameterType="map" resultType="String">
+        SELECT a.name as name
+        FROM t_sys_menu a
+            LEFT JOIN t_sys_org_menu c ON a.id = c.menu_id
+            LEFT JOIN t_sys_user b ON b.org_id = c.org_id
+        WHERE a.id = #{menuId} AND b.id = #{userId}
+    </select>
+
+    <select id="getFlag" parameterType="string" resultType="int">
+        select flag
+        from t_sys_menu
+        where id = #{id}
+    </select>
+</mapper>

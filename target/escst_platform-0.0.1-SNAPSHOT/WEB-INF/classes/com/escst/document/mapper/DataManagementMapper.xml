@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.document.mapper.DataManagementMapper">
+    <select id="selectList" parameterType="map" resultType="map">
+        SELECT a.id AS id,
+        c.name AS areaName,
+        a.CONSTRUCTION_ID AS constructionId,
+        b.name AS constructionName,
+        a.type AS type,
+        tdp.name as typeName,
+        t.name as parentName,
+        tdp.parent_id as parenId,
+        DATE_FORMAT(a.CREATE_TIME,'%Y-%m-%d') as createTime,
+        a.remark AS remark,
+        a.CREATE_BY as createBy,
+        tsu.name as createName
+        FROM t_basic_data_management a
+        LEFT JOIN T_BASIC_CONSTRUCTION b on b.id = a.construction_id
+        LEFT JOIN t_sys_territory c ON c.ID = b.belong_area
+        LEFT JOIN t_basic_document_type tdp on tdp.id = a.type_id
+        LEFT JOIN t_basic_document_type t on t.id = tdp.parent_id
+        LEFT JOIN t_sys_user tsu ON tsu.id = a.create_by
+        <where>
+              a.STATUS = 1
+              <if test="constructionId !='' and constructionId != null ">
+                  AND a.CONSTRUCTION_ID = #{constructionId}
+              </if>
+              <if test="typeId !=null and typeId !=''">
+                AND a.type_id = #{typeId}
+              </if>
+              <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                  AND a.CONSTRUCTION_ID IN
+                  <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                      (#{constructionVo.id})
+                  </foreach>
+              </if>
+              <if test="name != null and name != '' ">
+                  AND a.NAME LIKE CONCAT('%',#{name},'%')
+              </if>
+              <if test="areaId != null and areaId != '' ">
+                  AND c.id = #{areaId}
+              </if>
+          </where>
+          ORDER BY a.create_time DESC
+          LIMIT #{offset},#{rows}
+    </select>
+
+    <select id="selectCount" parameterType="map" resultType="Integer">
+        SELECT COUNT(a.id)
+        FROM t_basic_data_management a
+        LEFT JOIN T_BASIC_CONSTRUCTION b on b.id = a.construction_id
+        LEFT JOIN t_sys_territory c ON c.ID = b.belong_area
+        LEFT JOIN t_basic_document_type t on t.id = a.type_id
+        <where>
+            a.STATUS = 1
+            <if test="_parameter.containsKey('constructionId') and constructionId != null ">
+                AND a.CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                AND a.CONSTRUCTION_ID IN
+                <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                    (#{constructionVo.id})
+                </foreach>
+            </if>
+            <if test="type != null and type != 0 ">
+                AND a.TYPE = #{type}
+            </if>
+            <if test="name != null and name != '' ">
+                AND a.NAME LIKE CONCAT('%',#{name},'%')
+            </if>
+            <if test="areaId != null and areaId != '' ">
+                AND c.id = #{areaId}
+            </if>
+            <if test="typeId != null and typeId != '' ">
+                AND a.type_id = #{typeId}
+            </if>
+        </where>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <select id="selectById" parameterType="String" resultType="com.escst.document.vo.DataManagementVO">
+        SELECT b.name  as name ,a.remark as remark  , c.name AS constructionName, d.name AS areaName ,b.type as type , a.create_by as createBy  FROM t_basic_data_management a
+          LEFT JOIN t_basic_file b ON  b.id=a.id
+          LEFT JOIN T_BASIC_CONSTRUCTION c on c.id = a.construction_id
+          LEFT JOIN t_sys_territory d ON d.ID = c.belong_area
+         WHERE a.id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.escst.document.entity.DataManagementEntity">
+        INSERT INTO T_BASIC_DATA_MANAGEMENT(ID,CONSTRUCTION_ID,NAME,TYPE,type_id，STATUS,CREATE_TIME,CREATE_BY,remark)
+                    values(#{id},#{constructionId},#{name},#{type},#{typeId},#{status},#{createTime},#{createBy},#{remark})
+    </insert>
+
+    <update id="update" parameterType="com.escst.document.entity.DataManagementEntity">
+        UPDATE T_BASIC_DATA_MANAGEMENT
+        <set>
+            <if test="name !=null and name !=''">
+                NAME = #{name},
+            </if>
+            <if test="type !=null and type !=''">
+                TYPE = #{type},
+            </if>
+            <if test="updateTime !=null ">
+                UPDATE_TIME = #{updateTime},
+            </if>
+            <if test="status !=null">
+                status =#{status}
+            </if>
+        </set>
+        WHERE ID = #{id}
+    </update>
+
+    <select id="queryList"  parameterType="String" resultType="com.escst.document.vo.DocumentTypeVo">
+      SELECT id, name, parent_id as parentId, is_leaf as isLeaf ,create_time as createTime FROM  t_basic_document_type
+        <where>
+            <if test="constructionId !=null and constructionId !=''">
+                construction_id =#{constructionId}
+            </if>
+                <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                    AND construction_id IN
+                    <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                        (#{constructionVo.id})
+                    </foreach>
+                </if>
+        </where>
+    </select>
+
+    <insert id="batchSave" parameterType="com.escst.document.bean.DocumentBean">
+        INSERT  INTO t_basic_data_management (id,
+        construction_id,
+        type_id,
+        status,
+        remark,
+        create_time,
+        create_by
+        )
+        VALUES
+        <foreach  collection="list" item="item" index="" separator=",">
+        (
+          #{item.id},
+          #{item.constructionId},
+          #{item.typeId},
+          #{item.status},
+          #{item.remark},
+          #{item.createTime},
+          #{item.createBy}
+        )
+    </foreach>
+
+    </insert>
+
+    <insert id="saveDocType" parameterType="com.escst.document.entity.DocTypeEntity">
+        INSERT INTO t_basic_document_type (id,name,construction_id,parent_id,is_leaf,sort_num,create_time)
+        VALUES (#{id},#{name},#{constructionId},#{parentId},#{isLeaf},#{sortNum},#{createTime})
+    </insert>
+
+    <select id="selectDocTypeByConstructionId" parameterType="com.escst.commons.tree.TreeEntity" resultType="com.escst.commons.tree.TreeEntity">
+       SELECT id,parent_id as pId,construction_id as constructionId,is_leaf as isLeaf ,name  FROM t_basic_document_type
+        WHERE  construction_id =#{constructionId}
+        <choose>
+            <when test="id != null and id != '' ">
+                and parent_id = #{id}
+            </when>
+            <otherwise>
+                and parent_id = '0'
+            </otherwise>
+        </choose>
+        <if test="name !=null and name != ''">
+            AND  name LIKE CONCAT("%",#{name},"%")
+        </if>
+        order by sort_num
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="seletDocTypeCount" parameterType="com.escst.commons.tree.TreeEntity" resultType="Integer">
+        SELECT COUNT(id) as count FROM t_basic_document_type WHERE
+        construction_id =#{constructionId}
+        <choose>
+            <when test="id != null and id != '' ">
+                and parent_id = #{id}
+            </when>
+            <otherwise>
+                and parent_id = '0'
+            </otherwise>
+        </choose>
+
+    </select>
+
+    <update id="updateDocType" parameterType="com.escst.document.entity.DocTypeEntity">
+
+        UPDATE t_basic_document_type SET name = #{name} WHERE id =#{id}
+
+    </update>
+
+    <delete id="deleteDocType" parameterType="com.escst.commons.tree.TreeEntity">
+        delete from t_basic_document_type where id in
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item.id}
+        </foreach>
+    </delete>
+
+    <select id="selectDocTypeParentByConstructionId" parameterType="com.escst.commons.tree.TreeEntity" resultType="com.escst.commons.tree.TreeEntity">
+        SELECT
+        count( 1 ) as count,
+        parent_id as pId
+        FROM
+        t_basic_document_type
+        WHERE
+        parent_id IN
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item.id}
+        </foreach>
+        GROUP BY
+        parent_id
+    </select>
+
+    <select id="selectByTypeId" parameterType="com.escst.commons.tree.TreeEntity" resultType="String">
+        SELECT remark FROM  t_basic_data_management WHERE construction_id = #{constructionId} and type_id =#{id} AND status=1
+    </select>
+</mapper>

@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.material.mapper.MaterialApproachMapper">
+
+    <select id="selectMaterialApproachList" parameterType="com.escst.material.entity.MaterialApproachEntity"
+            resultType="map">
+        SELECT
+        a.id ,
+        a.construction_id constructionId,
+        a.material_id materialId,
+        a.material_budget_id as materialBudgetId,
+        a.report_num as reportNum,
+        a.order_no as orderNo,
+        mm.name as model,
+        e.unit as unit,
+        IFNULL(e.name,"") name,
+        IFNULL(a.quantity,0) quantity,
+        IFNULL(a.manufacturer,"") manufacturer,
+        IFNULL(a.use_position,"") usePosition,
+        IFNULL(a.available_quantity,0) availableQuantity,
+        IFNULL(a.is_attach,0) isAttach,
+        DATE_FORMAT(a.approach_date,'%Y-%m-%d') approachDate,
+        IFNULL(a.remark,"") remark,
+        IFNULL(a.create_time,"") createTime,
+        IFNULL(b.name,"") createBy,
+        c.name as constructionName,
+        d.name as areaName
+        <include refid="whereCondition"></include>
+        ORDER BY a.approach_date desc ,a.create_time DESC
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="selectApproachCount" parameterType="com.escst.material.entity.MaterialApproachEntity"
+            resultType="Integer">
+        SELECT
+        count(1)
+        <include refid="whereCondition"></include>
+    </select>
+
+    <sql id="whereCondition">
+        FROM
+        t_basic_material_approach a
+        left join t_basic_material e on a.material_id = e.id
+        LEFT JOIN t_basic_person b ON a.create_by=b.id
+        left join T_BASIC_CONSTRUCTION c on a.construction_id = c.id
+        left join t_sys_territory d on c.belong_area = d.id
+        left join t_basic_material_model mm on mm.id = a.model_id
+        WHERE 1=1
+        <if test="constructionId!=null and constructionId!=''">
+            and a.construction_id = #{constructionId}
+        </if>
+        <if test="approachDateStart!=null and approachDateStart!=''">
+            <![CDATA[and a.approach_date>#{approachDateStart}]]>
+        </if>
+        <if test="approachDateEnd!=null and approachDateEnd!=''">
+            <![CDATA[and a.approach_date<#{approachDateEnd}]]>
+        </if>
+        <if test="name!=null and name!=''">
+            and e.name=#{name}
+        </if>
+        and exists (
+        select 1
+        from t_sys_user u
+        inner join t_sys_organization p on p.id = u.org_id
+        inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+        where s.construction_id = a.construction_id and u.id = #{userId}
+        )
+    </sql>
+
+
+    <insert id="insertMaterialApproachInfo" parameterType="com.escst.material.entity.MaterialApproachEntity">
+        INSERT INTO t_basic_material_approach (
+            `id`,
+            `construction_id`,
+            `material_id`,
+            `model_id`,
+            `approach_date`,
+            `manufacturer`,
+            `use_position`,
+            `quantity`,
+            `available_quantity`,
+            breed,
+            `amount`,
+            `total_amount`,
+            site_result,
+            sampling_date,
+            `experiment_result`,
+            `material_budget_id`,
+            `report_num`,
+            `is_attach`,
+            `remark`,
+            `create_time`,
+            `create_by`,
+            order_no
+        )
+        VALUES
+            (#{id}, #{constructionId}, #{materialId}, #{modelId}, #{approachDate}, #{manufacturer}, #{usePosition},
+                    #{quantity},
+                    #{availableQuantity}, #{breed}, #{amount}, #{totalAmount}, #{siteResult}, #{samplingDate},
+                                                               #{experimentResult}, #{materialBudgetId}, #{reportNum},
+                                                               #{isAttach}, #{remark}, #{createTime},
+                                                               #{createBy}, #{orderNo})
+    </insert>
+
+    <select id="selectAvailableQuantity" parameterType="String"
+            resultType="float">
+        SELECT IFNULL(available_quantity, 0) availableQuantity
+        FROM
+            t_basic_material_approach
+        WHERE id = #{approachId}
+    </select>
+
+    <update id="updateAvailableQuantity" parameterType="map">
+        UPDATE T_BASIC_MATERIAL_APPROACH
+        SET available_quantity =
+        #{availableQuantity}
+        WHERE id = #{approachId}
+    </update>
+
+
+    <select id="selectApproachDetailInfo" parameterType="com.escst.material.entity.MaterialApproachEntity"
+            resultType="map">
+        SELECT
+            a.id    as                      id,
+            IFNULL(e.NAME, "")              NAME,
+            ma.id                           materialId,
+            m.name  as                      model,
+            m.id    as                      moderId,
+            ma.unit as                      unit,
+            t.id                            territoryId,
+            t.NAME  AS                      territoryName,
+            c.id    as                      constructionId,
+            c.NAME  AS                      constructionName,
+            IFNULL(a.report_num, "")        reportNum,
+            IFNULL(a.site_result, 0)        siteResult,
+            IFNULL(a.experiment_result, 0)  experimentResult,
+            IFNULL(a.quantity, 0)           quantity,
+            IFNULL(a.manufacturer, "")      manufacturer,
+            IFNULL(a.use_position, "")      usePosition,
+            IFNULL(a.available_quantity, 0) availableQuantity,
+            IFNULL(a.is_attach, 0)          isAttach,
+            IFNULL(a.approach_date, "")     approachDate,
+            IFNULL(a.remark, "")            remark,
+            IFNULL(a.create_time, "")       createTime,
+            IFNULL(b.NAME, "")              createBy
+        FROM
+            t_basic_material_approach a
+            left join t_basic_material ma on a.material_id = ma.id
+            left join t_basic_material_model m on a.model_id = m.id
+            left JOIN t_basic_material e ON a.material_id = e.id
+            left JOIN t_basic_construction c ON a.construction_id = c.id
+            left JOIN t_sys_territory t ON t.id = c.belong_area
+            LEFT JOIN t_basic_person b ON a.create_by = b.id
+        WHERE
+            a.id = #{id}
+    </select>
+
+
+    <select id="selectAvailableMApproachList" parameterType="String" resultType="map">
+        SELECT
+            a.id          AS     id,
+            b.name        as     name,
+            a.construction_id    constructionId,
+            a.approach_date      approachDate,
+            a.manufacturer,
+            a.use_position       usePosition,
+            a.quantity,
+            a.available_quantity availableQuantity,
+            b.unit        AS     unit,
+            a.material_id as     materialId
+        FROM
+            t_basic_material_approach a
+            INNER JOIN t_basic_material b ON a.material_id = b.id
+        WHERE
+            available_quantity != 0
+            AND
+            EXISTS(select 1
+                   from t_sys_user u
+                       inner join t_sys_organization p on p.id = u.org_id
+                       inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                   where s.construction_id = a.construction_id and u.id = #{userId})
+    </select>
+
+    <select id="selectApproach" resultType="map">
+        SELECT
+            id,
+            model            as model,
+            measurement_unit as unit,
+            create_by           createBy
+        from t_basic_material_approach
+    </select>
+
+    <update id="batchUpdateId" parameterType="map">
+        UPDATE T_BASIC_MATERIAL_APPROACH b
+        SET b.material_id = (
+            SELECT id
+            FROM
+                t_basic_material a
+            WHERE
+                b.id = a.update_by
+        ), b.model_id     = (
+            SELECT id
+            FROM
+                t_basic_material_model c
+            WHERE
+                b.id = c.update_by
+        )
+    </update>
+    <select id="queryMaterialAvailableList" parameterType="com.escst.material.bean.MaterialBean" resultType="map">
+        select a.id,a.material_id materialId,m.name materialName,a.model_id modelId,mm.name modelName,
+        a.available_quantity qty,a.manufacturer,m.unit,a.use_position usePosition
+        from t_basic_material_approach a
+        left join t_basic_material m on m.id = a.material_id
+        left join t_basic_material_model mm on mm.id = a.model_id
+        where a.construction_id = #{constructionId}
+        <![CDATA[
+			and a.available_quantity > 0
+		]]>
+        <if test="name != null and name != ''">
+            and locate(#{name}, m.name)
+        </if>
+        <if test="model != null and model != ''">
+            and locate(#{model}, mm.name)
+        </if>
+        order by a.create_time
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="queryMaterialAvailableCount" parameterType="com.escst.material.bean.MaterialBean" resultType="Integer">
+        select count(a.id)
+        from t_basic_material_approach a
+        left join t_basic_material m on m.id = a.material_id
+        left join t_basic_material_model mm on mm.id = a.model_id
+        where a.construction_id = #{constructionId}
+        <![CDATA[
+			and a.available_quantity > 0
+		]]>
+        <if test="name != null and name != ''">
+            and locate(#{name}, m.name)
+        </if>
+        <if test="model != null and model != ''">
+            and locate(#{model}, mm.name)
+        </if>
+    </select>
+
+    <!--查询地磅列表总数-->
+    <select id="getWeighbridgeCount" parameterType="com.escst.material.entity.MaterialApproachEntity" resultType="int">
+        select count(*)
+        from t_data_weighbridge
+        where construction_id = #{constructionId}
+              AND DATE_FORMAT(create_time, '%Y-%m-%d') = #{approachDate}
+    </select>
+
+    <!--查询地磅列表信息-->
+    <select id="listWeighbridge" parameterType="com.escst.material.entity.MaterialApproachEntity"
+            resultType="com.escst.material.entity.MaterialApproachEntity">
+        select
+            id,
+            carNumber as carNumber,
+            weight    as weight
+        from t_data_weighbridge
+        where construction_id = #{constructionId}
+              AND DATE_FORMAT(create_time, '%Y-%m-%d') = #{approachDate}
+    </select>
+
+
+    <select id="getWeighbridge" parameterType="string" resultType="com.escst.material.entity.MaterialApproachEntity">
+        <![CDATA[
+        select
+            w.id               as weighbridgeId,
+            w.weight           as quantity,
+            w.unit             as unit,
+            w.front_image_path as frontImagePath,
+            w.later_image_path as laterImagePath
+        from (
+                 SELECT *
+                 FROM t_data_weighbridge
+                 WHERE create_time <= "2180-01-01 00:01:00" AND construction_id =
+                                                                #{constructionId} and is_into = 0
+                 ORDER BY create_time DESC
+             ) w
+        GROUP BY
+            w.construction_id
+        ]]>
+    </select>
+
+    <update id="updateWeighbridge" parameterType="string">
+        update t_data_weighbridge
+        set is_into = 1
+        where id = #{weighbridgeId}
+    </update>
+
+    <update id="update" parameterType="com.escst.material.entity.MaterialApproachEntity">
+        update t_basic_material_approach
+        set
+        <if test="materialId != null and materialId != ''">
+            material_id = #{materialId},
+        </if>
+        <if test="modelId != null and modelId != ''">
+            model_id = #{modelId},
+        </if>
+        <if test="approachDate != null and approachDate != ''">
+            approach_date = #{approachDate},
+        </if>
+        <if test="manufacturer != null and manufacturer != ''">
+            manufacturer = #{manufacturer},
+        </if>
+        <if test="usePosition != null and usePosition != ''">
+            use_position = #{usePosition},
+        </if>
+        <if test="quantity != null and quantity != ''">
+            quantity = #{quantity},
+        </if>
+        <if test="availableQuantity != null and availableQuantity != ''">
+            available_quantity = #{availableQuantity},
+        </if>
+        <if test="breed != null and breed != ''">
+            breed = #{breed},
+        </if>
+        <if test="amount != null and amount != ''">
+            amount = #{amount},
+        </if>
+        <if test="totalAmount != null and totalAmount != ''">
+            total_amount = #{totalAmount},
+        </if>
+        <if test="siteResult != null and siteResult != ''">
+            site_result = #{siteResult},
+        </if>
+        <if test="samplingDate != null and samplingDate != ''">
+            sampling_date = #{samplingDate},
+        </if>
+        <if test="experimentResult != null and experimentResult != ''">
+            experiment_result = #{experimentResult},
+        </if>
+        <if test="materialBudgetId != null and materialBudgetId != ''">
+            material_budget_id = #{materialBudgetId},
+        </if>
+        <if test="reportNum != null and reportNum != ''">
+            report_num = #{reportNum},
+        </if>
+        <if test="isAttach != null and isAttach != ''">
+            is_attach = #{isAttach},
+        </if>
+        <if test="remark != null and remark != ''">
+            remark = #{remark},
+        </if>
+        <if test="createTime != null and createTime != ''">
+            create_time = #{createTime},
+        </if>
+        <if test="createBy != null and createBy != ''">
+            create_by = #{createBy},
+        </if>
+        <if test="updateTime != null and updateTime != ''">
+            update_time = #{updateTime},
+        </if>
+        <if test="updateBy != null and updateBy != ''">
+            update_by = #{updateBy}
+        </if>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectLatestOrderNo" resultType="String" parameterType="map">
+        select max(t.order_no)
+        from t_basic_material_approach t
+        where t.construction_id = #{constructionId}
+    </select>
+
+</mapper>

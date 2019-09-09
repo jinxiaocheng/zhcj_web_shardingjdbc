@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.thirdPart.mapper.ThirdPersonMapper">
+    <insert id="batchInsert" parameterType="com.escst.thirdPart.bean.PersonInfoBean">
+        INSERT INTO t_safe_training_person (id,OperDate,CreateDate,AutoID,OperUser,CreateUser,PersonName,Sex,IdentifyID
+              ,FileName,Address,Nation,Integral,Station,Category,TraID,PersonOrder,UnitName,UnitCode,UnitID,TraPrincipal
+              ,IsOut,BlackList,State,FingerId,ReadCardId,Email,TelPhone,BoxID,OwnerDeptID,RegisterDate,AvailabeDate
+              ,EntranceDate,LeaveDate,IsCard,IsPhoto,EmergencyContacts,EmergencyContactsTel,MaritalStatus,RegisteredType
+              ,HealthReport,SafeDuty,ContractOfLabour,BuildArea,Native,BirthDay,Degrees,ContractNumber,BloodType,
+              Passport,CategoryLevel,PersonScan,Standby7,ProjectName,ProjectNamePart,SufferDeptName)
+        VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (
+            #{item.id},
+            #{item.operDate},
+            #{item.createDate},
+            #{item.autoID},
+            #{item.operUser},
+            #{item.createUser},
+            #{item.personName},
+            #{item.sex},
+            #{item.identifyID},
+            #{item.fileName},
+            #{item.address},
+            #{item.nation},
+            #{item.integral},
+            #{item.station},
+            #{item.category},
+            #{item.traID},
+            #{item.personOrder},
+            #{item.unitName},
+            #{item.unitCode},
+            #{item.unitID},
+            #{item.traPrincipal},
+            #{item.isOut},
+            #{item.blackList},
+            #{item.state},
+            #{item.fingerId},
+            #{item.readCardId},
+            #{item.email},
+            #{item.telPhone},
+            #{item.boxID},
+            #{item.ownerDeptID},
+            #{item.registerDate},
+            #{item.availabeDate},
+            #{item.entranceDate},
+            #{item.leaveDate},
+            #{item.isCard},
+            #{item.isPhoto},
+            #{item.emergencyContacts},
+            #{item.emergencyContactsTel},
+            #{item.maritalStatus},
+            #{item.registeredType},
+            #{item.healthReport},
+            #{item.safeDuty},
+            #{item.contractOfLabour},
+            #{item.buildArea},
+            #{item.Native},
+            #{item.birthDay},
+            #{item.degrees},
+            #{item.contractNumber},
+            #{item.bloodType},
+            #{item.passport},
+            #{item.categoryLevel},
+            #{item.personScan},
+            #{item.standby7},
+            #{item.projectName},
+            #{item.projectNamePart},
+            #{item.sufferDeptName}
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE id = VALUES(id),OperDate =VALUES(operDate),OperUser=VALUES(operUser),PersonName=VALUES(personName)
+        ,Sex=VALUES(sex),IdentifyID=VALUES(identifyID),FileName=VALUES(fileName),Address=VALUES(address),Nation=VALUES(nation),Integral=VALUES(integral)
+        ,Station=VALUES(station),Category=VALUES(category),TraID=VALUES(traID),PersonOrder=VALUES(personOrder),UnitName=VALUES(unitName),UnitID=VALUES(unitID)
+        ,TraPrincipal=VALUES(traPrincipal),IsOut=VALUES(isOut),BlackList=VALUES(blackList),State=VALUES(state),FingerId=VALUES(fingerId),ReadCardId=VALUES(readCardId)
+        ,Email=VALUES(email),TelPhone=VALUES(telPhone),BoxID=VALUES(boxID),OwnerDeptID=VALUES(ownerDeptID),RegisterDate=VALUES(registerDate),AvailabeDate=VALUES(availabeDate)
+        ,EntranceDate=VALUES(entranceDate),LeaveDate=VALUES(leaveDate),IsCard=VALUES(isCard),IsPhoto=VALUES(isPhoto),EmergencyContacts=VALUES(emergencyContacts),EmergencyContactsTel=VALUES(emergencyContactsTel)
+        ,MaritalStatus=VALUES(maritalStatus),RegisteredType=VALUES(registeredType),HealthReport=VALUES(healthReport),SafeDuty=VALUES(safeDuty),ContractOfLabour=VALUES(contractOfLabour),BuildArea=VALUES(buildArea)
+        ,Native=VALUES(Native),BirthDay=VALUES(birthDay),Degrees=VALUES(degrees),ContractNumber=VALUES(contractNumber),BloodType=VALUES(bloodType),Passport=VALUES(passport)
+        ,CategoryLevel=VALUES(categoryLevel),PersonScan=VALUES(personScan),Standby7=VALUES(standby7),ProjectName=VALUES(projectName)
+        ,ProjectNamePart=VALUES(projectNamePart),SufferDeptName=VALUES(sufferDeptName)
+    </insert>
+
+
+    <select id="selectAll" parameterType="map" resultType="com.escst.thirdPart.vo.ThirdPersonVo">
+        SELECT tstp.id as id ,tstp.PersonName as personName,tstp.Sex as sex,tstp.Native as natives, tstp.IdentifyID as identifyID,tstp.Nation as nation
+        ,DATE_FORMAT(tstp.AvailabeDate,'%Y-%m-%d %H:%i:%S') as registerDate,tstp.UnitName as unitName ,tstp.Category as category,tstd.DepartName as departName
+        ,tstp.Station as station ,tstp.ReadCardId as readCardId
+        FROM t_safe_training_person tstp
+        LEFT JOIN t_safe_training_depart tstd ON tstd.ID = tstp.OwnerDeptID
+        <if test="train !=0 and train ==1">
+        INNER  JOIN t_safe_training_record_person t ON  t.IdentifyID = tstp.IdentifyID
+        </if>
+        <where>
+            <if test="category !=null and category !=''">
+                tstp.Category = #{category}
+            </if>
+            <if test="ownerDeptID !=null and ownerDeptID !=''">
+                AND tstp.OwnerDeptID = #{ownerDeptID}
+            </if>
+            <if test="unitID !=null and unitID !=''">
+                AND tstp.UnitID = #{unitID}
+            </if>
+            <if test="personName !=null and personName !=''">
+                AND (tstp.PersonName LIKE CONCAT("%",#{personName},"%") OR tstp.IdentifyID LIKE CONCAT("%",#{personName},"%") )
+            </if>
+            <if test="startDate !=null and startDate !=''">
+                AND <![CDATA[  DATE_FORMAT(tstp.AvailabeDate,'%Y-%m-%d') >= #{startDate}]]>
+            </if>
+            <if test="endDate !=null and endDate !=''">
+                AND <![CDATA[  DATE_FORMAT(tstp.AvailabeDate,'%Y-%m-%d') <= #{endDate}  ]]>
+            </if>
+            <if test="train !=0 and train ==2">
+                AND tstp.IdentifyID not in (
+                SELECT IdentifyID FROM t_safe_training_record_person
+                )
+            </if>
+        </where>
+        <if test="train !=0 and train ==1">
+            GROUP BY tstp.IdentifyID
+        </if>
+        ORDER BY tstp.RegisterDate DESC
+        <if test="type !=1">
+        LIMIT #{offset},#{rows}
+        </if>
+    </select>
+
+    <select id="count" parameterType="map" resultType="Integer">
+        SELECT
+        <choose>
+            <when test="train !=0 and train == 1">
+                count( DISTINCT tstp.id) as count
+            </when>
+            <otherwise>
+                count(tstp.id) as count
+            </otherwise>
+        </choose>
+         FROM t_safe_training_person tstp
+        LEFT JOIN t_safe_training_depart tstd ON tstd.ID = tstp.OwnerDeptID
+        <if test="train !=0 and train ==1">
+            INNER  JOIN t_safe_training_record_person t ON  t.IdentifyID = tstp.IdentifyID
+        </if>
+        <where>
+            <if test="category !=null and category !=''">
+                tstp.Category = #{category}
+            </if>
+            <if test="ownerDeptID !=null and ownerDeptID !=''">
+                AND tstp.OwnerDeptID = #{ownerDeptID}
+            </if>
+            <if test="unitID !=null and unitID !=''">
+                AND tstp.UnitID = #{unitID}
+            </if>
+            <if test="personName !=null and personName !=''">
+                AND (tstp.PersonName LIKE CONCAT("%",#{personName},"%") OR tstp.IdentifyID LIKE CONCAT("%",#{personName},"%") )
+            </if>
+            <if test="startDate !=null and startDate !=''">
+                AND <![CDATA[  DATE_FORMAT(tstp.AvailabeDate,'%Y-%m-%d') >= #{startDate}  ]]>
+            </if>
+            <if test="endDate !=null and endDate !=''">
+                AND <![CDATA[  DATE_FORMAT(tstp.AvailabeDate,'%Y-%m-%d') <= #{endDate}  ]]>
+            </if>
+            <if test="train !=0 and train ==2">
+                AND tstp.IdentifyID not in (
+                SELECT IdentifyID FROM t_safe_training_record_person
+                )
+            </if>
+
+        </where>
+    </select>
+
+    <select id="selectById" parameterType="String" resultType="com.escst.thirdPart.bean.PersonInfoBean">
+        SELECT tstp.PersonName as personName,tstp.Sex as sex,tstp.Degrees as degrees,tstp.Nation as nation,tstp.Native as Native,tstp.FileName as fileName
+        ,tstp.Integral as integral,tstp.Station as station,tstp.Category as category ,tstp.CategoryLevel as categoryLevel
+        ,tstp.ReadCardId as readCardId, DATE_FORMAT(tstp.AvailabeDate,'%Y-%m-%d %H:%i:%S') as registerDate,tstp.Standby7 as standby7
+            ,tstp.IdentifyID as identifyID,tstp.Passport as passport,tstp.TelPhone as telPhone,tstp.BuildArea as buildArea,tstp.traID as traID
+        ,tstp.TraPrincipal as traPrincipal,DATE_FORMAT(tstp.BirthDay,'%Y-%m-%d') as birthDay,DATE_FORMAT(tstp.EntranceDate,'%Y-%m-%d') as entranceDate,tstp.IsOut as isOut
+        ,tstp.IsPhoto as isPhoto,tstp.IsCard as isCard,tstp.MaritalStatus as maritalStatus,tstp.RegisteredType as registeredType
+        ,tstp.BloodType as bloodType,tstp.EmergencyContacts as emergencyContacts,tstp.EmergencyContactsTel as emergencyContactsTel
+        ,tstp.ContractNumber as contractNumber,tstp.UnitName as unitName,tstp.Address as address,count(tstr.id) as trainCount,sum(tstr.TrainPeriod) as trainHour
+        FROM t_safe_training_person tstp
+        LEFT JOIN t_safe_training_record_person tstrp ON tstrp.IdentifyID=tstp.IdentifyID
+        LEFT JOIN t_safe_training_record tstr ON tstr.id = tstrp.RecordID
+        WHERE tstp.id =#{id}
+    </select>
+
+    <select id="selectKindName" parameterType="Integer" resultType="String">
+        SELECT codeName FROM t_safe_training_code WHERE  type = #{type}
+    </select>
+
+    <select id="selectRecorPersonById" parameterType="String" resultType="com.escst.thirdPart.vo.RecordPersonVo">
+        SELECT tstr.TrainDepart as trainDepart,tstr.TrainName as trainName,tstr.TrainType as trainType,
+        DATE_FORMAT(tstr.TrainTime,'%Y-%m-%d %H:%i:%S') as trainTime,tstr.TrainPeriod as trainPeriod,tstrp.SGrade as sGrade,
+        tstrp.ISPass as iSPass
+        FROM t_safe_training_record tstr
+        LEFT JOIN t_safe_training_record_person tstrp ON tstr.id = tstrp.RecordID
+        LEFT JOIN t_safe_training_person tstp ON tstrp.IdentifyID=tstp.IdentifyID
+        WHERE tstp.id =#{id}
+    </select>
+
+    <select id="totalPerson" parameterType="map" resultType="Integer">
+        SELECT COUNT(id) as count FROM t_safe_training_person <where>
+        <if test="deptID !=null and deptID !=''">
+            UnitID=#{deptID}
+        </if>
+        <if test="fDeptID !=null and fDeptID !=''">
+          AND  OwnerDeptID=#{fDeptID}
+        </if>
+    </where>
+    </select>
+
+    <select id="TrainPersonCount" parameterType="com.escst.thirdPart.bean.CountBean" resultType="map">
+        SELECT
+        <if test="type !=1 and type !=0">
+        d.id as departId , d.DepartName as departName,
+        </if>
+        COUNT(b.id) as totalTrain,COUNT(DISTINCT a.id) as totalPersonNow,count(DISTINCT b.IdentifyID) as totalPersonTrain ,SUM(c.TrainPeriod) as totalTrainHour
+        FROM t_safe_training_person  a
+        LEFT JOIN t_safe_training_record_person b ON b.IdentifyID =a.IdentifyID
+        LEFT JOIN t_safe_training_record c ON c.id = b.RecordID
+        <if test="departId !=null and departId !='' and departId !='' ">
+            LEFT JOIN t_safe_training_depart d ON d.id = a.UnitID
+        </if>
+        <if test="type !=1 and type !=0 and departId ==null ">
+            LEFT JOIN t_safe_training_depart d ON d.id = a.OwnerDeptID
+        </if>
+        <where>
+            <if test="startTime !=null and startTime !=''">
+                <![CDATA[
+                DATE_FORMAT(RegisterDate,'%Y-%m-%d') >= #{startTime}
+                ]]>
+            </if>
+            <if test="endTime !=null and endTime !=''">
+                <![CDATA[
+               AND DATE_FORMAT(RegisterDate,'%Y-%m-%d') <= #{endTime}
+              ]]>
+            </if>
+            <choose>
+                <when test="type ==1 and type !=0">
+                    <if test="departId !=null and departId !=''">
+                        AND  d.id =#{departId}
+                    </if>
+                </when>
+                <when test="type ==2 and type !=0">
+                    <if test="departId !=null and departId !=''">
+                        AND  d.ParentID =#{departId}
+                    </if>
+                </when>
+            </choose>
+        </where>
+        <if test="type !=1 and type !=0">
+        GROUP BY d.id
+        </if>
+
+    </select>
+
+    <select id="TotalExamOrPass" parameterType="map" resultType="Integer">
+        SELECT COUNT( DISTINCT a.id) AS count   FROM t_safe_training_record_person a
+        LEFT JOIN t_safe_training_person b ON b.IdentifyID =a.IdentifyID
+        <where>
+            a.SGrade !=-1
+            <if test="isPasses !=null and isPasses !=''">
+            AND find_in_set(a.ISPass,#{isPasses})
+            </if>
+            <if test="deptID !=null and deptID !=''">
+            AND b.UnitID=#{deptID}
+            </if>
+            <if test="fDeptID !=null and fDeptID !=''">
+                AND b.OwnerDeptID=#{fDeptID}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectDepartList"  resultType="com.escst.commons.vo.BaseVO">
+        select ID as id ,
+				DepartName as name
+		FROM t_safe_training_depart
+		WHERE DepartSir=1
+    </select>
+</mapper>

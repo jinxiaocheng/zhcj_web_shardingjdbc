@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.attendance.mapper.AttendanceClockRecordMapper">
+
+	<select id="getNullClockDateNum" parameterType="String" resultType="map">
+		select id
+		from t_basic_attendance_clock_record
+		where clock_date is null
+		limit 0, 1
+	</select>
+
+	<update id="updateClockDateMinute">
+		update t_basic_attendance_clock_record
+		set clock_date = DATE_FORMAT(clock_time, '%Y-%m-%d'), clock_minute = DATE_FORMAT(clock_time, '%H:%i')
+		where clock_date is null
+	</update>
+
+	<select id="queryRecordPersonId" parameterType="map" resultType="String">
+		SELECT tbacr.person_id as personId
+		FROM t_basic_attendance_clock_record tbacr
+		LEFT JOIN t_basic_construction_person tbcp ON tbcp.person_id = tbacr.person_id
+		LEFT JOIN t_basic_construction tbc ON tbc.id = tbacr.construction_id
+		LEFT JOIN t_basic_person tbp ON tbp.id = tbacr.person_id
+		LEFT JOIN t_basic_project_company tbpc ON tbpc.id = tbacr.project_company_id
+		LEFT JOIN t_sys_territory tst ON tst.id=tbc.belong_area
+		LEFT JOIN t_basic_team tbt ON tbt.id = tbcp.team_id
+		left join t_basic_position_work pw on tbp.position_work_id = pw.id
+		<where>
+			tbcp.status=1 and tbp.status=1
+			<if test="personName !=null and personName !=''">
+				AND tbp.name like '%${personName}%'
+			</if>
+			<if test="areaId !=null and areaId !=''">
+				AND tst.id = #{areaId}
+			</if>
+			<if test="constructionId !=null and constructionId !=''">
+				AND tbacr.construction_id = #{constructionId}
+			</if>
+			<if test="companyId !=null and companyId !=''">
+				AND tbacr.project_company_id = #{companyId}
+			</if>
+			<if test="positionWorkId !=null and positionWorkId !=''">
+				AND pw.id = #{positionWorkId}
+			</if>
+			<if test="cardNum !=null and cardNum !=''">
+				AND tbcp.card_number like '%${cardNum}%'
+			</if>
+			<if test="startDate !=null and startDate !=''">
+				<![CDATA[ AND DATE_FORMAT(tbacr.clock_time,'%Y-%m-%d %H') >= #{startDate}  ]]>
+			</if>
+			<if test="endDate !=null and endDate !=''">
+				<![CDATA[
+		   AND  DATE_FORMAT(tbacr.clock_time,'%Y-%m-%d %H') <= #{endDate}  ]]>
+			</if>
+			<if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+				AND tbacr.construction_id IN
+				<foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+					(#{constructionVo.id})
+				</foreach>
+			</if>
+			GROUP BY tbacr.person_id
+			ORDER BY tbacr.clock_time DESC
+		</where>
+	</select>
+
+	<select id="count" parameterType="map" resultType="Integer">
+		select count(1) from (SELECT tbacr.person_id as personId,tbp.name as personName,tbc.name as constructionName,tbpc.name as
+		companyName,tbacr.type as type,tbt.name as teamName,tst.name as areaName,
+		pw.name as positionWorktype,tbcp.card_number as cardNum , DATE_FORMAT(tbacr.clock_time,'%Y-%m-%d %H:%i:%s') as
+		attendanceDate
+		FROM t_basic_attendance_clock_record tbacr
+		LEFT JOIN t_basic_construction_person tbcp ON tbcp.person_id = tbacr.person_id
+		LEFT JOIN t_basic_construction tbc ON tbc.id = tbacr.construction_id
+		LEFT JOIN t_basic_person tbp ON tbp.id = tbacr.person_id
+		LEFT JOIN t_basic_project_company tbpc ON tbpc.id = tbacr.project_company_id
+		LEFT JOIN t_sys_territory tst ON tst.id=tbc.belong_area
+		LEFT JOIN t_basic_team tbt ON tbt.id = tbcp.team_id
+		left join t_basic_position_work pw on tbp.position_work_id = pw.id
+		<where>
+			tbcp.status=1 and tbp.status=1
+			<if test="personName !=null and personName !=''">
+				AND tbp.name like '%${personName}%'
+			</if>
+			<if test="areaId !=null and areaId !=''">
+				AND tst.id = #{areaId}
+			</if>
+			<if test="constructionId !=null and constructionId !=''">
+				AND tbacr.construction_id = #{constructionId}
+			</if>
+			<if test="companyId !=null and companyId !=''">
+				AND tbacr.project_company_id = #{companyId}
+			</if>
+			<if test="positionWorkId !=null and positionWorkId !=''">
+				AND pw.id = #{positionWorkId}
+			</if>
+			<if test="cardNum !=null and cardNum !=''">
+				AND tbcp.card_number like '%${cardNum}%'
+			</if>
+			<if test="startDate !=null and startDate !=''">
+				<![CDATA[ AND DATE_FORMAT(tbacr.clock_time,'%Y-%m-%d %H') >= #{startDate} ]]>
+			</if>
+			<if test="endDate !=null and endDate !=''">
+				<![CDATA[ AND  DATE_FORMAT(tbacr.clock_time,'%Y-%m-%d %H') <= #{endDate} ]]>
+			</if>
+			and exists (
+			select 1
+			from t_sys_user u
+			inner join t_sys_organization p on p.id = u.org_id
+			inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+			where s.construction_id = tbcp.construction_id and u.id = #{userId} and s.status = 1
+			)
+			ORDER BY tbacr.clock_time DESC
+		</where>) a
+	</select>
+
+	<select id="queryList" parameterType="map" resultType="com.escst.attendance.vo.AttendanceClockRecordVo">
+		SELECT tbacr.person_id as personId,tbp.name as personName,tbc.name as constructionName,tbpc.name as
+		companyName,tbacr.type as type,tbt.name as teamName,tst.name as areaName,
+		pw.name as positionWorktype,tbcp.card_number as cardNum , DATE_FORMAT(tbacr.clock_time,'%Y-%m-%d %H:%i:%s') as
+		attendanceDate
+		FROM t_basic_attendance_clock_record tbacr
+		LEFT JOIN t_basic_construction_person tbcp ON tbcp.person_id = tbacr.person_id
+		LEFT JOIN t_basic_construction tbc ON tbc.id = tbacr.construction_id
+		LEFT JOIN t_basic_person tbp ON tbp.id = tbacr.person_id
+		LEFT JOIN t_basic_project_company tbpc ON tbpc.id = tbacr.project_company_id
+		LEFT JOIN t_sys_territory tst ON tst.id=tbc.belong_area
+		LEFT JOIN t_basic_team tbt ON tbt.id = tbcp.team_id
+		left join t_basic_position_work pw on tbp.position_work_id = pw.id
+		<where>
+			tbcp.status=1 and tbp.status=1
+			<if test="personName !=null and personName !=''">
+				AND tbp.name like '%${personName}%'
+			</if>
+			<if test="areaId !=null and areaId !=''">
+				AND tst.id = #{areaId}
+			</if>
+			<if test="constructionId !=null and constructionId !=''">
+				AND tbacr.construction_id = #{constructionId}
+			</if>
+			<if test="companyId !=null and companyId !=''">
+				AND tbacr.project_company_id = #{companyId}
+			</if>
+			<if test="positionWorkId !=null and positionWorkId !=''">
+				AND pw.id = #{positionWorkId}
+			</if>
+			<if test="cardNum !=null and cardNum !=''">
+				AND tbcp.card_number like '%${cardNum}%'
+			</if>
+			<if test="startDate !=null and startDate !=''">
+				<![CDATA[ AND DATE_FORMAT(tbacr.clock_time,'%Y-%m-%d %H') >= #{startDate} ]]>
+			</if>
+			<if test="endDate !=null and endDate !=''">
+				<![CDATA[ AND  DATE_FORMAT(tbacr.clock_time,'%Y-%m-%d %H') <= #{endDate} ]]>
+			</if>
+			and exists (
+			select 1
+			from t_sys_user u
+			inner join t_sys_organization p on p.id = u.org_id
+			inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+			where s.construction_id = tbcp.construction_id and u.id = #{userId} and s.status = 1
+			)
+			ORDER BY tbacr.clock_time DESC
+			<if test="rows!=null and rows!=''">
+				LIMIT #{offset},#{rows}
+			</if>
+		</where>
+	</select>
+
+	<select id="selectTotalByCompanyId" parameterType="map" resultType="com.escst.attendance.bean.AttendanceNewBean">
+		SELECT tbpc.name as companyName,tbpc.id as companyId,count(tbcp.person_id)as totalNum,tbc.id as
+		constructionId,tbc.name as constructionName ,tbc.belong_area as belongArea , tst.name as areaName
+		FROM t_basic_project_company tbpc
+		LEFT JOIN t_basic_construction_person tbcp ON tbcp.project_company_id =tbpc.id
+		LEFT JOIN t_basic_construction tbc ON tbc.id = tbpc.construction_id
+		LEFT JOIN t_sys_territory tst ON tst.id = tbc.belong_area
+		<where>
+			exists (
+			select 1
+			from t_sys_user u
+			inner join t_sys_organization p on p.id = u.org_id
+			inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+			inner join t_basic_construction c on c.id = s.construction_id
+			where s.construction_id = tbpc.construction_id and u.id = #{userId} and s.status = 1
+
+			)
+			<if test="constructionId !=null and constructionId !=''">
+				AND tbpc.construction_id =#{constructionId}
+			</if>
+			AND tbcp.status =1
+			GROUP BY tbpc.id
+			ORDER BY tbpc.create_time
+			<if test="type !=0 and type !=''">
+				LIMIT #{offset},#{rows}
+			</if>
+		</where>
+	</select>
+
+	<select id="countNew" parameterType="map" resultType="Integer">
+		SELECT COUNT(DISTINCT tbcp.project_company_id) as count FROM t_basic_project_company tbpc
+		LEFT JOIN t_basic_construction_person tbcp ON tbcp.project_company_id =tbpc.id
+		WHERE exists (
+		select 1
+		from t_sys_user u
+		inner join t_sys_organization p on p.id = u.org_id
+		inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+		inner join t_basic_construction c on c.id = s.construction_id
+		where s.construction_id = tbpc.construction_id and u.id = #{userId}
+		)
+		<if test="constructionId !=null and constructionId !=''">
+			AND tbpc.construction_id =#{constructionId}
+		</if>
+		AND tbcp.status =1
+	</select>
+
+	<select id="selectByCompanyId" parameterType="String" resultType="com.escst.attendance.vo.AttendanceNumNewVO">
+		SELECT
+			tbt.id                as id,
+			tbt.name              as teamName,
+			count(tbcp.person_id) as count
+		FROM
+			t_basic_team tbt
+			LEFT JOIN t_basic_construction_person tbcp ON tbcp.team_id = tbt.id
+		where tbt.project_company_id = #{companyId}
+			  AND tbcp.status = 1
+		GROUP BY tbcp.team_id
+	</select>
+
+</mapper>

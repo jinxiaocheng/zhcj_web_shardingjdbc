@@ -1,0 +1,14 @@
+@headerHeight:60px;
+.toolbar.group-box{
+   height:@headerHeight;
+   box-sizing: border-box;
+   padding: 15px;
+  .win-box{
+    float: right;
+  }
+}
+#pop{
+  canvas{
+    width: 100%;
+  }
+}

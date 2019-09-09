@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.video.mapper.HikPlatformMapper">
+
+	<select id="getPlatform" parameterType="String" resultType="com.escst.video.vo.VideoLoginVO">
+		select outside_ip ip, outside_port `port`,user_name userName, `password`
+		from t_basic_hik_platform p
+		where exists (
+			select 1 from t_basic_construction c where c.belong_area = p.area_id and c.id = #{constructionId}
+		)
+	</select>
+</mapper>

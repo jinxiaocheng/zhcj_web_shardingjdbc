@@ -1,0 +1,926 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.person.mapper.PersonMapper">
+
+    <select id="selectPersonList" parameterType="com.escst.person.entity.PersonEntity" resultType="java.util.Map">
+        SELECT a.id,
+        a.`name` AS name,
+        a.mobile AS mobile,
+        a.id_card AS idCard,
+        a.sex AS sex,
+        a.title AS title,
+        c.name AS projectCompanyName,
+        d.`name` AS teamName,
+        a.work_type AS workType,
+        a.ice_contact_name iceContactName,
+        a.ice_contact_mobile iceContactMobile,
+        a.blood_type AS bloodType,
+        e.`name` AS constructionName,
+        e.id as constructionId,
+        f.name AS terrName,
+        a.`status` AS status,
+			pw.name as positionWorkTypeName,
+        b.card_number as cardNumber,
+        b.client_user_id as clientUserId,
+        f.id as belongArea,
+        u.id as userId,
+        DATE_FORMAT(a.create_time, '%Y-%m-%d') as createTime
+        FROM T_BASIC_PERSON a
+        INNER JOIN T_BASIC_CONSTRUCTION_PERSON b ON a.id = b.person_id
+        INNER JOIN t_basic_construction e ON b.construction_id = e.id
+        LEFT JOIN t_basic_project_company c ON b.project_company_id = c.id
+        LEFT JOIN t_basic_team d ON b.team_id = d.id
+        INNER JOIN t_sys_territory f ON e.belong_area = f.id
+        left JOIN t_sys_user u on a.user_id=u.id
+        left join t_basic_position_work pw on a.position_work_id = pw.id
+        <include refid="conditionWhere"></include>
+        ORDER BY convert(e.`name` using gbk) COLLATE gbk_chinese_ci,
+        convert(c.name using gbk) COLLATE gbk_chinese_ci,
+        convert(a.`name` using gbk) COLLATE gbk_chinese_ci
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="selectCount" parameterType="com.escst.person.entity.PersonEntity" resultType="int">
+        SELECT count(1)
+        FROM
+        T_BASIC_PERSON a
+        INNER JOIN T_BASIC_CONSTRUCTION_PERSON b ON a.id = b.person_id
+        INNER JOIN t_basic_construction e ON b.construction_id = e.id
+        LEFT JOIN t_basic_project_company c ON a.project_company_id = c.id
+        LEFT JOIN t_basic_team d ON b.team_id = d.id
+        INNER JOIN t_sys_territory f ON e.belong_area = f.id
+        left JOIN t_sys_user u on a.user_id=u.id
+        left join t_basic_position_work pw on a.position_work_id = pw.id
+        <include refid="conditionWhere"></include>
+    </select>
+
+    <sql id="conditionWhere">
+        <where>
+            a.status = 1
+            <if test="name!=null and name!=''">
+                and a.name like '%${name}%'
+            </if>
+            <if test="mobile!=null and mobile!=''">
+                and a.mobile like '%${mobile}%'
+            </if>
+            <if test="title!=null and title!=''">
+                and a.title = #{title}
+            </if>
+           <if test="positionWorkId!=null and positionWorkId!=''">
+            	and a.position_work_id = #{positionWorkId}
+            </if>
+            <if test="projectCompanyName!=null and projectCompanyName!=''">
+                and c.name like '%${projectCompanyName}%'
+            </if>
+            <if test="projectCompanyId!=null and projectCompanyId!=''">
+                and b.project_company_id = #{projectCompanyId}
+            </if>
+            <if test="territoryId!=null and territoryId!=''">
+                and f.id = #{territoryId}
+            </if>
+            <if test="constructionId!=null and constructionId!=''">
+                and b.construction_id = #{constructionId}
+            </if>
+            <if test="cardNumber!=null and cardNumber!=''">
+                and b.card_number like '%${cardNumber}%'
+            </if>
+            and exists (
+            select 1
+            from t_sys_user u
+            inner join t_sys_organization p on p.id = u.org_id
+            inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+            where s.construction_id = b.construction_id and u.id = #{userId}
+            )
+        </where>
+    </sql>
+    <select id="getPersonById" parameterType="String" resultType="com.escst.person.entity.PersonEntity">
+        SELECT
+            a.id,
+            IFNULL(a.NAME, "")                         name,
+            IFNULL(a.MOBILE, "")                       mobile,
+	        ifnull(pw.id,"")							 positionWorkId,
+	        ifnull(pw.name,"")							 positionWorkTypeName,
+            IFNULL(cp.project_company_id, "")          projectCompanyId,
+            IFNULL(cp.team_id, "")                     teamId,
+            IFNULL(cp.is_leader, "")                   isLeader,
+            IFNULL(a.user_id, "")                      userId,
+            IFNULL(cp.construction_id, "")             constructionId,
+            IFNULL(c.name, "")                         constructionName,
+            IFNULL(c.belong_area, "")                  areaId,
+            IFNULL(a.SEX, 0)                           sex,
+            IFNULL(a.ID_CARD, "")                      idCard,
+            IFNULL(a.ICE_CONTACT_NAME, "")             iceContactName,
+            IFNULL(a.ICE_CONTACT_MOBILE, "")           iceContactMobile,
+            IFNULL(a.BLOOD_TYPE, "")                   bloodType,
+            IFNULL(a.HEAD_PORTRAIT_ID, "")             headPortraitId,
+            IFNULL(a.ID_CARD_FRONT_ID, "")             idCardFrontId,
+            IFNULL(a.ID_CARD_BACK_ID, "")              idCardBackId,
+            IFNULL(a.QUALIFICATION_CERTIFICATE_ID, "") qualificationCertificateId,
+            ifnull(cp.card_number, "")    as           cardNumber,
+            ifnull(cp.client_user_id, "") as           clientUserId,
+            ifnull(a.bank_card, "")      as           bankCard,
+            ifnull(a.attendance_type,0)      as        attendanceType,
+            IFNULL(DATE_FORMAT(a.create_time, '%Y-%m-%d'),"") as createDate
+        FROM t_basic_person a
+            left join t_basic_construction_person cp on cp.person_id = a.id
+            left join t_basic_construction c on c.id = cp.construction_id
+        	left join t_basic_position_work pw on a.position_work_id = pw.id
+        WHERE a.id = #{personId}
+    </select>
+
+    <select id="selUserId" parameterType="String" resultType="String">
+        SELECT IFNULL(user_id, "") userId
+        FROM t_basic_person
+        WHERE id = #{psersonId}
+    </select>
+
+    <select id="queryPersonList" parameterType="String" resultType="map">
+        SELECT
+            a.user_id AS userId,
+            a.name
+        FROM t_basic_person a
+            LEFT JOIN t_basic_construction_person b ON b.person_id = a.id
+        WHERE b.construction_id = #{constructionId} AND a.user_id is not null
+    </select>
+
+    <update id="updatePersonStatus" parameterType="String">
+        UPDATE t_basic_person
+        SET `status` = 0
+        WHERE id = #{personId}
+    </update>
+    <update id="updateConstructionPersonStatus" parameterType="String">
+        UPDATE T_BASIC_CONSTRUCTION_PERSON
+        SET `status` = 0
+        WHERE person_id = #{personId}
+    </update>
+
+    <update id="updateUserStatus" parameterType="String">
+        UPDATE t_sys_user
+        SET `status` = 0
+        WHERE id = #{userId}
+    </update>
+
+    <insert id="insert" parameterType="com.escst.person.entity.PersonEntity">
+        INSERT INTO T_BASIC_PERSON (ID, NAME, SEX, WORK_AGE, HEAD_PORTRAIT_ID, ID_CARD, QUALIFICATION_CERTIFICATE_ID, project_company_id, ID_CARD_FRONT_ID
+            , ID_CARD_BACK_ID, MOBILE, ICE_CONTACT_NAME, ICE_CONTACT_MOBILE, BLOOD_TYPE, STATUS, USER_ID
+            , CREATE_TIME, CREATE_BY, CODE, bank_card,attendance_type,position_work_id)
+        values (#{id}, #{name}, #{sex}, #{workAge}, #{headPortraitId}, #{idCard}, #{qualificationCertificateId},
+            #{projectCompanyId}, #{idCardFrontId}
+            , #{idCardBackId}, #{mobile}, #{iceContactName}, #{iceContactMobile}, #{bloodType}, #{status}, #{userId}
+            , #{createTime}, #{createBy}, #{code}, #{bankCard},#{attendanceType},#{positionWorkId})
+    </insert>
+
+    <insert id="batchInsert" parameterType="map">
+        INSERT INTO T_BASIC_PERSON(ID,NAME,SEX,TITLE,WORK_TYPE,WORK_AGE,MOBILE,ID_CARD,ICE_CONTACT_NAME,
+        ICE_CONTACT_MOBILE,BLOOD_TYPE,STATUS,USER_ID,CREATE_TIME,CREATE_BY,CODE) VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (#{item.id},#{item.name},#{item.sex},#{item.title},#{item.workType},#{item.workAge},#{item.mobile},#{item.idCard},
+            #{item.iceContactName},#{item.iceContactMobile},#{item.bloodType},#{item.status},#{item.userId},#{item.createTime},
+            #{item.createBy},#{item.code})
+        </foreach>
+    </insert>
+
+    <select id="selectMaxJobNumber" parameterType="String" resultType="int">
+        SELECT IFNULL(MAX(JOB_NUMBER),0) count
+        FROM T_BASIC_CONSTRUCTION_PERSON
+        WHERE CONSTRUCTION_ID = #{constructionId}
+    </select>
+
+    <insert id="batchInsertConstructionPerson" parameterType="com.escst.person.entity.ConstructionPersonEntity">
+        INSERT INTO
+        T_BASIC_CONSTRUCTION_PERSON(ID,PERSON_ID,CONSTRUCTION_ID,JOB_NUMBER,STATUS,PROJECT_COMPANY_ID,TEAM_ID) VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (#{item.id},#{item.personId},#{item.constructionId},#{item.jobNumber},#{item.status},#{item.projectCompanyId},#{item.teamId})
+        </foreach>
+    </insert>
+
+    <select id="selectEnum" parameterType="map" resultType="String">
+        SELECT IFNULL(name, "") name
+        FROM t_sys_dictionary
+        WHERE type = #{type} AND `value` = #{value}
+    </select>
+
+
+    <select id="selectPersonByConstructionId" parameterType="com.escst.person.entity.PersonEntity"
+            resultType="com.escst.person.entity.PersonEntity">
+        SELECT
+        IFNULL(TBP.ID, "") id,
+        IFNULL(TBP.user_id,"") userId,
+        IFNULL(TBP.`NAME`, "") name,
+        IFNULL(TBP.TITLE, 0) title,
+        IFNULL(TBP.WORK_AGE, 0) workAge,
+        IFNULL(TBP.WORK_TYPE, 0) workType,
+        IFNULL(TBP.mobile, "") mobile,
+        TBP.sex sex,
+        TBP.id_card idCard,
+        TBP.ice_contact_name iceContactName,
+        TBP.ice_contact_mobile iceContactMobile,
+        TBP.blood_type bloodType
+        FROM T_BASIC_PERSON TBP
+        LEFT JOIN T_BASIC_CONSTRUCTION_PERSON TBCP ON TBCP.PERSON_ID = TBP.ID
+        <where>
+            TBP.status = 1 AND TBCP.status=1
+            <if test="userId !=null and userId !=''">
+                AND TBP.user_id=#{userId}
+            </if>
+            <if test="constructionId != null and constructionId != '' ">
+                AND TBCP.CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="title != null and title != 0">
+                AND TBP.TITLE = #{title}
+            </if>
+            <if test="name != null and name != ''">
+                AND (TBP.NAME LIKE CONCAT("%",#{name},"%")
+                OR TBP.CODE LIKE CONCAT("%",#{name},"%"))
+            </if>
+            <if test="workType != null and workType != 0 ">
+                AND TBP.WORK_TYPE = #{workType}
+            </if>
+            <if test="startWorkAge != null and startWorkAge != 0 ">
+                AND TBP.WORK_AGE &gt;= #{startWorkAge}
+            </if>
+            <if test="endWorkAge != null and endWorkAge != 0 ">
+                AND TBP.WORK_AGE &lt;= #{endWorkAge}
+            </if>
+        </where>
+        ORDER BY TBP.CREATE_TIME DESC
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="selectPersonCount" parameterType="com.escst.person.entity.PersonEntity" resultType="Integer">
+        SELECT COUNT(TBP.ID)
+        FROM T_BASIC_PERSON TBP
+        LEFT JOIN T_BASIC_CONSTRUCTION_PERSON TBCP ON TBCP.PERSON_ID = TBP.ID
+        <where>
+            TBP.status = 1
+            <if test="userId !=null and userId !=''">
+                AND TBP.user_id=#{userId}
+            </if>
+            <if test="constructionId != null and constructionId != '' ">
+                AND TBCP.CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="title != null and title != 0">
+                AND TBP.TITLE = #{title}
+            </if>
+            <if test="name != null and name != ''">
+                AND (TBP.NAME LIKE CONCAT("%",#{name},"%")
+                OR TBP.CODE LIKE CONCAT("%",#{name},"%"))
+            </if>
+            <if test="workType != null and workType != 0 ">
+                AND TBP.WORK_TYPE = #{workType}
+            </if>
+            <if test="startWorkAge != null and startWorkAge != 0 ">
+                AND TBP.WORK_AGE &gt;= #{startWorkAge}
+            </if>
+            <if test="endWorkAge != null and endWorkAge != 0 ">
+                AND TBP.WORK_AGE &lt;= #{endWorkAge}
+            </if>
+        </where>
+        ORDER BY TBP.CREATE_TIME DESC
+    </select>
+
+    <update id="update" parameterType="com.escst.person.entity.PersonEntity">
+        UPDATE T_BASIC_PERSON
+        <set>
+            <if test="name != null and name != '' ">
+                NAME = #{name},
+            </if>
+            <if test="sex != null and sex != 0 ">
+                SEX = #{sex},
+            </if>
+            <if test="title != null and title != 0 ">
+                TITLE = #{title},
+            </if>
+            <if test="attendanceType != null">
+                attendance_type = #{attendanceType},
+            </if>
+            <if test="positionWorkId != null and positionWorkId != '' ">
+                POSITION_WORK_id = #{positionWorkId},
+            </if>
+            <if test="idCard != null and idCard != '' ">
+                ID_CARD = #{idCard},
+            </if>
+            <if test="mobile != null and mobile != '' ">
+                MOBILE = #{mobile},
+            </if>
+            <if test="iceContactName != null and iceContactName != '' ">
+                ICE_CONTACT_NAME = #{iceContactName},
+            </if>
+            <if test="iceContactMobile != null and iceContactMobile != '' ">
+                ICE_CONTACT_MOBILE = #{iceContactMobile},
+            </if>
+            <if test="bloodType != null and bloodType != '' ">
+                BLOOD_TYPE = #{bloodType},
+            </if>
+            <if test="code != null and code != '' ">
+                CODE = #{code},
+            </if>
+            <if test="headPortraitId != null and headPortraitId != ''">
+                HEAD_PORTRAIT_ID = #{headPortraitId},
+            </if>
+            <if test="qualificationCertificateId != null and qualificationCertificateId != '' ">
+                QUALIFICATION_CERTIFICATE_ID = #{qualificationCertificateId},
+            </if>
+            <if test="idCardFrontId != null and idCardFrontId != '' ">
+                ID_CARD_FRONT_ID = #{idCardFrontId},
+            </if>
+            <if test="idCardBackId != null and idCardBackId != '' ">
+                ID_CARD_BACK_ID = #{idCardBackId},
+            </if>
+            <if test="projectCompanyId != null and projectCompanyId != '' ">
+                PROJECT_COMPANY_ID = #{projectCompanyId},
+            </if>
+            <if test="userId != null and userId != '' ">
+                user_id = #{userId},
+            </if>
+            <if test="bankCard != null and bankCard != '' ">
+                bank_card = #{bankCard},
+            </if>
+            UPDATE_TIME = #{updateTime}
+        </set>
+        WHERE
+                ID = #{id}
+    </update>
+    <insert id="insertConstructionPersonInfo" parameterType="com.escst.person.entity.ConstructionPersonEntity">
+        INSERT INTO T_BASIC_CONSTRUCTION_PERSON (ID, PERSON_ID, CONSTRUCTION_ID, JOB_NUMBER, CARD_NUMBER, STATUS, bank_card, project_company_id, team_id, is_leader)
+        VALUES (#{id}, #{personId}, #{constructionId}, #{jobNumber}, #{cardNumber}, #{status}, #{bankCard},
+                #{projectCompanyId},
+                #{teamId}, #{isLeader})
+    </insert>
+    <update id="updateConstructionPersonInfo" parameterType="com.escst.person.entity.ConstructionPersonEntity">
+        UPDATE T_BASIC_CONSTRUCTION_PERSON
+        SET project_company_id = #{projectCompanyId}, team_id = #{teamId}, is_leader = #{isLeader},
+            card_number        = #{cardNumber},
+            bank_card          = #{bankCard}
+        WHERE PERSON_ID = #{personId} and CONSTRUCTION_ID = #{constructionId}
+    </update>
+
+    <select id="getTeamLeaderList" parameterType="string" resultType="com.escst.team.bean.TeamLeaderVO">
+        select
+            p.`name`              userName,
+            p.mobile,
+            p.user_id             userId,
+            t.id,
+            t.`name`,
+            cp.project_company_id companyId
+        from t_basic_construction_person cp
+            inner join t_basic_person p on p.id = cp.person_id and p.title in (10, 12)
+            left join t_basic_team t on t.id = cp.team_id and t.project_company_id = cp.project_company_id
+        where cp.`status` = 1 and cp.construction_id = #{constructionId}
+        order by companyId, name
+    </select>
+    <select id="getAuthWorkTypePersonQtyCount" parameterType="com.escst.commons.vo.PageAuthVO" resultType="int">
+        SELECT count(distinct p.position_work_id)
+        FROM t_basic_person p
+		inner join t_basic_position_work pw on p.position_work_id = pw.id
+        inner join t_basic_construction_person cp on cp.person_id = p.id and cp.status = 1
+        where exists (
+        select 1
+        from t_sys_user u
+        inner join t_sys_organization p on p.id = u.org_id
+        inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+        inner join t_basic_construction c on c.id = s.construction_id
+        where s.construction_id = cp.construction_id and u.id = #{userId}
+        <if test="id != null and id != '' and id != '1'.toString()">
+            and (c.id = #{id} or c.belong_area = #{id} or c.belong_city = #{id})
+        </if>
+        )
+    </select>
+    <select id="queryAuthWorkTypePersonQty" parameterType="com.escst.commons.vo.PageAuthVO"
+            resultType="com.escst.commons.vo.QtyVO">
+        SELECT p.position_work_id id,pw.`name`, count(p.position_work_id) qty
+        FROM t_basic_person p
+		inner join t_basic_position_work pw on p.position_work_id = pw.id
+        inner join t_basic_construction_person cp on cp.person_id = p.id and cp.status = 1
+        where exists (
+        select 1
+        from t_sys_user u
+        inner join t_sys_organization p on p.id = u.org_id
+        inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+        inner join t_basic_construction c on c.id = s.construction_id
+        where s.construction_id = cp.construction_id and u.id = #{userId}
+        <if test="id != null and id != '' and id != '1'.toString()">
+            and (c.id = #{id} or c.belong_area = #{id} or c.belong_city = #{id})
+        </if>
+
+
+        )
+        group by p.position_work_id,pw.`name`
+        limit #{startIndex},#{rowNum}
+    </select>
+    <select id="selectPersonByWorkType" parameterType="com.escst.person.vo.PersonQueryVO" resultType="map">
+        SELECT
+        IFNULL(TBP.ID, "") personId,
+        IFNULL(tsu.id, "") userId,
+        IFNULL(tsu.name, "") name,
+        pw.name as positionWorktype,
+        IFNULL(TBP.mobile, "") mobile,
+        tbcp.project_company_id projectCompanyId,
+        pc.name projectCompanyName,
+        tbcp.team_id teamId,
+        t.name teamName,
+        tsu.create_time
+        FROM
+        t_sys_user tsu
+        LEFT JOIN t_sys_organization o ON tsu.org_id = o.id
+        LEFT JOIN t_basic_construction c ON c.id = o.construction_id
+        LEFT JOIN T_BASIC_PERSON tbp ON tsu.id = tbp.user_id
+        LEFT JOIN T_BASIC_CONSTRUCTION_PERSON tbcp ON TBCP.PERSON_ID = TBP.ID
+        LEFT JOIN T_BASIC_PROJECT_COMPANY pc ON pc.id = tbcp.project_company_id
+        LEFT JOIN t_basic_team t ON t.id = tbcp.team_id
+		left join t_basic_position_work pw on tbp.position_work_id = pw.id
+        <where>
+            tsu.`status`=1
+            <if test="constructionId != null and constructionId !=''">
+                and o.CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="companyTypes !='' and companyTypes !=null ">
+                and FIND_IN_SET(pc.type, #{companyTypes})
+            </if>
+            <if test="teamId !='' and teamId !=null ">
+                and tbcp.team_id =#{teamId}
+            </if>
+            <if test="projectCompanyId !='' and projectCompanyId !=null ">
+                and tbcp.project_company_id =#{projectCompanyId}
+            </if>
+            <if test="name !='' and name !=null ">
+                and tsu.name LIKE CONCAT("%",#{name},"%")
+            </if>
+            <if test="positionWorkType !='' and positionWorkType !=null ">
+                and tbp.position_work_id =#{positionWorkType}
+            </if>
+            <if test="userId !='' and userId !=null ">
+                AND tsu.id = #{userId}
+            </if>
+        </where>
+        ORDER BY create_time desc
+        limit #{startIndex},#{rowNum}
+    </select>
+
+    <select id="selectAuthPerson" parameterType="String" resultType="map">
+        select *
+        from t_basic_person a
+            INNER JOIN t_basic_construction_person b on a.id = b.person_id
+        where EXISTS(select 1
+                     from t_sys_user u
+                         inner join t_sys_organization p on p.id = u.org_id
+                         inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                     where s.construction_id = b.construction_id and u.id = #{userId})
+    </select>
+    <select id="selectConstructionPersonList" parameterType="com.escst.person.vo.PersonQueryVO"
+            resultType="java.util.Map">
+        SELECT
+        tsu.id id,
+        cp.person_id personId,
+        tsu.id userId,
+        cp.construction_id constructionId,
+        cp.project_company_id projectCompanyId,
+        cp.team_id teamId,
+        t.`name` teamName,
+        tsu.`name`,
+			pw.`name` positionWorkTypeName,
+        pc.name projectCompanyName,
+        c.name constructionName,
+        c.belong_area areaId,
+        p.mobile
+        <include refid="selectPerson"></include>
+        order by name
+        limit #{startIndex},#{rowNum}
+    </select>
+    <select id="selectConstructionPersonCount" parameterType="com.escst.person.vo.PersonQueryVO" resultType="int">
+        SELECT count(1)
+        <include refid="selectPerson"></include>
+    </select>
+    <sql id="selectPerson">
+        FROM
+        t_sys_user tsu
+        LEFT JOIN t_sys_organization o ON tsu.org_id = o.id
+        LEFT JOIN t_basic_construction c ON c.id = o.construction_id
+        LEFT JOIN t_basic_person p ON tsu.id = p.user_id
+        LEFT JOIN t_basic_construction_person cp ON p.id = cp.person_id
+        LEFT JOIN t_basic_project_company pc ON pc.id = cp.project_company_id
+        LEFT JOIN t_basic_team t ON t.id = cp.team_id
+		left join t_basic_position_work pw ON p.position_work_id = pw.id
+        <where>
+            tsu.status = 1 and o.construction_id = #{constructionId}
+            <if test="projectCompanyId != null and projectCompanyId != '' ">
+                and cp.project_company_id = #{projectCompanyId}
+            </if>
+            <if test="teamId != null and teamId != '' ">
+                and cp.team_id = #{teamId}
+            </if>
+            <if test="name != null and name != '' ">
+                and locate(#{name}, tsu.`name`)
+            </if>
+        </where>
+    </sql>
+
+    <select id="getConstructionPersonInfo" parameterType="map"
+            resultType="com.escst.person.entity.ConstructionPersonEntity">
+        select
+            id,
+            person_id          personId,
+            construction_id    constructionId,
+            job_number         jobNumber,
+            project_company_id projectCompanyId,
+            team_id            teamId,
+            status,
+            is_leader          isLeader
+        from T_BASIC_CONSTRUCTION_PERSON
+        where person_id = #{personId} and construction_id = #{constructionId}
+    </select>
+
+    <select id="query7DaysWorkTypeQty" parameterType="com.escst.person.vo.WorkTypeQueryVO"
+            resultType="com.escst.person.vo.WorkTypeDateVO">
+        SELECT DATE_FORMAT(p.create_time, '%Y-%m-%d') date,
+        sum(case d.value when 1 then 1 else 0 end) one,
+        sum(case d.value when 2 then 1 else 0 end) two,
+        sum(case d.value when 3 then 1 else 0 end) three,
+        sum(case d.value when 4 then 1 else 0 end) four,
+        sum(case d.value when 5 then 1 else 0 end) five,
+        sum(case d.value when 6 then 1 else 0 end) six,
+        sum(case d.value when 7 then 1 else 0 end) seven,
+        sum(case d.value when 8 then 1 else 0 end) eight,
+        sum(case d.value when 9 then 1 else 0 end) nine,
+        sum(case d.value when 10 then 1 else 0 end) ten,
+        sum(case d.value when 11 then 1 else 0 end) eleven,
+        sum(case d.value when 12 then 1 else 0 end) twelve,
+        sum(case d.value when 13 then 1 else 0 end) thirteen
+        from t_basic_person p
+        inner join t_sys_dictionary d on d.value = p.work_type and d.type = 'workType'
+        where exists (
+        select 1
+        from t_basic_construction_person cp
+        inner join t_basic_construction c on c.id = cp.construction_id
+        inner join t_sys_organization s on s.construction_id = c.id
+        inner join t_sys_organization op on locate(op.sys_code, s.sys_code) = 1
+        inner join t_sys_user u on u.org_id = op.id
+        where cp.person_id = p.id and cp.status = 1
+        and u.id = #{userId}
+        <if test="constructionId!=null and constructionId!=''">
+            and c.id=#{constructionId}
+        </if>
+        )
+        <![CDATA[
+					and  p.create_time>#{startDate} and p.create_time<=#{endDate}
+					]]>
+        group by DATE_FORMAT(p.create_time, '%Y-%m-%d')
+        order by p.create_time ASC
+    </select>
+    <select id="queryPersonByConstructionIdUserId" parameterType="String"
+            resultType="com.escst.person.entity.PersonEntity">
+        SELECT
+            a.id,
+            IFNULL(a.NAME, "")                         name,
+            IFNULL(a.MOBILE, "")                       mobile,
+            IFNULL(a.position_work_id, "")            positionWorkType,
+            IFNULL(cp.project_company_id, "")          projectCompanyId,
+            IFNULL(cp.team_id, "")                     teamId,
+            IFNULL(cp.is_leader, "")                   isLeader,
+            IFNULL(a.user_id, "")                      userId,
+            IFNULL(cp.construction_id, "")             constructionId,
+            IFNULL(a.SEX, 0)                           sex,
+            IFNULL(a.ID_CARD, "")                      idCard,
+            IFNULL(a.ICE_CONTACT_NAME, "")             iceContactName,
+            IFNULL(a.ICE_CONTACT_MOBILE, "")           iceContactMobile,
+            IFNULL(a.HEAD_PORTRAIT_ID, "")             headPortraitId,
+            IFNULL(a.ID_CARD_FRONT_ID, "")             idCardFrontId,
+            IFNULL(a.ID_CARD_BACK_ID, "")              idCardBackId,
+            IFNULL(a.QUALIFICATION_CERTIFICATE_ID, "") qualificationCertificateId,
+            cp.id                                      constructionPersonId
+        FROM t_basic_person a
+            inner join t_basic_construction_person cp on cp.person_id = a.id
+			left join t_basic_position_work pw on a.position_work_id = pw.id
+        WHERE a.user_id = #{userId} and cp.construction_id = #{constructionId}
+        order by cp.status, a.status
+    </select>
+    <insert id="insertConstructionPerson" parameterType="com.escst.person.entity.ConstructionPersonEntity">
+        INSERT INTO T_BASIC_CONSTRUCTION_PERSON (ID, PERSON_ID, CONSTRUCTION_ID, JOB_NUMBER, STATUS, PROJECT_COMPANY_ID, TEAM_ID)
+        VALUES (#{id}, #{personId}, #{constructionId}, #{jobNumber}, #{status}, #{projectCompanyId}, #{teamId})
+    </insert>
+
+    <select id="queryPersonByConstructionId" parameterType="map" resultType="com.escst.person.entity.PersonEntity">
+        SELECT
+        IFNULL(TBP.ID, "") personId,
+        IFNULL(tsu.id, "") userId,
+        IFNULL(tsu.name, "") name,
+        IFNULL(TBP.mobile, "") mobile,
+        tbcp.project_company_id projectCompanyId,
+        pc.name projectCompanyName,
+        tbcp.team_id teamId,
+        t.name teamName,
+        tsu.create_time
+        FROM
+        t_sys_user tsu
+        LEFT JOIN t_sys_organization o ON tsu.org_id = o.id
+        LEFT JOIN t_basic_construction c ON c.id = o.construction_id
+        LEFT JOIN T_BASIC_PERSON tbp ON tsu.id = tbp.user_id
+        LEFT JOIN T_BASIC_CONSTRUCTION_PERSON tbcp ON TBCP.PERSON_ID = TBP.ID
+        LEFT JOIN T_BASIC_PROJECT_COMPANY pc ON pc.id = tbcp.project_company_id
+        LEFT JOIN t_basic_team t ON t.id = tbcp.team_id
+        <where>
+            tsu.`status`=1 and o.CONSTRUCTION_ID = #{constructionId}
+            <if test="name !='' and name !=null ">
+                AND (TBP.NAME LIKE CONCAT("%",#{name},"%")
+                OR TBP.CODE LIKE CONCAT("%",#{name},"%"))
+            </if>
+            <if test="projectCompanyName !='' and projectCompanyName !=null ">
+                AND pc.NAME LIKE CONCAT("%",#{projectCompanyName},"%")
+            </if>
+            <if test="companyTypes !='' and companyTypes !=null ">
+                and FIND_IN_SET(pc.type, #{companyTypes})
+            </if>
+        </where>
+
+        ORDER BY create_time desc
+    </select>
+    <update id="disabledConstructionPersonStatus" parameterType="map">
+		<![CDATA[
+        update t_basic_construction_person cp
+        set cp.status = 0
+        where cp.construction_id <> #{constructionId}
+              and exists(
+                      select 1
+                      from t_basic_person p
+                      where p.id = cp.person_id and p.user_id = #{userId}
+              )
+              and cp.status = 1
+        ]]>
+    </update>
+    <update id="disabledPersonStatus" parameterType="map">
+		<![CDATA[
+        update t_basic_person p
+        set p.`status` = 0, update_time = SYSDATE()
+        where p.`status` = 1 and p.user_id = #{userId}
+              and exists(
+                      select 1
+                      from t_basic_construction_person cp
+                      where cp.person_id = p.id and cp.construction_id <> #{constructionId} and cp.status = 1
+              )
+        ]]>
+    </update>
+    <select id="getTotalAttendanceNum" parameterType="map" resultType="int">
+        select count(DISTINCT r.person_id) num
+        from t_basic_attendance_clock_record r
+        <if test="type != 0 and type !=''">
+            LEFT JOIN t_basic_construction_person tbcp ON tbcp.person_id = r.person_id
+        </if>
+        <where>
+            <if test="constructionId !=null and constructionId !=''">
+                r.construction_id = #{constructionId}
+            </if>
+            <if test="companyId !=null and companyId !=''">
+                r.project_company_id =#{companyId}
+            </if>
+            <if test="teamId !=null and teamId !=''">
+                tbcp.team_id =#{teamId}
+            </if>
+            <![CDATA[
+              and r.clock_time > #{startDate}
+              and r.clock_time < #{endDate}
+            ]]>
+        </where>
+    </select>
+    <select id="getLocalePersonNum" parameterType="map" resultType="int">
+        select count(DISTINCT r.person_id) num
+        from t_basic_attendance_clock_record r
+        <if test="type != 0 and type !=''">
+            LEFT JOIN t_basic_construction_person tbcp ON tbcp.person_id = r.person_id
+        </if>
+        <where>
+            <if test="constructionId !=null and constructionId !=''">
+                r.construction_id = #{constructionId}
+            </if>
+            <if test="companyId !=null and companyId !=''">
+                r.project_company_id =#{companyId}
+            </if>
+            <if test="teamId !=null and teamId !=''">
+                tbcp.team_id =#{teamId}
+            </if>
+            <![CDATA[
+              and r.clock_time > #{startDate}
+              and r.clock_time < #{endDate}
+              ]]>
+            and r.type = 1
+            and exists(
+                      select 1
+                      from (
+                               select
+                                   t.person_id,
+                                   max(t.clock_time) clock_time
+                               from t_basic_attendance_clock_record t
+                              <if test="type != 0 and type !=''">
+                                LEFT JOIN t_basic_construction_person tbcp ON tbcp.person_id = t.person_id
+                              </if>
+                               <where>
+                                   <if test="constructionId !=null and constructionId !=''">
+                                       t.construction_id = #{constructionId}
+                                   </if>
+                                   <if test="companyId !=null and companyId !=''">
+                                       t.project_company_id =#{companyId}
+                                   </if>
+                                   <if test="teamId !=null and teamId !=''">
+                                       tbcp.team_id =#{teamId}
+                                   </if>
+                                   <![CDATA[
+                                     and t.clock_time > #{startDate}
+                                     and t.clock_time < #{endDate}
+                                     ]]>
+                               </where>
+
+                               group by person_id
+                           ) a
+                      where a.person_id = r.person_id and a.clock_time = r.clock_time
+              )
+        </where>
+    </select>
+
+    <select id="selectById" parameterType="String" resultType="com.escst.person.entity.PersonEntity">
+        SELECT
+            t.id,
+            t.name,
+            t.sex,
+            t.id_card      AS idCard,
+            t.mobile,
+            cp.card_number AS cardNumber
+        FROM
+            t_basic_person t
+            LEFT JOIN t_basic_construction_person cp ON t.id = cp.person_id
+        WHERE
+            t.id = #{id}
+    </select>
+
+    <select id="getUserList" resultType="com.escst.person.entity.UserEntity">
+        SELECT
+            name,
+            sex,
+            card_no                as cardNo,
+            job_no                 as jobNo,
+            id_card_no             as idCardNo,
+            mobile,
+            company_name           as companyName,
+            position_worktype_name as positionWorkTypeName,
+            team_name              as teamName,
+            status
+        FROM t_user
+    </select>
+
+    <insert id="insertPerosn" parameterType="com.escst.person.entity.PersonEntity">
+
+        INSERT INTO t_basic_person (id, name, status, id_card, mobile, position_work_id, create_time)
+        VALUES (#{id}, #{name}, #{status}, #{idCardNo}, #{mobile}, #{positionWorkId}, #{createTime})
+
+    </insert>
+
+
+    <update id="updateBatchConstructionClientUserId" parameterType="com.escst.excelimport.vo.UpdatePersonVo">
+        UPDATE t_basic_construction_person
+        SET client_user_id=
+        <foreach collection="list" item="item" index="index"
+                     separator=" " open="case person_id" close="end">
+            when #{item.id} then #{item.clientUserId}
+        </foreach>
+        where  person_id in
+        <foreach collection="list" index="index" item="item"
+                 separator="," open="(" close=")">
+            #{item.id}
+        </foreach>
+    </update>
+
+    <select id="selectSyncUrlByConstructionId" parameterType="String" resultType="String">
+        SELECT sync_url as url
+        FROM t_basic_construction_syncurl
+        WHERE construction_id = #{constructionId}
+    </select>
+
+    <select id="listTeam" parameterType="string" resultType="com.escst.person.entity.PersonEntity">
+        select
+            id   as teamId,
+            name as teamName
+        from t_basic_team
+        where project_company_id = #{projectCompanyId}
+    </select>
+
+    <select id="getProjectCompanyId" parameterType="com.escst.person.entity.PersonEntity" resultType="string">
+        select id as id
+        from t_basic_project_company
+        where construction_id = #{constructionId} and name = #{projectCompanyName}
+    </select>
+    
+    <select id="getTeamId" parameterType="com.escst.person.entity.PersonEntity" resultType="string">
+        select id as id
+        from t_basic_team
+        where construction_id = #{constructionId} and project_company_id = #{projectCompanyId} and name = #{teamName}
+    </select>
+
+    <select id="getPositionWorkTypeId" parameterType="com.escst.person.entity.PersonEntity" resultType="string">
+        select id as id
+        from t_basic_position_work
+        where construction_id = #{constructionId} and name = #{positionWorkTypeName}
+    </select>
+
+
+    <insert id="batchInsertPerson" parameterType="map">
+        INSERT INTO T_BASIC_PERSON (ID, NAME, SEX, WORK_AGE, HEAD_PORTRAIT_ID, ID_CARD, QUALIFICATION_CERTIFICATE_ID,
+        project_company_id, ID_CARD_FRONT_ID
+        , ID_CARD_BACK_ID, MOBILE, ICE_CONTACT_NAME, ICE_CONTACT_MOBILE, BLOOD_TYPE, STATUS, USER_ID
+        , CREATE_TIME, CREATE_BY, CODE, position_work_id, bank_card)
+        VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (#{item.id}, #{item.name}, #{item.sex}, #{item.workAge}, #{item.headPortraitId}, #{item.idCard}, #{item.qualificationCertificateId},
+            #{item.projectCompanyId}, #{item.idCardFrontId}
+            , #{item.idCardBackId}, #{item.mobile}, #{item.iceContactName}, #{item.iceContactMobile}, #{item.bloodType}, #{item.status}, #{item.userId}
+            , #{item.createTime}, #{item.createBy}, #{item.code}, #{item.positionWorkId}, #{item.bankCard})
+        </foreach>
+    </insert>
+
+
+    <insert id="batchInsertPersonConstruction" parameterType="com.escst.person.entity.PersonEntity">
+        INSERT INTO
+        T_BASIC_CONSTRUCTION_PERSON(ID,PERSON_ID,CONSTRUCTION_ID,JOB_NUMBER,PROJECT_COMPANY_ID,TEAM_ID,STATUS,card_number,bank_card)
+        VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (#{item.id},#{item.personId},#{item.constructionId},#{item.jobNumber},#{item.projectCompanyId},#{item.teamId},#{item.status},#{item.cardNumber},#{item.bankCard})
+        </foreach>
+    </insert>
+    
+    <select id="selectPersonId" parameterType="com.escst.person.entity.PersonEntity" resultType="String">
+        select p.id as id
+        from T_BASIC_PERSON p
+        inner join T_BASIC_CONSTRUCTION_PERSON cp
+        where cp.person_id = p.id and cp.construction_id = #{constructionId} and p.name = #{name} and cp.PROJECT_COMPANY_ID = #{projectCompanyId}
+    </select>
+    
+    <update id="batchUpdateHeadId" parameterType="map">
+            insert into T_BASIC_PERSON(id,head_portrait_id) values 
+            <foreach collection="list" item="item" index="" separator=",">
+            	(#{item.personId},#{item.headFileId})
+            </foreach>
+            on duplicate key update head_portrait_id = values(head_portrait_id)
+    	
+    </update>
+
+
+
+    <select id="selectByConstructionId" parameterType="map" resultType="com.escst.attendance.vo.AttendanceClockRecordVo">
+        SELECT tbp.id as personId,tbc.name as constructionName,tst.name as areaName,tbpc.name as companyName,
+        tbt.name as teamName,tbcp.card_number as cardNum,tbp.name as personName,pw.name as positionWorktype
+        FROM T_BASIC_PERSON tbp
+        LEFT JOIN T_BASIC_CONSTRUCTION_PERSON tbcp ON tbp.id = tbcp.person_id
+        LEFT JOIN t_basic_construction tbc ON tbc.id = tbcp.construction_id
+        LEFT JOIN t_basic_project_company tbpc ON tbpc.id = tbcp.project_company_id
+        LEFT JOIN t_sys_territory tst ON tst.id=tbc.belong_area
+        LEFT JOIN t_basic_team tbt ON tbt.id = tbcp.team_id
+		left join t_basic_position_work pw on tbp.position_work_id = pw.id
+        <where>
+            <if test="constructionId !=null and constructionId !=''">
+                tbcp.construction_id = #{constructionId}
+            </if>
+            <if test="companyId !=null and companyId !=''">
+             AND   tbcp.project_company_id = #{companyId}
+            </if>
+            <if test="personName !=null and personName !=''">
+               AND tbp.name like '%${personName}%'
+            </if>
+            and exists (
+            select 1
+            from t_sys_user u
+            inner join t_sys_organization p on p.id = u.org_id
+            inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+            where s.construction_id = tbcp.construction_id and u.id = #{userId} and s.status = 1
+            )
+        </where>
+        AND  tbp.status=1 AND tbcp.status=1
+    </select>
+
+	<select id="selectByCardNo" parameterType="map" resultType="int">
+		select count(1) from t_basic_construction_person t where t.construction_id=#{constructionId} and t.card_number=#{cardNumber} and t.status=1
+	</select>
+
+	<select id="getConstructionInfoAll"  resultType="map">
+		SELECT
+			p.id as id,
+			cp.construction_id constructionId,
+			c.name as constructionName,
+			d.description description,
+			d.name name,
+			p.position_worktype as positionWorktype
+		FROM
+			t_basic_person p
+			LEFT JOIN t_basic_construction_person cp ON p.id = cp.person_id
+			LEFT JOIN t_basic_construction c on cp.construction_id=c.id
+			left join t_sys_dictionary d on p.position_worktype=d.`value`
+		where d.type = 'positionWorkType'
+		group by cp.construction_id,p.position_worktype
+	</select>
+	
+	<update id="updatePositionWorkId" parameterType="map">
+		UPDATE t_basic_person t
+				INNER JOIN t_basic_construction_person P ON T.ID = P.person_id
+		SET t.position_work_id = #{positionWorkId}
+		WHERE
+			P.construction_id = #{constructionId}
+		AND T.position_worktype = #{positionWorkType}
+	</update>
+</mapper>

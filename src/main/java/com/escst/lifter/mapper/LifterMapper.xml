@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.lifter.mapper.LifterMapper">
+    <select id="queryRealtimeList" parameterType="com.escst.equipment.vo.AcquisitionDataQueryVO"
+            resultType="com.escst.lifter.vo.LifterRealtimeVO">
+        SELECT DATE_FORMAT(acquisition_time,'%Y-%m-%d %H:%i:%s') time,height,weight,obliquity,peopleNum,speed,floor_no
+        floorNo
+        ,driver_name driverName,driver_no driverNo,front_door_lock_state frontDoorLockState,back_door_lock_state
+        backDoorLockState
+        ,high_limit_state highLimitState,low_limit_state lowLimitState
+        FROM t_basic_lift_realtime a
+        <where>
+            <if test="constructionId != null and constructionId != '' ">
+                and a.construction_id = #{constructionId}
+            </if>
+            <if test="equipmentId != null and equipmentId != ''">
+                AND a.equipment_id = #{equipmentId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                <![CDATA[
+				AND a.acquisition_time > str_to_date(#{startDate}, '%Y-%m-%d')
+				]]>
+            </if>
+            <if test="endDate != null and endDate != ''">
+                <![CDATA[
+				AND a.acquisition_time < date_add(str_to_date(#{endDate}, '%Y-%m-%d'), interval 1 day)
+				]]>
+            </if>
+        </where>
+        order by acquisition_time desc
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+    <select id="getRealtimeCount" parameterType="com.escst.equipment.vo.AcquisitionDataQueryVO" resultType="int">
+        SELECT count(1) count
+        FROM t_basic_lift_realtime a
+        <where>
+            <if test="constructionId != null and constructionId != '' ">
+                a.construction_id = #{constructionId}
+            </if>
+            <if test="equipmentId != null and equipmentId != ''">
+                AND a.equipment_id = #{equipmentId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                <![CDATA[
+				AND a.acquisition_time > str_to_date(#{startDate}, '%Y-%m-%d')
+				]]>
+            </if>
+            <if test="endDate != null and endDate != ''">
+                <![CDATA[
+				AND a.acquisition_time < date_add(str_to_date(#{endDate}, '%Y-%m-%d'), interval 1 day)
+				]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectTimeDiffByIds" resultType="int" parameterType="map">
+        SELECT count(1)
+        FROM
+            t_basic_lift_realtime t
+        WHERE
+            t.construction_id = #{constructionId} and t.equipment_id = #{equipmentId} and t.create_time > #{createTime}
+    </select>
+
+    <select id="getLifterRealTimeData" parameterType="com.escst.equipment.vo.QueryVO"
+            resultType="com.escst.lifter.vo.LifterRealtimeVO">
+        SELECT
+            id,
+            DATE_FORMAT(acquisition_time, '%Y-%m-%d %H:%i:%s') time,
+            height,
+            weight,
+            obliquity,
+            peopleNum,
+            speed,
+            floor_no                                           floorNo,
+            driver_name                                        driverName,
+            driver_no                                          driverNo,
+            front_door_lock_state                              frontDoorLockState,
+            back_door_lock_state                               backDoorLockState,
+            high_limit_state                                   highLimitState,
+            low_limit_state                                    lowLimitState
+        FROM t_basic_lift_realtime
+        where
+            equipment_id = #{equipmentId}
+        order by acquisition_time desc
+        LIMIT 0, 1
+    </select>
+
+    <select id="getLifterWarningData" parameterType="string" resultType="com.escst.lifter.vo.LifterRealtimeVO">
+        select
+            height,
+            weight,
+            obliquity,
+            peopleNum,
+            type
+        from t_basic_lift_alarm
+        where id = #{id}
+    </select>
+
+    <select id="countLifterHistoryData" parameterType="com.escst.towerCrane.vo.QueryConditionVo" resultType="int">
+        select count(*)
+        <include refid="lifterHistoryData"></include>
+    </select>
+
+    <select id="listLifterHistoryData" parameterType="com.escst.towerCrane.vo.QueryConditionVo"
+            resultType="com.escst.lifter.vo.LifterRealtimeVO">
+        SELECT
+        id,
+        DATE_FORMAT(acquisition_time, '%Y-%m-%d %H:%i:%s') time,
+        height,
+        weight,
+        obliquity,
+        peopleNum,
+        speed,
+        floor_no floorNo,
+        driver_name driverName,
+        driver_no driverNo,
+        front_door_lock_state frontDoorLockState,
+        back_door_lock_state backDoorLockState,
+        high_limit_state highLimitState,
+        low_limit_state lowLimitState
+        <include refid="lifterHistoryData"></include>
+        order by acquisition_time desc
+        limit #{page},#{rowNum}
+    </select>
+
+    <sql id="lifterHistoryData">
+        from t_basic_lift_history where equipment_id = #{equipmentId}
+        <if test="startTime != null and startTime != ''">
+            <![CDATA[ AND acquisition_time >= #{startTime} ]]>
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ AND acquisition_time <= #{endTime} ]]>
+        </if>
+    </sql>
+
+</mapper>

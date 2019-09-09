@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.material.mapper.MaterialMapper">
+
+	<insert id="batchInsert" parameterType="com.escst.material.entity.MaterialEntity">
+        INSERT INTO t_basic_material(
+			`id`,
+			`name`,
+			`code`,
+			`model`,
+			`unit`,
+			`create_time`,
+			`create_by`,
+			`update_time`,
+			`update_by`
+		)
+		VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (
+                #{item.id},
+				#{item.name},
+				#{item.code},
+				#{item.model},
+				#{item.unit},
+				#{item.createTime},
+				#{item.createBy},
+				#{item.updateTime},
+				#{item.updateBy}
+            )
+        </foreach>
+    </insert>
+    
+    <insert id="batchInsertModel" parameterType="com.escst.material.entity.MaterialModelEntity">
+        INSERT INTO t_basic_material_model(
+			`id`,
+			`material_id`,
+			`name`,
+			`create_time`,
+			`create_by`,
+			`update_time`,
+			`update_by`
+		)
+		VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (
+                #{item.id},
+				#{item.materialId},
+				#{item.name},
+				#{item.createTime},
+				#{item.createBy},
+				#{item.updateTime},
+				#{item.updateBy}
+            )
+        </foreach>
+    </insert>
+    
+    <select id="selectAll" resultType="com.escst.material.entity.MaterialEntity">
+    	SELECT
+			t.id AS id,
+			t.name AS name,
+			t.code AS code,
+			t.unit AS unit
+		FROM
+			t_basic_material t
+    </select>
+
+    <select id="selectMaterial" resultType="map" parameterType="com.escst.material.entity.MaterialEntity">
+    	SELECT
+			mm.id AS id,
+			t.name AS name,
+			t.code AS code,
+			t.unit AS unit,
+			mm.`name` as modelName,
+			DATE_FORMAT(t.create_time,'%Y-%m-%d') createTime
+		FROM
+			t_basic_material t
+		LEFT JOIN t_basic_material_model mm on t.id=mm.material_id
+		<include refid="materialSql"></include>
+		order by t.create_time desc,t.name asc
+		LIMIT #{startIndex},#{rowNum}
+    </select>    
+    
+    <select id="selectMaterialCount" resultType="int" parameterType="com.escst.material.entity.MaterialEntity">
+    	SELECT
+		 	count(1)
+		FROM
+			t_basic_material t
+		LEFT JOIN t_basic_material_model mm on t.id=mm.material_id
+		<include refid="materialSql"></include>
+    </select>    
+    
+    <sql id="materialSql">
+    	<where>
+			<if test="name!=null and name!=''">
+				t.name like '%${name}%'
+			</if>
+			<if test="model!=null and model!=''">
+				t.model like '%${model}%'
+			</if>	
+		</where>
+    </sql>
+    
+    <insert id="insert" parameterType="com.escst.material.entity.MaterialEntity">
+		INSERT INTO t_basic_material(
+			`id`,
+			`name`,
+			`code`,
+			`unit`,
+			`create_time`,
+			`create_by`,
+			`update_time`,
+			`update_by`
+		)
+		VALUES
+			(
+				#{id},
+				#{name},
+				#{code},
+				#{unit},
+				#{createTime},
+				#{createBy},
+				#{updateTime},
+				#{updateBy}
+			)
+	</insert>
+    
+     <select id="selectByMap" resultType="String" parameterType="map">
+    	SELECT
+		 	t.id as id
+		FROM
+			t_basic_material t
+		INNER JOIN t_basic_material_model mm on t.id=mm.material_id
+		<where>
+			1=1
+			<if test="name!=null and name!=''">
+				and t.name = #{name}	
+			</if>
+			<if test="unit!=null and unit!=''">
+				and t.unit = #{unit}	
+			</if>
+			<if test="modelName!=null and modelName!=''">
+				and mm.name=#{modelName}				
+			</if>
+		</where>	
+    </select>   
+    
+    <select id="selectByCondition" resultType="com.escst.material.entity.MaterialEntity" parameterType="map">
+    	SELECT
+		 	*
+		FROM
+			t_basic_material t
+		<where>
+			1=1
+			<if test="name!=null and name!=''">
+				and t.name = #{name}
+			</if>
+			<if test="unit!=null and unit!=''">
+				and t.unit=#{unit}			
+			</if>
+		</where>
+    </select> 
+    
+     <insert id="insertMaterialModel" parameterType="com.escst.material.entity.MaterialModelEntity">
+		INSERT INTO t_basic_material_model (
+			`id`,
+			`material_id`,
+			`name`,
+			`create_time`,
+			`create_by`,
+			`update_time`,
+			`update_by`
+		)
+		VALUES
+			(
+				#{id},
+				#{materialId},
+				#{name},
+				#{createTime},
+				#{createBy},
+				#{updateTime},
+				#{updateBy}
+			)
+	</insert>
+	<select id="queryBaseMaterialList" resultType="map" parameterType="com.escst.material.entity.MaterialEntity">
+    	SELECT
+			t.id AS materialId,
+			t.name AS materialName,
+			t.unit AS unit,
+			mm.id modelId,
+			mm.`name` as modelName
+		FROM t_basic_material t
+		INNER JOIN t_basic_material_model mm on t.id=mm.material_id
+		<include refid="materialSql"></include>
+		order by t.code
+		LIMIT #{startIndex},#{rowNum}
+    </select>
+    <select id="queryBaseMaterialCount" resultType="int" parameterType="com.escst.material.entity.MaterialEntity">
+    	SELECT
+		 	count(1)
+		FROM t_basic_material t
+		INNER JOIN t_basic_material_model mm on t.id=mm.material_id
+		<include refid="materialSql"></include>
+    </select>
+    
+    <select id="selectModeById" parameterType="String" resultType="com.escst.material.entity.MaterialModelEntity">
+    	select id,material_id as materialId,name from t_basic_material_model where id=#{id}
+    </select>
+</mapper>

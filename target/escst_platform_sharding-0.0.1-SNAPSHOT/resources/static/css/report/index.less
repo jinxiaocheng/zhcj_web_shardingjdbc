@@ -1,0 +1,57 @@
+.charts_children(){
+  width:100% ;
+  height:100%;
+  border: 1px solid #DFDFDF;
+  box-shadow: 0 0 10px #dfdfdf;
+}
+
+body{
+  height: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 10px;
+  padding-top: 60px;
+}
+
+header{
+  position: absolute;
+  top: 0;
+  left:0;
+  width:100% ;
+  padding:0 20px;
+  &>div{
+    .charts_children();
+    border-radius: 0 0 5px 5px;
+    box-sizing: border-box;
+    padding-top: 10px;
+    height: 60px;
+  }
+}
+section{
+  width: 100%;
+  height: 100%;
+}
+
+.charts{
+  width: 50%;
+  height: 50%;
+  padding: 10px;
+  box-sizing: border-box;
+  float: left;
+}
+
+#workTypeChart{
+  .charts_children()
+}
+
+#qualityInspectionChart{
+  .charts_children()
+}
+
+#safetyInspectionChart{
+  .charts_children()
+}
+
+#areaConstructionChart{
+  .charts_children()
+}

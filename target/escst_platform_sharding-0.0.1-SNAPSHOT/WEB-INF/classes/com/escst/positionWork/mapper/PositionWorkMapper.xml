@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.positionWork.mapper.PositionWorkMapper">
+	<insert id="insert" parameterType="com.escst.positionWork.entity.PositionWorkEntity">
+	 INSERT INTO t_basic_position_work(
+        `id`,
+        `construction_id`,
+        `construction_name`,
+        `name`,
+        `type`,
+        `create_time`,
+        `create_by`,
+        `update_time`,
+        `update_by`
+        )
+        VALUES
+         (
+            #{id},
+            #{constructionId},
+            #{constructionName},
+            #{name},
+            #{type},
+            #{createTime},
+            #{createBy},
+            #{updateTime},
+            #{updateBy}
+            )
+	</insert>
+	
+	<insert id="batchInsert" parameterType="com.escst.positionWork.entity.PositionWorkEntity">
+        INSERT INTO t_basic_position_work(
+        `id`,
+        `construction_id`,
+        `construction_name`,
+        `name`,
+        `type`,
+        `create_time`,
+        `create_by`,
+        `update_time`,
+        `update_by`
+        )
+        VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (
+            #{item.id},
+            #{item.constructionId},
+            #{item.constructionName},
+            #{item.name},
+            #{item.type},
+            #{item.createTime},
+            #{item.createBy},
+            #{item.updateTime},
+            #{item.updateBy}
+            )
+        </foreach>
+    </insert>
+
+	<select id="selectCount" parameterType="com.escst.positionWork.entity.PositionWorkEntity" resultType="int">
+		select count(1) from t_basic_position_work t
+		LEFT JOIN t_basic_construction b ON t.construction_id = b.id
+		LEFT JOIN t_sys_territory c ON b.belong_area = c.id
+		<include refid="conditionWhere"></include>
+	</select>
+	
+	<select id="selectMapList" parameterType="com.escst.positionWork.entity.PositionWorkEntity" resultType="map">
+		select 
+			t.id AS id,
+			t.construction_id AS constructionId,
+			t.construction_name AS constructionName,
+			t.name as name,
+			t.type AS type,
+			t.create_time AS createTime,
+			c.`name` areaName,
+			c.id as areaId
+		from t_basic_position_work t
+		LEFT JOIN t_basic_construction b ON t.construction_id = b.id
+		LEFT JOIN t_sys_territory c ON b.belong_area = c.id
+		<include refid="conditionWhere"></include>
+		order by t.create_time desc,t.type
+		LIMIT #{startIndex},#{rowNum}
+	</select>
+	
+	<sql id="conditionWhere">
+		<where>
+			exists (
+					select 1
+						from t_sys_user u
+						inner join t_sys_organization p on p.id = u.org_id
+						inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+						where s.construction_id = b.id and u.id = #{userId}
+					)
+			<if test="name!=null and name!=''">
+				and t.name like '%${name}%'
+			</if>
+			<if test="type!=null and type!=''">
+				and t.type like '%${type}%'
+			</if>
+			<if test="constructionId!=null and constructionId!=''">
+				and t.construction_id = #{constructionId} 
+			</if>
+		</where>
+	</sql>
+	
+	<update id="update" parameterType="com.escst.positionWork.entity.PositionWorkEntity">
+		update t_basic_position_work 
+		<set>
+			<if test="name!=null and name!=''">
+				name=#{name},
+			</if>
+			<if test="type !=null and type!=''">
+				type=#{type},
+			</if>
+				update_time=#{updateTime}
+		</set>
+		   where id=#{id}
+	</update>
+	
+	<select id="selectByConstructionId" parameterType="com.escst.positionWork.vo.PositionWorkVo" resultType="com.escst.positionWork.entity.PositionWorkEntity">
+		select t.id as id,t.`name`,t.type,t.construction_id as constructionId from t_basic_position_work t 
+		<where>
+			<if test="constructionId!=null and constructionId!=''">
+				and t.construction_id=#{constructionId}
+			</if>
+			<if test="name!=null and name!=''">
+				and t.name like '%${name}%'
+			</if>
+			<if test="type!=null and type!=''">
+				and t.type=#{type}
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectByName" parameterType="map" resultType="int">
+		select count(1) from t_basic_position_work where name=#{name} and construction_id=#{constructionId}
+	</select>
+	
+</mapper>

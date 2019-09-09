@@ -1,0 +1,222 @@
+@lineColor:#f5f5f5;
+@box-shadow:0 0 20px #ececec;
+.charts_children(){
+  width:100% ;
+  height:100%;
+  border: 1px solid #DFDFDF;
+  box-shadow: 0 0 10px #dfdfdf;
+}
+.biyue-red{
+  color: #FF5722;
+}
+.warmImg{
+  position: absolute;
+  right: 5px;
+  top: 15px;
+  width: 20px;
+  height: 20px;
+  background: url("../../images/lift/warm.png") no-repeat center;
+  background-size: contain;
+}
+.biyue_search{
+  position: fixed;
+  top: 0;
+  left:0;
+  width:100% ;
+  .charts_children();
+  box-sizing: border-box;
+  padding-top: 10px;
+  height: 60px;
+  border: none;
+  z-index: 10000;
+  background: #fff;
+}
+
+h1.siteTitle{
+  font-size: 20px;
+  font-weight: bold;
+  border-left: 3px solid #ff9966;
+  margin-left: 10px;
+  padding-left: 10px;
+  line-height: 24px;
+  letter-spacing: 2px;
+}
+
+.bodyBox{
+  position: absolute;
+  top:0;left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10px;
+  box-sizing: border-box;
+  overflow: auto;
+  padding-top: 70px;
+  .sectionBox{
+    width: 50%;
+    height: 620px;
+    padding: 10px;
+    box-sizing: border-box;
+    display: inline-block;
+   // min-width: 802px;
+    .towerBox{
+      width: 100%;
+      height: 100%;
+      border: 1px solid @lineColor;
+      box-shadow:@box-shadow;
+      border-radius: 6px;
+      background: #fff;
+      overflow: hidden;
+      position: relative;
+      box-sizing: border-box;
+      .tower canvas{
+        margin-top: 130px;margin-left: 20px;
+        -webkit-transform-origin: 0 0;
+        -moz-transform-origin: 0 0;
+        -ms-transform-origin: 0 0;
+        -o-transform-origin: 0 0;
+        transform-origin: 0 0;
+        -webkit-transform: scale(0.7);
+        -moz-transform: scale(0.7);
+        -ms-transform: scale(0.7);
+        -o-transform: scale(0.7);
+        transform: scale(0.7);
+      }
+      .titleBox{
+        position: relative;
+        height: 50px;
+        line-height: 50px;
+        font-size: 18px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        margin-top: 0;
+        margin-bottom: 0;
+        &>i{
+          display: block;
+          width: 8px;
+          height: 8px;
+          border-radius:50%;
+          overflow: hidden;
+          background: #3617e3;
+          position: absolute;
+          top:50%;margin-top: -4px;
+          left: 10px;
+        }
+        &>span{
+          margin-left: 30px;
+        }
+      }
+      &>.title{
+        position: absolute;
+        top: 10px; left: 10px;
+        width: 200px;
+        height: 50px;
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow:@box-shadow;
+        box-sizing: border-box;
+      }
+      .towerInfoBox{
+        width: 350px;
+        height: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+        position: absolute;
+        right: 0;
+        top:0;
+        .timeBox{
+          box-shadow: @box-shadow;
+          width: 100%;
+          height: 90px;
+          margin-bottom: 20px;
+          padding: 0 10px;
+          box-sizing: border-box;
+          p{
+            color: #ff9966;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 1px;
+            width: 100%;
+          }
+        }
+        .towerInfo{
+          box-shadow: @box-shadow;
+          width: 100%;
+          height: 470px;
+          padding:0 10px;
+          box-sizing: border-box;
+          .info{
+            width: 100%;
+            border-top: 1px solid @lineColor;
+            padding:10px 40px;
+            box-sizing: border-box;
+            font-size: 14px;
+            letter-spacing: 1px;
+            &>li{
+              height: 40px;
+              line-height: 40px;
+              color: #9d9d9d;
+              border-bottom: 1px solid @lineColor;
+              span{
+                float: right;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+@media screen and (min-width: 1232px) and (max-width: 1623px) {
+  .bodyBox .sectionBox .towerBox .towerInfoBox {
+    width: 300px;
+  }
+  .bodyBox .sectionBox .towerBox .tower canvas {
+    margin-top: 200px;
+    -webkit-transform: scale(0.5);
+    -moz-transform: scale(0.5);
+    -ms-transform: scale(0.5);
+    -o-transform: scale(0.5);
+    transform: scale(0.5);
+  }
+  .bodyBox .sectionBox .towerBox .towerInfoBox .towerInfo .info {
+    padding: 10px 20px;
+  }
+}
+@media screen and (min-width: 1000px) and (max-width: 1232px) {
+  .bodyBox .sectionBox {
+    width: 100%;
+  }
+  .bodyBox .sectionBox .towerBox .tower canvas {
+    margin-top: 80px;
+    -webkit-transform: scale(1);
+    -moz-transform: scale(1);
+    -ms-transform: scale(1);
+    -o-transform: scale(1);
+    transform: scale(1);
+  }
+}
+@media screen and (min-width: 825px) and (max-width: 1000px) {
+  .bodyBox .sectionBox {
+    width: 100%;
+  }
+}
+@media screen and (max-width: 825px) {
+  .bodyBox .sectionBox {
+    width: 100%;
+  }
+  .bodyBox .sectionBox .towerBox .towerInfoBox {
+    width: 300px;
+  }
+  .bodyBox .sectionBox .towerBox .tower canvas {
+    margin-top: 200px;
+    -webkit-transform: scale(0.5);
+    -moz-transform: scale(0.5);
+    -ms-transform: scale(0.5);
+    -o-transform: scale(0.5);
+    transform: scale(0.5);
+  }
+  .bodyBox .sectionBox .towerBox .towerInfoBox .towerInfo .info {
+    padding: 10px 20px;
+  }
+}

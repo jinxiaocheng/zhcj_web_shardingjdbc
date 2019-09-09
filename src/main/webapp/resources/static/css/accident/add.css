@@ -1,0 +1,134 @@
+.personName {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  position: relative;
+  padding: 0 5px;
+}
+.personName * {
+  letter-spacing: 2px;
+}
+.personName > label {
+  width: 10%;
+}
+.personName > div {
+  background-color: #fff;
+  width: 90%;
+  box-sizing: border-box;
+  padding: 10px 0;
+}
+.personName > div .alert {
+  display: inline-block;
+  padding: 5px 10px;
+  position: relative;
+  cursor: pointer;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.personName > div .alert label {
+  margin-right: 5px;
+}
+.personName > div .alert input {
+  border: 1px solid #c09853;
+  background: transparent;
+  display: inline;
+  color: #c09853;
+  width: 100px;
+}
+.personName > div .close {
+  position: absolute;
+  top: -11px;
+  right: -5px;
+  color: red;
+}
+.check_result,
+.biyue-skewing,
+.check_item {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  position: relative;
+  padding: 0 5px;
+}
+.check_result *,
+.biyue-skewing *,
+.check_item * {
+  letter-spacing: 2px;
+}
+.check_result > label,
+.biyue-skewing > label,
+.check_item > label {
+  width: 10%;
+}
+.check_result > div,
+.biyue-skewing > div,
+.check_item > div {
+  background-color: #fff;
+  width: 90%;
+  box-sizing: border-box;
+  padding: 10px 0;
+}
+.check_result > div .alert,
+.biyue-skewing > div .alert,
+.check_item > div .alert {
+  display: inline-block;
+  padding: 5px 10px;
+  position: relative;
+  cursor: pointer;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.check_result > div .alert label,
+.biyue-skewing > div .alert label,
+.check_item > div .alert label {
+  margin-right: 5px;
+}
+.check_result > div .alert input,
+.biyue-skewing > div .alert input,
+.check_item > div .alert input {
+  border: 1px solid #c09853;
+  background: transparent;
+  display: inline;
+  color: #c09853;
+  width: 100px;
+}
+.check_result > div .close,
+.biyue-skewing > div .close,
+.check_item > div .close {
+  position: absolute;
+  top: -11px;
+  right: -5px;
+  color: red;
+}
+.result ul li {
+  width: 80px;
+  border-radius: 6px;
+  height: 30px;
+  line-height: 30px;
+  border: 1px solid #ccc;
+}
+#check_result_tree {
+  padding: 10px;
+  padding-bottom: 40px;
+  box-sizing: border-box;
+  min-width: 220px;
+  min-height: 120px;
+  max-height: 320px;
+  overflow: auto;
+  display: none;
+}
+#check_result_tree #check_result_submit {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+.skewing button {
+  position: relative;
+  left: -4px;
+}
+.skewing > ul {
+  left: 16.66666% !important;
+  width: 83.3333%;
+}

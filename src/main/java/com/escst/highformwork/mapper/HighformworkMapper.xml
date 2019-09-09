@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.highformwork.mapper.HighformworkMapper">
+
+    <select id="selectCollectorAll" parameterType="map" resultType="com.escst.highformwork.vo.CollectorVo">
+        SELECT IFNULL(a.id,"") id,
+        IFNULL(a.name,"") name,
+        IFNULL(a.number,"") number,
+        IFNULL(a.status,"") status
+        FROM t_highformwork_equipment a
+        <where>
+            <if test="constructionId !=null and constructionId !=''">
+                a.construction_id =#{constructionId}
+            </if>
+            <if test="name !=null and name !=''">
+                AND a.name LIKE CONCAT("%",#{name},"%") OR number LIKE CONCAT("%",#{name},"%")
+            </if>
+            <if test="userId !=null and userId !=''">
+                AND exists(
+                select 1
+                from t_sys_user u
+                inner join t_sys_organization p on p.id = u.org_id
+                inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                where s.construction_id = a.construction_id and u.id = #{userId} and s.status =1
+                )
+            </if>
+        </where>
+        ORDER BY a.number DESC
+        LIMIT #{offset},#{rows}
+    </select>
+
+    <select id="collectorCount" parameterType="map" resultType="Integer">
+        SELECT count(a.id) as count
+        FROM t_highformwork_equipment a
+        <where>
+            <if test="constructionId !=null and constructionId !=''">
+                a.construction_id =#{constructionId}
+            </if>
+            <if test="name !=null and name !=''">
+                AND a.name LIKE CONCAT("%",#{name},"%") OR number LIKE CONCAT("%",#{name},"%")
+            </if>
+            <if test="userId !=null and userId !=''">
+                AND exists(
+                select 1
+                from t_sys_user u
+                inner join t_sys_organization p on p.id = u.org_id
+                inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                where s.construction_id = a.construction_id and u.id = #{userId} and s.status =1
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="selectVaildCollectorByConstructionId" parameterType="String"
+            resultType="com.escst.highformwork.vo.CollectorVo">
+        SELECT
+            id,
+            name,
+            number,
+            status
+        FROM t_highformwork_equipment
+        WHERE construction_id = #{constructionId} AND status = 1
+    </select>
+
+
+    <insert id="batchInsert" parameterType="com.escst.highformwork.entity.CollectorEntity">
+        INSERT INTO t_highformwork_equipment(id,construction_id,construction_name,name,number,status,create_by,create_time)
+        VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (
+            #{item.id},#{item.constructionId},#{item.constructionName},#{item.name},#{item.number},#{item.status},#{item.createBy},#{item.createTime}
+            )
+        </foreach>
+    </insert>
+
+    <update id="batchUpdate" parameterType="com.escst.highformwork.vo.UpdateVo">
+        update t_highformwork_equipment set status = #{status},update_time = #{updateTime},update_by =#{updateBy}
+        where id in
+        <foreach collection="ids" item="item" index="index" open="("
+                 separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="selectAllByConstructionId" parameterType="map" resultType="com.escst.highformwork.vo.FlowVo">
+        SELECT IFNULL(thf.id,"") id,
+        IFNULL(thf.name,"") name,
+        IFNULL(thf.start_time,"") startTime,
+        IFNULL(thf.end_time,"") endTime,
+        IFNULL(thf.construction_name,"") constructionName
+        FROM t_highformwork_flow thf
+        <where>
+            <if test="constructionId !=null and constructionId != ''">
+                thf.construction_id =#{constructionId}
+            </if>
+            <if test="name !=null and name != ''">
+                AND thf.name like CONCAT("%",#{name},"%")
+            </if>
+            <if test="status !=0 and status != ''">
+                AND thfe.flow_status = #{status}
+            </if>
+            <if test="userId !=null and userId !=''">
+                AND exists(
+                select 1
+                from t_sys_user u
+                inner join t_sys_organization p on p.id = u.org_id
+                inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                where s.construction_id = thf.construction_id and u.id = #{userId} and s.status =1
+                )
+            </if>
+        </where>
+        ORDER BY thf.create_time DESC
+        LIMIT #{offset},#{rows}
+    </select>
+
+    <select id="flowCount" parameterType="map" resultType="Integer">
+        SELECT count(thf.id) as count
+        FROM t_highformwork_flow thf
+        <where>
+            <if test="constructionId !=null and constructionId != ''">
+                thf.construction_id =#{constructionId}
+            </if>
+            <if test="name !=null and name != ''">
+                AND thf.name like CONCAT("%",#{name},"%")
+            </if>
+            <if test="status !=0 and status != ''">
+                AND thfe.flow_status = #{status}
+            </if>
+            <if test="userId !=null and userId !=''">
+                AND exists(
+                select 1
+                from t_sys_user u
+                inner join t_sys_organization p on p.id = u.org_id
+                inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                where s.construction_id = thf.construction_id and u.id = #{userId} and s.status =1
+                )
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertFlow" parameterType="com.escst.highformwork.entity.FlowEntity">
+        INSERT INTO t_highformwork_flow (id, construction_id, construction_name, name, start_time, file_id, create_time)
+        VALUES (#{id}, #{constructionId}, #{constructionName}, #{name}, #{startTime}, #{fileId}, #{createTime})
+    </insert>
+
+    <update id="updateFlow" parameterType="com.escst.highformwork.entity.FlowEntity">
+        UPDATE t_highformwork_flow
+        <set>
+            <if test="startTime !=null and startTime !=''">
+                start_time = #{startTime},
+            </if>
+            <if test="name !=null and name !=''">
+                name = #{name},
+            </if>
+            <if test="endTime !=null and endTime !=''">
+                end_time = #{endTime},
+            </if>
+            <if test="updateTime !=null and updateTime !=''">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        WHERE id =#{id}
+    </update>
+
+    <select id="isFlowId" parameterType="String" resultType="String">
+        SELECT flow_id as flowId
+        FROM t_highformwork_equipment
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectFlowDetail" parameterType="String" resultType="com.escst.highformwork.vo.FlowVo">
+        SELECT
+            IFNULL(thf.id, "")                id,
+            IFNULL(thf.name, "")              name,
+            IFNULL(thf.file_id, "")           fileId,
+            IFNULL(thfe.flow_status, "")      status,
+            IFNULL(thf.construction_id, "")   constructionId,
+            IFNULL(thf.construction_name, "") constructionName,
+            IFNULL(tst.id, "")                areaId,
+            IFNULL(tst.name, "")              areaName
+        FROM t_highformwork_flow thf
+            LEFT JOIN t_highformwork_flow_equipment thfe ON thfe.flow_id = thf.id
+            LEFT JOIN t_basic_construction tbc ON tbc.id = thf.construction_id
+            LEFT JOIN t_sys_territory tst ON tst.id = tbc.belong_area
+        WHERE thf.id = #{id}
+        GROUP BY thfe.flow_id
+        ORDER BY thf.create_time DESC
+    </select>
+
+    <select id="selectMinTimeByCollectorId" parameterType="com.escst.highformwork.bean.CollectorTimeBean" resultType="String">
+        SELECT DATE_FORMAT(min(a.acquisition_time),'%Y-%m-%d %H:%m:%s') as time FROM t_highformwork_realtime a
+        LEFT JOIN t_highformwork_equipment b ON b.id =a.equipment_id
+        WHERE a.equipment_id in
+        <foreach collection="ids" item="item" index="index" open="("
+                 separator="," close=")">
+            #{item}
+        </foreach>
+        <if test="flowId !=null and flowId !=''">
+            AND  a.flow_id = #{flowId}
+        </if>
+    </select>
+
+    <select id="selectMaxTimeByCollectorId" parameterType="com.escst.highformwork.bean.CollectorTimeBean" resultType="String">
+        SELECT DATE_FORMAT(max(a.acquisition_time),'%Y-%m-%d %H:%m:%s') as time FROM t_highformwork_realtime a
+        WHERE a.equipment_id in
+        <foreach collection="ids" item="item" index="index" open="("
+                 separator="," close=")">
+            #{item}
+        </foreach>
+        <if test="flowId !=null and flowId !=''">
+            AND  a.flow_id = #{flowId}
+        </if>
+    </select>
+
+    <select id="selectFilePath" parameterType="String" resultType="String">
+        SELECT f.path as filePath
+        FROM t_highformwork_flow hf left join t_basic_file f on hf.file_id = f.id
+        where hf.id = #{flowId}
+    </select>
+
+    <insert id="batchFlowCollector" parameterType="com.escst.highformwork.bean.FlowCollectorBean">
+        INSERT INTO t_highformwork_flow_equipment(id,flow_id,equipment_id,flow_status,create_time,create_by)
+        VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (
+            #{item.id},#{item.flowId},#{item.collectorId},#{item.flowStatus},#{item.createTime},#{item.createBy}
+            )
+        </foreach>
+    </insert>
+
+
+    <select id="selectCollectorById" parameterType="String" resultType="com.escst.highformwork.vo.CollectorVo">
+        SELECT name ,number,construction_id as constructionId FROM
+    </select>
+
+    <select id="updateFlowCollector" parameterType="com.escst.highformwork.bean.FlowCollectorBean">
+        UPDATE t_highformwork_flow_equipment
+        <set>
+            <if test="flowStatus !=''">
+                flow_status = #{flowStatus},
+            </if>
+            <if test="updateTime !=null and updateTime !=''">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        <where>
+            <if test="flowId !=null and flowId !=''">
+            flow_id =#{flowId}
+            </if>
+            <if test="collectorId !=null and collectorId !=''">
+               AND equipment_id =#{collectorId}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectCollectorByFlowId" parameterType="String" resultType="com.escst.highformwork.vo.CollectorVo">
+        SELECT
+            IFNULL(the.id, "")     id,
+            IFNULL(the.name, "")   name,
+            IFNULL(the.number, "") number,
+            IFNULL(thfe.flow_status, "") status
+        FROM t_highformwork_equipment the
+            LEFT JOIN t_highformwork_flow_equipment thfe ON thfe.equipment_id = the.id
+        WHERE thfe.flow_id = #{folwId}
+    </select>
+
+
+    <select id="selectCollectorIdsByFlowId" parameterType="map" resultType="String">
+        SELECT
+        IFNULL(the.id, "")     id
+        FROM t_highformwork_equipment the
+        LEFT JOIN t_highformwork_flow_equipment thfe ON thfe.equipment_id = the.id
+        <where>
+            <if test="folwId !=null and folwId !=''">
+                thfe.flow_id = #{folwId}
+            </if>
+            <if test="flowStatus !=null">
+                AND thfe.flow_status =#{flowStatus}
+            </if>
+        </where>
+    </select>
+
+    <update id="disableOrEnable" parameterType="com.escst.highformwork.entity.CollectorEntity">
+        UPDATE t_highformwork_equipment
+        <set>
+            <if test="name !=null and name !=''">
+                name=#{name},
+            </if>
+            <if test="number !=null and number !=''">
+                number=#{number}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="isUse" parameterType="String" resultType="String">
+        SELECT equipment_id as equipmentId
+        FROM t_highformwork_flow_equipment
+        WHERE equipment_id = #{id} AND flow_status = 1
+    </select>
+
+    <select id="batchUpdateFlow" parameterType="com.escst.highformwork.vo.UpdateVo">
+        update t_highformwork_flow_equipment set flow_status = #{status},update_time = #{updateTime}
+        where id in
+        <foreach collection="ids" item="item" index="index" open="("
+                 separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+    <select id="selectCollectorFlowId" parameterType="map" resultType="String">
+        SELECT  id FROM  t_highformwork_flow_equipment WHERE flow_id =#{flowId} AND equipment_id in
+        <foreach collection="equipmentIds" index="index" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+</mapper>

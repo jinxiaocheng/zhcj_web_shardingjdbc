@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>    
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.escst.territory.mapper.TerritoryMapper">
+    <resultMap id="territoryResultMap" type="com.escst.territory.entity.TerritoryEntity">
+        <id column="ID" property="id"/>
+        <result column="CODE" property="code"/>
+        <result column="LEVEL" property="level"/>
+        <result column="NAME" property="name"/>
+        <result column="PINYIN" property="pinyin"/>
+        <result column="X_WGS84" property="xWgs84"/>
+        <result column="Y_WGS84" property="yWgs84"/>
+        <result column="PARENT_ID" property="parentId"/>
+    </resultMap>
+
+    <select id="selectById" parameterType="string" resultMap="territoryResultMap">
+         SELECT * FROM T_SYS_TERRITORY WHERE ID = #{id}
+    </select>
+    
+    <select id="selectByParentId" parameterType="string" resultType="com.escst.territory.entity.TerritoryEntity">
+         SELECT * FROM T_SYS_TERRITORY WHERE parent_id = #{id}
+    </select>
+
+    <select id="selectAuthAreaByUserId" parameterType="map" resultType="map">
+        select DISTINCT t.id as areaId,t.name as areaName,c.belong_city as cityId
+		from t_basic_construction c
+		inner join t_sys_territory t on t.id = c.belong_area
+		<where>
+            exists (
+            select 1
+            from t_sys_user u
+            inner join t_sys_organization p on p.id = u.org_id
+            inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+            where s.construction_id = c.id and u.id = #{userId}
+            )
+            <if test="status != null and status != 0">
+                and c.status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectAuthConstructionByUserId" parameterType="map" resultType="com.escst.territory.vo.ConstructionVO">
+        select c.id as constructionId,c.name as constructionName
+		from t_basic_construction c
+        where
+            exists (
+	            select 1
+	            from t_sys_user u
+	            inner join t_sys_organization p on p.id = u.org_id
+	            inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+	            where s.construction_id = c.id and u.id = #{userId}
+            )
+            and c.status = 1
+            <if test="areaId !=null and areaId != '' ">
+                and c.belong_area = #{areaId}
+            </if>
+    </select>
+
+    <select id="selectAuthConstructionIds" parameterType="map" resultType="String">
+        select c.id as constructionId
+        from t_basic_construction c
+        inner join t_sys_territory t on t.id = c.belong_area
+        <where>
+            exists (
+            select 1
+            from t_sys_user u
+            inner join t_sys_organization p on p.id = u.org_id
+            inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+            where s.construction_id = c.id and u.id = #{userId}
+            )
+            <if test="status != null and status != 0">
+                and c.status = #{status}
+            </if>
+        </where>
+    </select>
+	<select id="queryAllList" resultMap="territoryResultMap">
+         SELECT * FROM T_SYS_TERRITORY
+    </select>
+</mapper>

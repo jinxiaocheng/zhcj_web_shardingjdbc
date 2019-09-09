@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.safety.mapper.RiskOperationMapper">
+
+    <insert id="add" parameterType="com.escst.safety.entity.RiskOperationEntity">
+        insert into t_risk_operation_record (id, construction_id, category, title, content, is_attach, is_push, operation, create_time, create_by, update_time, update_by)
+        values
+            (#{id}, #{constructionId}, #{category}, #{title}, #{content}, #{isAttach}, #{isPush}, #{operation},
+                    #{createTime}, #{createBy},
+                    #{updateTime},
+             #{updateBy})
+    </insert>
+
+    <delete id="delete" parameterType="com.escst.safety.entity.RiskOperationEntity">
+        delete from t_risk_operation_record
+        where id = #{id}
+    </delete>
+
+    <select id="getCount" parameterType="com.escst.safety.entity.RiskOperationEntity" resultType="int">
+        select count(r.id)
+        <include refid="condition"></include>
+    </select>
+
+    <select id="listData" parameterType="com.escst.safety.entity.RiskOperationEntity"
+            resultType="com.escst.safety.entity.RiskOperationEntity">
+        select
+        r.id,
+        r.construction_id as constructionId,
+        c.name as constructionName,
+        t.name as areaName,
+        r.category,
+        r.title,
+        r.content,
+        r.create_time as createTime,
+        r.create_by as createBy,
+        r.update_time as updateTime,
+        r.update_by as updateBy
+        <include refid="condition"></include>
+        order by r.create_time desc
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <sql id="condition">
+        from t_risk_operation_record r
+        INNER JOIN t_basic_construction c ON r.construction_id = c.id
+        INNER JOIN t_sys_territory t ON c.belong_area = t.id
+        and exists (
+        select 1
+        from t_sys_user u
+        inner join t_sys_organization p on p.id = u.org_id
+        inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+        where s.construction_id = r.construction_id and u.id = #{userId}
+        )
+        <if test="startTime != null and startTime != ''">
+            and r.create_time >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and
+            r.create_time <= #{endTime} ]]>
+        </if>
+        <if test="category != null and category != ''">
+            and r.category = #{category}
+        </if>
+        <if test="title != null and title != ''">
+            and r.title = #{title}
+        </if>
+        <if test="areaId != null and areaId != ''">
+            and t.id = #{areaId}
+        </if>
+        <if test="constructionId != null and constructionId != ''">
+            and r.construction_id = #{constructionId}
+        </if>
+    </sql>
+
+    <select id="view" parameterType="com.escst.safety.entity.RiskOperationEntity"
+            resultType="com.escst.safety.entity.RiskOperationEntity">
+        select
+            r.id,
+            r.category,
+            r.title,
+            r.content,
+            c.id                                            as constructionId,
+            c.name                                          as constructionName,
+            t.name                                          as areaName,
+            r.is_attach                                     as isAttach,
+            DATE_FORMAT(r.create_time, '%Y-%m-%d %H:%i:%s') as startTime
+        from t_risk_operation_record r left join t_basic_construction c on c.id = r.construction_id
+            left join t_sys_territory t on c.belong_area = t.id
+        where r.id = #{id}
+    </select>
+
+    <select id="data" parameterType="com.escst.safety.entity.RiskOperationEntity"
+            resultType="com.escst.safety.entity.RiskOperationEntity">
+        select
+            id,
+            construction_id as constructionId,
+            category,
+            title,
+            content,
+            create_time        startTime,
+            is_push         as isPush,
+            operation
+        from t_risk_operation_record
+        where construction_id = #{constructionId} and date_format(create_time, '%Y-%m-%d') = #{startTime}
+        order by create_time desc
+    </select>
+
+
+    <select id="dataIsPush" parameterType="com.escst.safety.entity.RiskOperationEntity"
+            resultType="com.escst.safety.entity.RiskOperationEntity">
+        select
+            id,
+            construction_id as constructionId,
+            category,
+            title,
+            content,
+            create_time        startTime,
+            is_push         as isPush,
+            operation
+        from t_risk_operation_record
+        where construction_id = #{constructionId} and date_format(create_time, '%Y-%m-%d') = #{startTime}
+              and is_push = 0
+        order by create_time desc
+    </select>
+
+
+    <update id="batchUpdate" parameterType="com.escst.safety.entity.RiskOperationEntity">
+        update t_risk_operation_record set is_push = 1 where id in(
+        <foreach collection="list" item="item" index="" separator=",">
+            #{item.id}
+        </foreach>)
+    </update>
+
+    <update id="update" parameterType="com.escst.safety.entity.RiskOperationEntity">
+        update t_risk_operation_record set
+        <if test="category != null and category != ''">
+            category = #{category},
+        </if>
+        <if test="title != null and title != ''">
+            title = #{title},
+        </if>
+        <if test="content != null and content != ''">
+            content = #{content},
+        </if>
+        <if test="operation != null and operation != ''">
+            operation = #{operation},
+        </if>
+        <if test="updateBy != null and updateBy != ''">
+            update_by = #{updateBy},
+        </if>
+        <if test="updateTime != null and updateTime != ''">
+            update_time = #{updateTime},
+        </if>
+        is_push = 0
+        where id = #{id}
+    </update>
+
+</mapper>

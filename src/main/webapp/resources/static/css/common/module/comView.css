@@ -1,0 +1,9 @@
+/*查看页面css模板*/
+.com-min-title h2.min-title p {
+  border-left: 3px solid #36a1da;
+  margin: 5px 0;
+  text-indent: 0.5em;
+  line-height: 24px;
+  font-size: 16px;
+  letter-spacing: 2px;
+}

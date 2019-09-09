@@ -1,0 +1,417 @@
+body {
+  overflow: hidden;
+}
+.BMap_bubble_content {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: auto;
+}
+#mapBox {
+  position: absolute;
+  left: 350px;
+  right: 350px;
+  top: 0;
+  bottom: 0;
+}
+#map {
+  width: 100%;
+  height: 100%;
+}
+#marker {
+  width: 100%;
+}
+#marker > div {
+  width: 100%;
+}
+#marker > li {
+  width: 100%;
+  position: relative;
+  margin-bottom: 8px;
+}
+#marker label {
+  display: inline-block;
+  width: 30%;
+  margin-right: 4%;
+  vertical-align: text-top;
+  position: absolute;
+}
+#marker span {
+  position: relative;
+  display: inline-block;
+  width: 65%;
+  left: 35%;
+}
+#searchMap {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  z-index: 100;
+  width: 300px;
+  height: 30px;
+  background: red;
+}
+.slimScrollDiv {
+  position: absolute !important;
+  top: 50px;
+  bottom: 0px;
+  width: 100% !important;
+  left: 0px;
+  padding: 0 10px;
+  height: auto !important;
+  box-sizing: border-box;
+}
+.clickShowP {
+  -webkit-transition: all 0.5s;
+  -moz-transition: all 0.5s;
+  -ms-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;
+}
+.clickShowP.csclose {
+  z-index: 200;
+}
+.clickShowP.csopen {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  overflow: auto !important;
+  background: #fff;
+  padding: 20px;
+  z-index: 200;
+  width: 100% ;
+  height: 100% !important;
+  box-sizing: border-box;
+  /*-webkit-transition: all 0.5s;
+  -moz-transition: all 0.5s;
+  -ms-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;*/
+}
+/*滚动条整体部分,必须要设置*/
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  background-color: #7c7c7c;
+}
+/*滚动条的轨道*/
+::-webkit-scrollbar-track {
+  background-color: #fff;
+}
+/*滚动条的滑块按钮*/
+::-webkit-scrollbar-thumb {
+  background-color: #d5d6d5;
+}
+/*滚动条的上下两端的按钮*/
+::-webkit-scrollbar-button {
+  height: 0px;
+  background-color: #fff;
+}
+#leftBox {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 350px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+#leftBox h2 {
+  border-left: 3px solid coral;
+  text-indent: 0.5em;
+  color: #000;
+  font-weight: bold;
+  font-size: 18px;
+  letter-spacing: 2px;
+  position: relative;
+  width: 100%;
+}
+#leftBox h2 i {
+  position: static;
+  cursor: pointer;
+  float: right;
+}
+#leftBox #progressOfWorks {
+  width: 100%;
+  height: 220px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ececec;
+}
+#leftBox #progressOfWorks .progressBar {
+  text-align: right;
+  color: coral;
+  font-weight: bold;
+  font-size: 24px;
+  margin-top: 15px;
+}
+#leftBox #progressOfWorks .progressBar p {
+  font-weight: bold;
+}
+#leftBox #progressOfWorks .progressBar .bar {
+  overflow: hidden;
+  width: 100%;
+  height: 16px;
+  border-radius: 20px;
+  background: #dfdfdf;
+}
+#leftBox #progressOfWorks .progressBar .bar i {
+  display: block;
+  background: coral;
+  border-radius: 20px;
+  height: 100%;
+}
+#leftBox #progressOfWorks .progressTime {
+  position: relative;
+  margin-top: 30px;
+}
+#leftBox #progressOfWorks .progressTime p {
+  width: 33%;
+  float: left;
+}
+#leftBox #progressOfWorks .progressTime p label,
+#leftBox #progressOfWorks .progressTime p span {
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+#leftBox #progressOfWorks .progressTime p span {
+  font-size: 18px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+#leftBox #progressOfWorks .progressTime p label {
+  color: #989898;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+#leftBox #progressOfWorks .progressTime .surplusTime span {
+  height: 56px;
+  line-height: 56px;
+  font-size: 24px;
+  font-weight: bold;
+}
+#leftBox #infoOfWorks {
+  width: 100%;
+  height: 200px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ececec;
+}
+#leftBox #infoOfWorks .me {
+  margin-top: 15px;
+}
+#leftBox #infoOfWorks .me i {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 3px solid #dfdfdf;
+  position: relative;
+  top: 2px;
+  margin-right: 6px;
+}
+#leftBox #infoOfWorks .m1 i {
+  border-color: #2fb8ff;
+}
+#leftBox #infoOfWorks .m2 i {
+  border-color: #b357fb;
+}
+#leftBox #infoOfWorks .m3 i {
+  border-color: #ffcf5c;
+}
+#leftBox #infoOfWorks .m4 i {
+  border-color: #ff5c5c;
+}
+#leftBox #trendsOfWorks {
+  position: absolute;
+  width: 100%;
+  top: 460px;
+  left: 0;
+  padding: 20px;
+  bottom: 0;
+  box-sizing: border-box;
+  background: #fff;
+}
+#leftBox #trendsOfWorks .trends {
+  position: absolute;
+  top: 0;
+  bottom: 0px;
+  width: 100%;
+  left: 0;
+  box-sizing: border-box;
+  overflow: auto;
+  padding: 10px 20px;
+}
+#leftBox #trendsOfWorks .trends .trendsBox {
+  margin-bottom: 10px;
+  width: 100%;
+  font-size: 14px;
+  letter-spacing: 1px;
+  border-bottom: 1px solid #ececec;
+}
+#leftBox #trendsOfWorks .trends .trendsBox p {
+  margin-bottom: 6px;
+}
+#leftBox #trendsOfWorks .trends .trendsBox span {
+  display: block;
+  width: 100%;
+  text-align: right;
+  color: #989898;
+  font-size: 12px;
+}
+#rightBox {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 350px;
+  padding: 20px;
+}
+#rightBox .allInfo {
+  border-bottom: 1px solid #ececec;
+  height: 220px;
+  width: 100%;
+  font-weight: bold;
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+#rightBox .allInfo .time {
+  width: 100%;
+  text-align: right;
+  font-size: 30px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+#rightBox .allInfo .time p {
+  font-weight: bold;
+}
+#rightBox .allInfo .weather {
+  width: 100%;
+  height: 50px;
+  margin-bottom: 15px;
+}
+#rightBox .allInfo .weather .temperature {
+  float: left;
+  width: 70%;
+  font-weight: bold;
+  position: relative;
+  padding-left: 80px;
+  box-sizing: border-box;
+}
+#rightBox .allInfo .weather .temperature .w {
+  position: absolute;
+  display: block;
+  width: 70px;
+  height: 50px;
+  left: 0;
+  top: -20px;
+}
+#rightBox .allInfo .weather .temperature .w0 {
+  background: url('../../images/map/sun.png') center no-repeat;
+}
+#rightBox .allInfo .weather .temperature .w1 {
+  background: url('../../images/map/cloud.png') center no-repeat;
+}
+#rightBox .allInfo .weather .temperature .w2 {
+  background: url('../../images/map/rian.png') center no-repeat;
+}
+#rightBox .allInfo .weather .temperature .w3 {
+  background: url('../../images/map/snow.png') center no-repeat;
+}
+#rightBox .allInfo .weather .week {
+  text-align: right;
+  float: right;
+  font-weight: bold;
+  width: 30%;
+}
+#rightBox .allInfo .personNum {
+  width: 100%;
+  height: 100px;
+}
+#rightBox .allInfo .personNum p {
+  width: 50%;
+  margin: 0;
+  float: left;
+  text-align: center;
+}
+#rightBox .allInfo .personNum p span,
+#rightBox .allInfo .personNum p label {
+  font-weight: bold !important;
+  display: block;
+  width: 100%;
+}
+#rightBox .allInfo .personNum p span {
+  font-size: 22px;
+  letter-spacing: 2px;
+}
+#rightBox .allInfo .personNum .nowNum span {
+  color: #00d33c;
+}
+#rightBox .allInfo .personNum .todayNum span {
+  color: #ff8441;
+}
+#rightBox #modelBox {
+  position: absolute;
+  top: 240px;
+  left: 0;
+  bottom: 0;
+  overflow: auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+  width: 100%;
+}
+#rightBox #modelBox .modelBox {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+#rightBox #modelBox .modelBox .modelList {
+  width: 100%;
+  height: 80px;
+  border-bottom: 1px solid #ececec;
+}
+#rightBox #modelBox .modelBox .modelList > i {
+  display: block;
+  float: left;
+  width: 20%;
+  height: 100%;
+}
+#rightBox #modelBox .modelBox .modelList .l1 {
+  background: url('../../images/map/1.png') center no-repeat;
+}
+#rightBox #modelBox .modelBox .modelList .l2 {
+  background: url('../../images/map/2.png') center no-repeat;
+}
+#rightBox #modelBox .modelBox .modelList .l3 {
+  background: url('../../images/map/3.png') center no-repeat;
+}
+#rightBox #modelBox .modelBox .modelList .l4 {
+  background: url('../../images/map/4.png') center no-repeat;
+}
+#rightBox #modelBox .modelBox .modelList .l5 {
+  background: url('../../images/map/5.png') center no-repeat;
+}
+#rightBox #modelBox .modelBox .modelList .l6 {
+  background: url('../../images/map/6.png') center no-repeat;
+}
+#rightBox #modelBox .modelBox .modelList > div {
+  display: block;
+  float: left;
+  width: 80%;
+  height: 100%;
+}
+#rightBox #modelBox .modelBox .modelList > div p {
+  width: 50%;
+  float: left;
+}
+#rightBox #modelBox .modelBox .modelList > div p span,
+#rightBox #modelBox .modelBox .modelList > div p label {
+  margin-top: 10px;
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+}
+#conImg {
+  overflow: hidden;
+}

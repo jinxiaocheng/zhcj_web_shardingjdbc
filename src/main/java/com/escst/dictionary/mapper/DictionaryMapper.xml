@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>    
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.escst.dictionary.mapper.DictionaryMapper">
+    <resultMap id="dictionaryResultMap" type="com.escst.dictionary.entity.DictionaryEntity">
+        <id column="ID" property="id"/>
+        <result column="TYPE" property="type"/>
+        <result column="NAME" property="name"/>
+        <result column="VALUE" property="value" />
+        <result column="DESCRIPTION" property="description" />
+    </resultMap>
+
+    <select id="selectByType" parameterType="String" resultMap="dictionaryResultMap">
+          SELECT * FROM T_SYS_DICTIONARY WHERE TYPE = #{type}
+    </select>
+
+    <select id="selectAllType" resultType="String">
+        SELECT DISTINCT type FROM T_SYS_DICTIONARY
+    </select>
+	<select id="selectAll" resultMap="dictionaryResultMap">
+          SELECT * FROM T_SYS_DICTIONARY order by type,value
+    </select>
+</mapper>

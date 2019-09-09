@@ -1,0 +1,241 @@
+#conImgBox {
+  position: absolute;
+  left: 350px;
+  right: 350px;
+  top: 0;
+  bottom: 0;
+  border: 1px solid #ececec;
+  border-top: none;
+  border-bottom: none;
+  padding: 20px;
+  box-sizing: border-box;
+}
+#conImgBox > p {
+  width: 100%;
+  position: absolute;
+  bottom: 8px;
+  text-align: center;
+  color: #a0a0a0 ;
+  letter-spacing: 1px;
+}
+#conImgBox h2 {
+  border-left: 3px solid coral;
+  margin-bottom: 5%;
+  text-indent: 0.5em;
+  color: #000;
+  font-weight: bold;
+  font-size: 18px;
+  letter-spacing: 2px;
+  position: relative;
+  width: 100%;
+}
+#conImgBox h2 > a {
+  float: right;
+  font-size: 14px;
+  position: relative;
+  top: 4px;
+  font-weight: bold;
+  color: #20b8fd;
+}
+#conImgBox h2 > i {
+  position: static;
+  cursor: pointer;
+  float: right;
+}
+#conImgBox #conImg {
+  position: absolute;
+  top: 60px;
+  bottom: 40px;
+  left: 20px;
+  right: 20px;
+  overflow: hidden;
+}
+#conImgBox #conImg #imgBox {
+  position: absolute;
+}
+.cameraBox {
+  display: none;
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 0 0 5px rgba(94, 94, 94, 0.76);
+  border-left: 3px solid coral;
+  position: absolute;
+  z-index: 100;
+  width: 200px;
+  height: 50px;
+  cursor: pointer;
+}
+.cameraBox h5,
+.cameraBox p {
+  height: 25px;
+  line-height: 25px;
+  text-indent: 5px;
+}
+.cameraBox h5 {
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+.cameraBox p {
+  color: #9d9d9d;
+}
+.cameraBox i {
+  position: absolute;
+  right: 5px;
+  top: 18px;
+  color: #9d9d9d;
+}
+.personTrackBox {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: #fff;
+}
+.personTrackBox .personList {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  top: 0;
+  width: 300px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.personTrackBox .personList h1 {
+  width: 100%;
+  height: 50px;
+  line-height: 50px;
+  font-size: 22px;
+  font-weight: bold;
+  border-bottom: 1px solid #dfdfdf;
+  letter-spacing: 1px;
+}
+.personTrackBox .personList h1 span {
+  font-size: 16px;
+  font-weight: bold;
+  color: coral;
+  float: right;
+  letter-spacing: 1px;
+  position: relative;
+  top: 3px;
+}
+.personTrackBox .personList ul {
+  position: absolute;
+  width: 100%;
+  top: 70px;
+  left: 0;
+  bottom: 0;
+  overflow: auto;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.personTrackBox .personList ul li {
+  width: 100%;
+  height: 60px;
+  cursor: pointer;
+  position: relative;
+  padding: 5px 0 5px 50px;
+  box-sizing: border-box;
+}
+.personTrackBox .personList ul li u {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #dfdfdf;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+}
+.personTrackBox .personList ul li u img {
+  width: 100%;
+  height: 100%;
+}
+.personTrackBox .personList ul li h5,
+.personTrackBox .personList ul li p {
+  text-indent: 5px;
+}
+.personTrackBox .personList ul li h5 {
+  font-size: 14px;
+  letter-spacing: 1px;
+  height: 30px;
+  line-height: 30px;
+}
+.personTrackBox .personList ul li p {
+  color: #9d9d9d;
+  font-size: 12px;
+  height: 20px;
+  line-height: 20px;
+}
+.personTrackBox .personList ul li i {
+  position: absolute;
+  right: 5px;
+  top: 22px;
+  color: #9d9d9d;
+  font-size: 12px;
+}
+.personTrackBox .personList ul li:hover,
+.personTrackBox .personList ul .ac {
+  background: #4bcefd;
+  border-radius: 5px;
+  color: #fff;
+}
+.personTrackBox .personList ul li:hover p,
+.personTrackBox .personList ul .ac p {
+  color: #fff;
+}
+.personTrackBox .personList ul li:hover i,
+.personTrackBox .personList ul .ac i {
+  color: #fff;
+}
+.personTrackBox .personList ul .ac {
+  background: #20b8fd;
+}
+.personTrackBox .personTrackImg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 300px;
+  background: #f8f8f8;
+  overflow: hidden;
+}
+.personTrackBox .personTrackImg .imgBox {
+  position: absolute;
+}
+#layui-layer1 {
+  border-radius: 4px;
+}
+#layui-layer1 .layui-layer-content {
+  border-radius: 4px;
+}
+.cameraImg {
+  position: absolute;
+  background: url("../../images/map/s.png") no-repeat;
+  display: block;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+.cameraImg u {
+  position: absolute;
+  top: -40px;
+  left: -8px;
+  display: block;
+}
+.cameraImg .trackNum {
+  display: inline-block;
+  text-align: center;
+  margin-right: 10px;
+  width: 27px;
+  height: 27px;
+  line-height: 27px;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: bold;
+  font-size: 20px;
+  background: red;
+}

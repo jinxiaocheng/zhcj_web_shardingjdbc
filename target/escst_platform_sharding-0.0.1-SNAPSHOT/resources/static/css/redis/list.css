@@ -1,0 +1,41 @@
+.biyue_body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+}
+.biyue_body .biyue_tool {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 60px;
+  line-height: 60px;
+  box-shadow: 0 3px 6px #dfdfdf;
+}
+.biyue_body .biyue_tool label {
+  height: 60px;
+  line-height: 60px;
+  padding: 0 15px;
+  width: 40px;
+}
+.biyue_body .biyue_tool .layui-input-inline {
+  width: 300px;
+}
+.biyue_body .biyue_main {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10px;
+}
+.layui-table-view .layui-table {
+  width: 100%;
+}
+#look {
+  display: none;
+  width: 100%;
+  height: 100%;
+}

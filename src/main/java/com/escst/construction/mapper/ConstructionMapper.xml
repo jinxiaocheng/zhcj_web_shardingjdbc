@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.construction.mapper.ConstructionMapper">
+    <resultMap id="constructionResultMap" type="com.escst.construction.entity.ConstructionEntity">
+        <id column="ID" property="id"/>
+        <result column="name" property="name"/>
+        <result column="belong_city" property="belongCity"/>
+        <result column="belong_area" property="belongArea"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="construct_license_id" property="constructLicenseId"/>
+        <result column="construct_license_no" property="constructLicenseNo"/>
+        <result column="license_date" property="licenseDate"/>
+        <result column="development" property="development"/>
+        <result column="building" property="building"/>
+        <result column="supervision" property="supervision"/>
+        <result column="project_manager" property="projectManager"/>
+        <result column="contract_start_date" property="contractStartDate"/>
+        <result column="contract_end_date" property="contractEndDate"/>
+        <result column="is_online" property="isOnline"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="update_by" property="updateBy"/>
+    </resultMap>
+
+    <select id="selectList" parameterType="com.escst.construction.entity.ConstructionEntity"
+            resultMap="constructionResultMap">
+        SELECT * FROM T_BASIC_CONSTRUCTION
+        <where>
+            <if test="belongCity!=null and belongCity!='' ">
+                AND BELONG_CITY = #{belongCity}
+            </if>
+            <if test="belongArea!=null and belongArea!='' ">
+                AND BELONG_AREA = #{belongArea}
+            </if>
+            <if test="status!=null ">
+                AND STATUS = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectCount" parameterType="com.escst.construction.entity.ConstructionEntity" resultType="int">
+        SELECT COUNT(ID) FROM T_BASIC_CONSTRUCTION
+        <where>
+            <if test="belongCity!=null and belongCity!='' ">
+                AND BELONG_CITY = #{belongCity}
+            </if>
+            <if test="belongArea!=null and belongArea!='' ">
+                AND BELONG_AREA = #{belongArea}
+            </if>
+            <if test="status!=null ">
+                AND STATUS = #{status}
+            </if>
+            <if test="isOnline!=null ">
+                AND IS_ONLINE = #{isOnline}
+            </if>
+        </where>
+    </select>
+    <select id="selectByConstructionId" parameterType="String" resultType="map">
+        SELECT
+            t.id             id,
+            t.NAME           name,
+            t.CODE           code,
+            t.type           type,
+            t.belong_city AS belongCity,
+            t.belong_area    belongArea,
+            t.is_online   AS isOnline,
+            ts.name          areaName
+        FROM
+            T_BASIC_CONSTRUCTION t left join t_sys_territory ts on t.belong_area = ts.id
+        WHERE t.id = #{id} and t.status = 1
+    </select>
+
+    <select id="selectConstructionCity" parameterType="String" resultType="map">
+        SELECT
+            t.belong_city belongCity,
+            ts.name       name
+        FROM
+            T_BASIC_CONSTRUCTION t
+            LEFT JOIN t_sys_territory ts ON t.belong_city = ts.id
+        where t.status = 1
+        group by t.belong_city
+    </select>
+
+    <select id="selectAreaByCityCode" parameterType="String" resultType="map">
+        SELECT
+            t.belong_area belongArea,
+            ts.name       name,
+            ts.parent_id  parentId
+        FROM
+            T_BASIC_CONSTRUCTION t
+            LEFT JOIN t_sys_territory ts ON t.belong_area = ts.id
+        where t.status = 1 and t.belong_city = #{belongCity}
+        group by t.belong_area
+    </select>
+    <select id="selectConstByAreaCode" parameterType="String" resultMap="constructionResultMap">
+        SELECT *
+        FROM
+            T_BASIC_CONSTRUCTION t
+        WHERE
+            t.status = 1 and t.belong_area = #{belongArea}
+    </select>
+    <select id="selectAuthConstructionByUserId" parameterType="String"
+            resultType="com.escst.construction.vo.SimpleConstructionVO">
+        select
+            c.id,
+            c.name,
+            t.id                                                areaId,
+            t.name                                              areaName,
+            is_online                                           isOnline,
+            c.belong_city                                       cityId,
+            c.lng                                               lng,
+            c.lat                                               lat,
+            c.development                                       development,
+            c.building                                          building,
+            c.supervision                                       supervision,
+            c.project_manager                                   projectManager,
+            DATE_FORMAT(c.plan_contract_start_date, '%Y-%m-%d') contractStartDate,
+            DATE_FORMAT(c.plan_contract_end_date, '%Y-%m-%d')   contractEndDate,
+            c.icon_id as                                        iconId,
+            c.bim_id                                            bimId
+        from t_basic_construction c
+            inner join t_sys_territory t on t.id = c.belong_area
+        where exists(
+                      select 1
+                      from t_sys_user u
+                          inner join t_sys_organization p on p.id = u.org_id
+                          inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                      where s.construction_id = c.id and u.id = #{userId} and s.status =1
+              )
+              and c.status = 1
+        order by c.create_time, c.belong_city, c.belong_area, c.name DESC
+    </select>
+    <select id="selectConstructionList" parameterType="com.escst.construction.entity.ConstructionEntity"
+            resultType="map">
+        SELECT
+        a.id as constructionId,
+        a.construct_license_id as constructLicenseId,
+        a.`name` AS name,
+        a.type AS type,
+        (select c.name from t_sys_territory c where c.id = a.belong_city) AS cityName,
+        (select d.name from t_sys_territory d where d.id = a.belong_area) AS areaName,
+        a.development AS development,
+        a.building AS building,
+        a.supervision AS supervision,
+        a.project_manager projectManager,
+        DATE_FORMAT(a.contract_start_date,'%Y-%m-%d') as contractStartDate,
+        DATE_FORMAT(a.contract_end_date,'%Y-%m-%d') as contractEndDate,
+        DATE_FORMAT(a.plan_contract_start_date,'%Y-%m-%d') as planContractStartDate,
+        DATE_FORMAT(a.plan_contract_end_date,'%Y-%m-%d') as planContractEndDate,
+        a.is_online isOnline,
+        a.`status` status
+        FROM
+        t_basic_construction a
+        LEFT JOIN t_basic_construction_license b ON a.construct_license_id = b.id
+        <include refid="conditionWhere"></include>
+        order by a.create_time desc
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="selectConstructionCount" parameterType="com.escst.construction.entity.ConstructionEntity"
+            resultType="Integer">
+        SELECT count(1) FROM
+        t_basic_construction a
+        LEFT JOIN t_basic_construction_license b ON a.construct_license_id = b.id
+        <include refid="conditionWhere"></include>
+
+    </select>
+
+    <sql id="conditionWhere">
+        <where>
+            1=1
+            <if test="name!=null and name!=''">
+                and a.name like '%${name}%'
+            </if>
+            <if test="development!=null and development!=''">
+                and a.development like '%${development}%'
+            </if>
+            <if test="building!=null and building!=''">
+                and a.building like '%${building}%'
+            </if>
+            <if test="areaId!=null and areaId!=''">
+                and a.belong_area =#{areaId}
+            </if>
+            <if test="id!=null and id!=''">
+                and a.id =#{id}
+            </if>
+        </where>
+        and exists (
+        select 1
+        from t_sys_user u
+        inner join t_sys_organization p on p.id = u.org_id
+        inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+        where s.construction_id = a.id and u.id = #{userId} and s.status = 1
+        )
+    </sql>
+
+    <insert id="insert" parameterType="com.escst.construction.entity.ConstructionEntity">
+        INSERT INTO t_basic_construction (
+            `id`,
+            `name`,
+            `type`,
+            `belong_city`,
+            `belong_area`,
+            `construct_license_id`,
+            `construct_license_no`,
+            `license_date`,
+            `development`,
+            `building`,
+            `supervision`,
+            `project_manager`,
+            `contract_start_date`,
+            `contract_end_date`,
+            plan_contract_start_date,
+            plan_contract_end_date,
+            `is_online`,
+            `status`,
+            `icon_id`,
+            lng,
+            lat,
+            `create_time`,
+            `create_by`,
+            `update_time`,
+            `update_by`
+        )
+        VALUES
+            (
+                #{id},
+                #{name},
+                #{type},
+                #{belongCity},
+                #{belongArea},
+                #{constructLicenseId},
+                #{constructLicenseNo},
+                #{licenseDate},
+                #{development},
+                #{building},
+                #{supervision},
+                #{projectManager},
+                #{contractStartDate},
+                #{contractEndDate},
+                #{planContractStartDate},
+                #{planContractEndDate},
+                #{isOnline},
+                #{status},
+                #{iconId},
+                #{lng},
+                #{lat},
+                #{createTime},
+                #{createBy},
+                #{updateTime},
+                #{updateBy}
+            )
+    </insert>
+    <select id="selectAuthAreaConstructionQty" parameterType="String" resultType="com.escst.commons.vo.QtyVO">
+        select
+            t.id,
+            t.name,
+            count(c.id) qty
+        from t_basic_construction c
+            inner join t_sys_territory t on t.id = c.belong_area
+        where exists(
+                      select 1
+                      from t_sys_user u
+                          inner join t_sys_organization p on p.id = u.org_id
+                          inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                      where s.construction_id = c.id and u.id = #{userId}
+              )
+              and c.status = 1
+        group by t.id, t.name
+    </select>
+
+    <select id="queryVisibleConstructionCount" parameterType="String" resultType="int">
+        select count(1)
+        from t_basic_construction c
+        where exists(
+                      select 1
+                      from t_sys_user u
+                          inner join t_sys_organization p on p.id = u.org_id
+                          inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                      where s.construction_id = c.id and u.id = #{userId}
+              )
+              and c.status = 1
+              and EXISTS(
+                      select 1
+                      from t_basic_project_structure d
+                      where d.construction_id = c.id
+              )
+    </select>
+    <select id="queryVisibleConstruction" parameterType="String"
+            resultType="com.escst.construction.vo.SimpleConstructionVO">
+        select
+            c.id,
+            c.name,
+            t.id                                           areaId,
+            t.name                                         areaName,
+            is_online                                      isOnline,
+            c.belong_city                                  cityId,
+            DATE_FORMAT(c.contract_start_date, '%Y-%m-%d') contractStartDate,
+            DATE_FORMAT(c.contract_end_date, '%Y-%m-%d')   contractEndDate
+        from t_basic_construction c
+            inner join t_sys_territory t on t.id = c.belong_area
+        where exists(
+                      select 1
+                      from t_sys_user u
+                          inner join t_sys_organization p on p.id = u.org_id
+                          inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+                      where s.construction_id = c.id and u.id = #{userId}
+              )
+              and c.status = 1
+              and EXISTS(
+                      select 1
+                      from t_basic_project_structure d
+                      where d.construction_id = c.id
+              )
+        order by c.belong_area, c.name
+    </select>
+
+    <select id="queryById" parameterType="String" resultType="com.escst.construction.vo.SimpleConstructionVO">
+        select
+            id,
+            name,
+            development,
+            building,
+            supervision,
+            project_manager                                   projectManager,
+            DATE_FORMAT(plan_contract_start_date, '%Y-%m-%d') contractStartDate,
+            DATE_FORMAT(plan_contract_end_date, '%Y-%m-%d')   contractEndDate,
+            floor_plan_id                                     floorPlanId
+        from t_basic_construction
+        where id = #{id}
+    </select>
+
+    <update id="update" parameterType="com.escst.construction.entity.ConstructionEntity">
+        UPDATE t_basic_construction
+        <set>
+            <if test=" name != null and name !=''">
+                name = #{name},
+            </if>
+
+            <if test=" belongCity != null and belongCity !=''">
+                belong_city = #{belongCity},
+            </if>
+
+            <if test=" belongArea != null and belongArea !=''">
+                belong_area =#{belongArea},
+            </if>
+
+            <if test=" constructLicenseNo != null and constructLicenseNo !=''">
+                construct_license_no = #{constructLicenseNo},
+            </if>
+
+            <if test=" development != null and development !=''">
+                development = #{development},
+            </if>
+
+            <if test=" building != null and building !=''">
+                building = #{building},
+            </if>
+
+            <if test=" supervision != null and supervision !=''">
+                supervision = #{supervision},
+            </if>
+
+            <if test=" projectManager != null and projectManager !=''">
+                project_manager = #{projectManager},
+            </if>
+            <if test=" licenseDate != null and licenseDate !=''">
+                license_date = #{licenseDate},
+            </if>
+
+            <if test=" contractStartDate != null and contractStartDate !=''">
+                contract_start_date = #{contractStartDate},
+            </if>
+
+            <if test=" contractEndDate != null and contractEndDate !=''">
+                contract_end_date = #{contractEndDate},
+            </if>
+            <if test="planContractStartDate != null and planContractStartDate !=''">
+                plan_contract_start_date = #{planContractStartDate},
+            </if>
+
+            <if test="planContractEndDate != null and planContractEndDate!=''">
+                plan_contract_end_date = #{planContractEndDate},
+            </if>
+            <if test=" lng != null and lng !=''">
+                lng = #{lng},
+            </if>
+
+            <if test=" lat != null and lat !=''">
+                lat = #{lat},
+            </if>
+
+            <if test=" iconId != null and iconId !=''">
+                icon_id = #{iconId},
+            </if>
+
+            <if test=" updateTime != null and updateTime !=''">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <select id="queryByUserId" parameterType="String" resultType="map">
+        SELECT
+            t.id,
+            t.name,
+            t.development,
+            t.building,
+            t.supervision
+        FROM
+            t_basic_construction t
+            LEFT JOIN t_sys_organization o on t.id = o.construction_id
+            LEFT JOIN t_sys_user u on u.org_id = o.id
+        where u.id = #{id}
+    </select>
+
+    <select id="selectAll" resultType="com.escst.construction.entity.ConstructionEntity">
+        select id as id
+        from t_basic_construction
+    </select>
+
+    <select id="getSyncUrl" parameterType="string" resultType="string">
+        select sync_url
+        from t_basic_construction_syncurl
+        where construction_id = #{constructionId}
+    </select>
+
+    <select id="listCardNumber" parameterType="string" resultType="string">
+        SELECT card_number cardNumber
+        FROM
+            t_basic_construction_person
+        WHERE
+            construction_id = #{construction_id}
+    </select>
+
+</mapper>

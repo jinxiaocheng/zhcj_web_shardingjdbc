@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.file.mapper.FileMapper">
+
+    <select id="queryByBusinessId" parameterType="map" resultType="com.escst.file.entity.FileEntity">
+        SELECT id,name,path,business_id as businessId,type FROM t_basic_file
+        <where>
+            <if test="businessId !=null and businessId !='' ">
+                AND business_id =#{businessId}
+            </if>
+
+        </where>
+    </select>
+
+    <select id="queryById" parameterType="map" resultType="com.escst.file.entity.FileEntity">
+        SELECT id,name,path,business_id as businessId,type FROM t_basic_file
+        <where>
+            <if test="fileId !=null and fileId !=''">
+                id = #{fileId}
+            </if>
+            <if test="businessId !=null and businessId !='' ">
+                AND business_id =#{businessId}
+            </if>
+        </where>
+    </select>
+
+    <insert id="batchInsert" parameterType="com.escst.file.entity.FileEntity">
+        INSERT INTO T_BASIC_FILE(id,name,type,path,business_id,create_time)
+        values
+        <foreach item="item" collection="list" open="" separator="," close="">
+            (#{item.id},#{item.name},#{item.type},#{item.path},#{item.businessId},#{item.createTime})
+        </foreach>
+    </insert>
+
+    <select id="queryListByConstructionId" parameterType="string" resultType="com.escst.file.entity.FileEntity">
+        select
+            id,
+            path
+        from t_basic_file
+        where id in (
+            select a.head_portrait_id
+            from t_basic_person a
+                inner join t_basic_construction_person b on b.person_id = a.id and b.construction_id = #{constructionId}
+        )
+    </select>
+
+    <update id="batchUpdatePath" parameterType="com.escst.file.entity.FileEntity">
+        insert into t_basic_file(id,path) values
+        <foreach collection="list" item="item" index="" separator=",">
+            (#{item.id},#{item.path})
+        </foreach>
+        on duplicate key update path = values(path)
+    </update>
+
+    <update id="batchDelete" parameterType="list">
+        delete from t_basic_file where id in
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+</mapper>

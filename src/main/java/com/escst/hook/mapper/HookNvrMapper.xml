@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.hook.mapper.HookNvrMapper">
+	
+	<select id="queryNvrByConstructionId" parameterType="String" resultType="com.escst.hook.entity.HookNvrEntity">
+		select n.id,
+			n.construction_id as constructionId,
+			n.ip,
+			n.web_port webPort,
+			n.app_port appPort,
+			n.user_name as userName,
+			n.user_password as userPassword
+		 from t_hook_nvr n where n.construction_id=#{constructionId}
+	</select>
+</mapper>

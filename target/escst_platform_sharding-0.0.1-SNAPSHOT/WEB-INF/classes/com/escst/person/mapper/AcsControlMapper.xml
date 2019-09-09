@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.person.mapper.AcsControlMapper">
+
+    <insert id="save" parameterType="com.escst.person.entity.AcsControlEntity">
+        INSERT INTO t_basic_equipment
+        (id, name, construction_id, construction_name, number, create_time)
+        VALUES (#{id}, #{name}, #{constructionId}, #{constructionName}, #{number}, #{createTime})
+    </insert>
+
+    <update id="update" parameterType="com.escst.person.entity.AcsControlEntity">
+        UPDATE t_basic_equipment
+        <set>
+            <if test="name != null and name != '' ">
+                name = #{name},
+            </if>
+            <if test="number !=null and number !=''">
+                number = #{number},
+            </if>
+        </set>
+        WHERE id =#{id}
+
+    </update>
+
+
+    <select id="queryList" parameterType="com.escst.person.entity.AcsControlEntity"
+            resultType="com.escst.person.entity.AcsControlEntity">
+        SELECT
+            id,
+            IFNULL(name, "")              name,
+            IFNULL(construction_id, "")   constructionId,
+            IFNULL(construction_name, "") constructionName,
+            IFNULL(number, "")            number
+        FROM t_basic_equipment
+        where construction_id = #{constructionId}
+        ORDER by create_time DESC
+        LIMIT #{startIndex}, #{rowNum}
+    </select>
+
+    <select id="queryById" parameterType="String" resultType="com.escst.person.entity.AcsControlEntity">
+        SELECT
+            e.id                 as id,
+            IFNULL(e.name, "")   as name,
+            IFNULL(e.number, "") as number,
+            e.construction_name  as constructionName,
+            t.name               as areaName
+        FROM t_basic_equipment e inner join t_basic_construction c on e.construction_id = c.id
+            inner join t_sys_territory t on c.belong_area = t.id
+        WHERE e.id = #{id}
+    </select>
+
+    <select id="queryCount" parameterType="string" resultType="Integer">
+        SELECT count(*)
+        FROM t_basic_equipment
+        where construction_id = #{constructionId}
+    </select>
+
+    <select id="listControllerNoDoor" resultType="com.escst.person.entity.AcsControlEntity">
+        select
+            id,
+            IFNULL(name, "")   name,
+            IFNULL(number, "") number
+        FROM t_basic_equipment
+        WHERE construction_id = #{constructionId} and (door_id is null or door_id = '')
+    </select>
+</mapper>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.taskAppointment.mapper.TaskAppointmentMapper">
+    <select id="queryList" parameterType="map" resultType="map">
+        SELECT
+        IFNULL(a.id,"") id,
+        IFNULL(a.remark,"") remark,
+        IFNULL(a.create_by,"")createBy,
+        IFNULL(DATE_FORMAT(a.create_time,'%Y-%m-%d'),"") createTime,
+        IFNULL(DATE_FORMAT(a.appointment_date,'%Y-%m-%d %H:%i'),"") appointmentDate,
+        IFNULL(a.is_urgent_task,0) isUrgentTask,
+        IFNULL(a.equipment_type,0) equipmentType,
+        IFNULL(a.status,"") status,
+        IFNULL(a.id,"") id,
+        IFNULL(a.appointment_id,"") appointmentId,
+        IFNULL(q.name,"") createByName,
+        IFNULL(b.mobile,"")moblie,
+        IFNULL(c.name,"") projectCompanyName,
+        IFNULL(e.name,"") projectStructureName,
+        IFNULL(b.name,"")appointmentName,
+        IFNULL(d.name,"")handlePerson,
+        IFNULL(f.name,"")constructionName,
+        IFNULL(tst.name,"")areaName
+        FROM t_basic_task_appointment a
+        LEFT JOIN t_sys_user q ON q.id=a.create_by
+        LEFT JOIN t_sys_user b ON b.id=a.appointment_id
+        LEFT JOIN t_sys_user d ON d.id=a.handle_person
+        LEFT JOIN t_basic_project_company c ON c.id=a.project_company_id
+        LEFT JOIN t_basic_project_structure e ON e.id=a.project_structure_id
+        LEFT JOIN t_basic_construction f ON f.id=a.construction_id
+        LEFT JOIN t_sys_territory tst ON tst.id = f.belong_area
+        <where>
+            <if test="appointmentId != null and appointmentId != ''">
+                (a.create_by = #{appointmentId} OR a.appointment_id = #{appointmentId} OR a.handle_person =#{appointmentId})
+            </if>
+            <if test="equipmentType != null and equipmentType !=0">
+                AND a.equipment_type=#{equipmentType}
+            </if>
+            <if test="status != null and status !=0">
+                AND a.status=#{status}
+            </if>
+            <if test="areaId != null and areaId !=''">
+                AND f.belong_area=#{areaId}
+            </if>
+            <if test="createTime!=null">
+                AND a.create_time LIKE CONCAT('%',#{createTime},'%')
+            </if>
+            <if test="constructionId != null and constructionId != '' ">
+                AND a.CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                AND a.CONSTRUCTION_ID IN
+                <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                    (#{constructionVo.id})
+                </foreach>
+            </if>
+        </where>
+        ORDER BY a.is_urgent_task desc ,a.appointment_date ASC ,a.create_time ASC
+    </select>
+
+    <select id="queryCount" parameterType="map" resultType="Integer">
+      SELECT count(a.id) FROM t_basic_task_appointment a
+        LEFT JOIN t_basic_construction b ON b.id=a.construction_id
+        <where>
+            <if test="appointmentId != null and appointmentId != ''">
+                (a.create_by = #{appointmentId} OR a.appointment_id = #{appointmentId})
+            </if>
+            <if test="createTime!=null">
+                AND a.create_time LIKE CONCAT('%',#{createTime},'%')
+            </if>
+            <if test="areaId!=null and areaId !=''">
+                AND b.belong_area = #{areaId}
+            </if>
+            <if test="constructionId != null and constructionId != '' ">
+                AND a.CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                AND a.CONSTRUCTION_ID IN
+                <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                    (#{constructionVo.id})
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="queryListDetial" parameterType="map" resultType="map">
+        SELECT
+        IFNULL(a.task_status,0) taskStatus,
+        IFNULL(b.name,"") appointmentName,
+        IFNULL(a.appointment_id,"")appointmentId ,
+        IFNULL(DATE_FORMAT(c.appointment_date,'%Y-%m-%d %H:%i '),"") appointmentDate,
+        IFNULL(a.remark,"") remark
+        FROM t_basic_task_appointment_process a
+        left JOIN t_basic_person b ON b.user_id=a.appointment_id
+        left JOIN t_basic_task_appointment c ON c.id=a.task_appointment_id
+        <where>
+            <if test="taskAppointmentId != null and taskAppointmentId != ''">
+                a.task_appointment_id = #{taskAppointmentId}
+            </if>
+            ORDER BY a.create_time DESC
+        </where>
+    </select>
+
+    <insert id="insertTaskAppointmnet" parameterType="com.escst.taskAppointment.entity.TaskAppointmentEntity">
+        INSERT INTO t_basic_task_appointment(id,construction_id,is_urgent_task,project_structure_id,project_company_id,equipment_type,appointment_date,remark,team_id,appointment_id,status,create_time,create_by,update_time,update_by,handle_person)
+        VALUES (#{id},#{constructionId},#{isUrgentTask},#{projectStructureId},#{projectCompanyId},#{equipmentType},#{appointmentDate},#{remark},#{teamId},#{appointmentId},#{status},#{createTime},#{createBy},#{updateTime},#{updateBy},#{handlePerson})
+    </insert>
+
+    <insert id="insertTaskAppointmnetProcess" parameterType="com.escst.taskAppointment.entity.TaskAppointmentProcessEntity">
+        INSERT INTO t_basic_task_appointment_process(id,task_appointment_id,appointment_id,task_status,remark,create_time)
+        VALUES (#{id},#{taskAppointmentId},#{appointmentId},#{taskStatus},#{remark},#{createTime})
+    </insert>
+
+    <update id="updateTaskAppointment" parameterType="com.escst.taskAppointment.entity.TaskAppointmentEntity">
+        UPDATE t_basic_task_appointment
+        <set>
+            <if test="status != null and status != 0">
+                status = #{status}
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+</mapper>

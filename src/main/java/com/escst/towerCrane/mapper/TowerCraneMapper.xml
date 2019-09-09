@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.towerCrane.mapper.TowerCraneMapper">
+
+    <insert id="insert" parameterType="com.escst.towerCrane.entity.TowerCraneEntity">
+        INSERT INTO t_basic_towercrane_realtime (`id`,
+                                                 `construction_id`,
+                                                 `equipment_id`,
+                                                 `acquisition_time`,
+                                                 `angle`,
+                                                 `extent`,
+                                                 `height`,
+                                                 `wind_speed`,
+                                                 `weight`,
+                                                 `obliquity`,
+                                                 `create_time`,
+                                                 `create_by`,
+                                                 `update_time`,
+                                                 `update_by`)
+        VALUES (#{id},
+                #{constructionId},
+                #{equipmentId},
+                #{acquisitionTime},
+                #{angle},
+                #{extent},
+                #{height},
+                #{windSpeed},
+                #{weight},
+                #{obliquity},
+                current_timestamp(),
+                #{createBy},
+                current_timestamp(),
+                #{updateBy});
+    </insert>
+    <select id="queryRealtimeList" parameterType="com.escst.equipment.vo.AcquisitionDataQueryVO"
+            resultType="com.escst.towerCrane.vo.TowercraneRealtimeVO">
+        SELECT DATE_FORMAT(a.acquisition_time,'%Y-%m-%d %H:%i:%s') time,a.angle angle,a.extent extent,a.height
+        height,a.wind_speed windSpeed,a.weight weight,a.obliquity obliquity,a.percent percent,tber.name name
+        FROM t_basic_towercrane_realtime a
+        LEFT JOIN t_basic_equipment_register tber ON tber.id = a.equipment_id
+        <where>
+            <if test="constructionId != null and constructionId != '' ">
+                a.construction_id = #{constructionId}
+            </if>
+            <if test="equipmentId != null and equipmentId != ''">
+                AND a.equipment_id = #{equipmentId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                <![CDATA[
+				AND a.acquisition_time > str_to_date(#{startDate}, '%Y-%m-%d')
+				]]>
+            </if>
+            <if test="endDate != null and endDate != ''">
+                <![CDATA[
+				AND a.acquisition_time < date_add(str_to_date(#{endDate}, '%Y-%m-%d'), interval 1 day)
+				]]>
+            </if>
+        </where>
+        order by a.acquisition_time desc
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+    <select id="getRealtimeCount" parameterType="com.escst.equipment.vo.AcquisitionDataQueryVO" resultType="int">
+        SELECT count(1) count
+        FROM t_basic_towercrane_realtime a
+        <where>
+            <if test="constructionId != null and constructionId != '' ">
+                a.construction_id = #{constructionId}
+            </if>
+            <if test="equipmentId != null and equipmentId != ''">
+                AND a.equipment_id = #{equipmentId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                <![CDATA[
+				AND a.acquisition_time > str_to_date(#{startDate}, '%Y-%m-%d')
+				]]>
+            </if>
+            <if test="endDate != null and endDate != ''">
+                <![CDATA[
+				AND a.acquisition_time < date_add(str_to_date(#{endDate}, '%Y-%m-%d'), interval 1 day)
+				]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectTimeDiffByIds" resultType="int" parameterType="map">
+        SELECT count(1)
+        FROM t_basic_towercrane_realtime t
+        WHERE t.construction_id = #{constructionId}
+          and t.equipment_id = #{equipmentId}
+          and t.create_time > #{createTime}
+    </select>
+
+    <select id="queryRealtimeData" parameterType="String" resultType="com.escst.towerCrane.vo.TowercraneRealtimeVO">
+        SELECT id,
+               DATE_FORMAT(acquisition_time, '%Y-%m-%d %H:%i:%s') time,
+               angle,
+               extent,
+               height,
+               wind_speed                                         windSpeed,
+               weight,
+               obliquity,
+               percent
+        FROM t_basic_towercrane_realtime a
+        WHERE a.equipment_id = #{equipmentId}
+        ORDER BY acquisition_time desc
+        LIMIT 1
+    </select>
+
+    <select id="getCount" parameterType="com.escst.towerCrane.vo.TowercraneRealtimeVO" resultType="int">
+        select count(1)
+        <include refid="condition"></include>
+    </select>
+
+    <select id="listHistoryData" parameterType="com.escst.towerCrane.vo.TowercraneRealtimeVO"
+            resultType="com.escst.towerCrane.vo.TowercraneRealtimeVO">
+        SELECT
+        DATE_FORMAT(acquisition_time, '%Y-%m-%d %H:%i:%s') time,
+        angle,
+        extent,
+        height,
+        wind_speed windSpeed,
+        weight,
+        obliquity,
+        percent
+        <include refid="condition"></include>
+        ORDER BY acquisition_time desc
+        limit #{startIndex},#{rowNum}
+    </select>
+
+    <sql id="condition">
+        from t_basic_towercrane_realtime_history
+        where 1 = 1
+        <if test="constructionId != null and constructionId != ''">
+            and construction_id = #{constructionId}
+        </if>
+        <if test="equipmentId != null and equipmentId != ''">
+            and equipment_id = #{equipmentId}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            and acquisition_time >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and acquisition_time <= #{endTime}]]>
+        </if>
+    </sql>
+
+    <select id="countTowerCraneWarningData" parameterType="com.escst.towerCrane.vo.QueryConditionVo" resultType="int">
+        select count(*)
+        <include refid="towerCraneWarningData"></include>
+    </select>
+
+    <select id="listTowerCraneWarningData" parameterType="com.escst.towerCrane.vo.QueryConditionVo"
+            resultType="com.escst.towerCrane.vo.TowercraneRealtimeVO">
+        SELECT
+        DATE_FORMAT(acquisition_time, '%Y-%m-%d %H:%i:%s') time,
+        ifnull(angle,0) angle,
+        ifnull(extent,0) extent,
+        ifnull(height,0) height,
+        ifnull(wind_speed,0) windSpeed,
+        ifnull(weight,0) weight,
+        ifnull(obliquity,0) obliquity,
+        ifnull(percent,0) percent
+        <include refid="towerCraneWarningData"></include>
+        ORDER BY acquisition_time desc
+        limit #{startIndex},#{rowNum}
+    </select>
+
+    <sql id="towerCraneWarningData">
+        from t_basic_towercrane_alarm
+        where equipment_id = #{equipmentId}
+        <if test="startTime != null and startTime != ''">
+            and acquisition_time >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and acquisition_time <= #{endTime}]]>
+        </if>
+    </sql>
+
+    <select id="countLifterWarningData" parameterType="com.escst.towerCrane.vo.QueryConditionVo" resultType="int">
+        select count(*)
+        <include refid="lifterWarningData"></include>
+    </select>
+
+    <select id="listLifterWarningData" parameterType="com.escst.towerCrane.vo.QueryConditionVo"
+            resultType="com.escst.lifter.vo.LifterRealtimeVO">
+        SELECT
+        DATE_FORMAT(acquisition_time, '%Y-%m-%d %H:%i:%s') time,
+        ifnull(height, 0) height,
+        ifnull(weight, 0) weight,
+        ifnull(obliquity, 0) obliquity,
+        ifnull(peopleNum, 0) peopleNum
+        <include refid="lifterWarningData"></include>
+        ORDER BY acquisition_time desc
+        limit #{startIndex},#{rowNum}
+    </select>
+
+    <sql id="lifterWarningData">
+        from t_basic_lift_alarm
+        where equipment_id = #{equipmentId}
+        <if test="startTime != null and startTime != ''">
+            and acquisition_time >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and acquisition_time <= #{endTime}]]>
+        </if>
+    </sql>
+
+    <select id="getTowerCraneWarningData" parameterType="string"
+            resultType="com.escst.towerCrane.vo.TowercraneRealtimeVO">
+        SELECT ifnull(angle, 0)      angle,
+               ifnull(extent, 0)     extent,
+               ifnull(height, 0)     height,
+               ifnull(wind_speed, 0) windSpeed,
+               ifnull(weight, 0)     weight,
+               ifnull(obliquity, 0)  obliquity,
+               ifnull(percent, 0)    percent,
+               type
+        from t_basic_towercrane_alarm
+        where id = #{id}
+    </select>
+
+
+    <select id="data" parameterType="com.escst.towerCrane.vo.TowercraneRealtimeVO"
+            resultType="com.escst.towerCrane.entity.TowerCraneEntity">
+        <![CDATA[
+        select id,
+               construction_id  as constructionId,
+               equipment_id     as equipmentId,
+               acquisition_time as acquisitionTime,
+               angle            as angle,
+               extent           as extent,
+               height,
+               wind_speed          windSpeed,
+               weight,
+               obliquity,
+               percent,
+               create_time         createTime,
+               create_by           createBy,
+               update_time         updateTime,
+               update_by           updateBy,
+               al_forbidden_zone,
+               al_obstacle_collision,
+               al_tower_collision,
+               al_Incline,
+               al_wind_speed,
+               al_load,
+               al_limit,
+               al_hardware_fault,
+               al_torque
+        from t_basic_towercrane_realtime_history
+        where acquisition_time >= #{startTime}
+          and acquisition_time <=
+              #{endTime}
+        ]]>
+    </select>
+
+    <insert id="insertData" parameterType="map">
+        insert into ${tableName} (id,
+        construction_id,
+        equipment_id,
+        acquisition_time,
+        angle,
+        extent,
+        height,
+        wind_speed,
+        weight,
+        obliquity,
+        percent,
+        create_time,
+        create_by,
+        update_time,
+        update_by,
+        al_forbidden_zone,
+        al_obstacle_collision,
+        al_tower_collision,
+        al_Incline,
+        al_wind_speed,
+        al_load,
+        al_limit,
+        al_hardware_fault,
+        al_torque
+        ) values
+        <foreach collection="list" item="item" index="" separator=",">
+            (#{item.id,jdbcType=VARCHAR},#{item.constructionId,jdbcType=VARCHAR},#{item.equipmentId,jdbcType=VARCHAR},#{item.acquisitionTime,jdbcType=DATE},#{item.angle,jdbcType=DOUBLE},#{item.extent,jdbcType=DOUBLE},#{item.height,jdbcType=DOUBLE},#{item.windSpeed,jdbcType=DOUBLE},
+            #{item.weight,jdbcType=DOUBLE},#{item.obliquity,jdbcType=DOUBLE},#{item.percent,jdbcType=DOUBLE},#{item.createTime,jdbcType=DATE},#{item.createBy,jdbcType=VARCHAR},#{item.upDATE,jdbcType=DATE},#{item.updateBy,jdbcType=VARCHAR},#{item.al_forbidden_zone,jdbcType=DOUBLE},#{item.al_obstacle_collision,jdbcType=DOUBLE}
+            ,#{item.al_tower_collision,jdbcType=DOUBLE},#{item.al_Incline,jdbcType=DOUBLE},#{item.al_wind_speed,jdbcType=DOUBLE},#{item.al_load,jdbcType=DOUBLE},#{item.al_limit,jdbcType=DOUBLE},#{item.al_hardware_fault,jdbcType=DOUBLE},#{item.al_torque,jdbcType=DOUBLE})
+        </foreach>
+    </insert>
+
+    <insert id="insertShardingData" parameterType="map">
+        insert into ${tableName}
+        select *
+        from t_basic_towercrane_realtime_history
+        where equipment_id = #{equipmentId}
+    </insert>
+
+    <select id="countGroupByEquipmentId" resultType="com.escst.towerCrane.vo.TowercraneRealtimeVO">
+        select equipment_id as equipmentId, count(*) as count
+        from t_basic_towercrane_realtime_history
+        group by equipment_id
+    </select>
+
+    <select id="groupByEquipmentId" resultType="string">
+        select equipment_id as equipmentId
+        from t_basic_towercrane_realtime_history
+        group by equipment_id
+    </select>
+
+
+</mapper>

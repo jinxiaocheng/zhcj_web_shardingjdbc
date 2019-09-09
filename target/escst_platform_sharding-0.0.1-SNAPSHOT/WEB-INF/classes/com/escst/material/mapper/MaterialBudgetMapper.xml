@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.material.mapper.MaterialBudgetMapper">
+
+	<select id="selectMapList" parameterType="com.escst.material.bean.MaterialBean"
+		resultType="map">
+		SELECT
+			mm.id AS id,
+			b.name AS name,
+			mm.`name` as modelName,
+			a.quantity AS quantity,
+			b.unit as unit,
+			a.amount amount,
+			(case when a.update_time is null then a.create_time else a.update_time end) updateTime,
+			c.`name` AS constructionName,
+			d.name as terrName
+		FROM
+			t_basic_material_budget a
+		INNER JOIN t_basic_material b ON a.material_id = b.id
+		LEFT JOIN t_basic_material_model mm on a.model_id=mm.id
+		LEFT JOIN t_basic_construction c ON a.construction_id = c.id
+		LEFT JOIN t_sys_territory d on c.belong_area=d.id
+		<include refid="whereCondition"></include>
+		ORDER BY a.CREATE_TIME DESC
+		LIMIT #{startIndex},#{rowNum}
+	</select>
+
+	<select id="selectMapCount" parameterType="com.escst.material.bean.MaterialBean"
+		resultType="Integer">
+		SELECT
+			count(1)
+		FROM
+			t_basic_material_budget a
+		INNER JOIN t_basic_material b ON a.material_id = b.id
+		LEFT JOIN t_basic_material_model mm on b.id=mm.material_id
+		LEFT JOIN t_basic_construction c ON a.construction_id = c.id
+		LEFT JOIN t_sys_territory d on c.belong_area=d.id
+		<include refid="whereCondition"></include>
+	</select>
+
+	<sql id="whereCondition">
+		<where>
+			1=1
+			<if test="name!=null and name!=''">
+				and b.name like '%${name}%'
+			</if>
+			<if test="areaId!=null and areaId!=''">
+				and c.belong_area = #{areaId}
+			</if>
+			<if test="constructionId!=null and constructionId!=''">
+				and c.id = #{constructionId}
+			</if>
+		</where>
+		 and exists (
+						select 1
+						from t_sys_user u
+						inner join t_sys_organization p on p.id = u.org_id
+						inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+						where s.construction_id = a.construction_id and u.id = #{userId}
+					)
+	</sql>
+	
+	<insert id="insert" parameterType="com.escst.material.entity.MaterialBudgetEntity">
+        INSERT INTO t_basic_material_budget (
+			`id`,
+			`construction_id`,
+			`material_id`,
+			model_id,
+			`quantity`,
+			`amount`,
+			`create_time`,
+			`create_by`,
+			`update_time`,
+			`update_by`
+		)
+		VALUES
+			(
+				#{id},
+				#{constructionId},
+				#{materialId},
+				#{modelId},
+				#{quantity},
+				#{amount},
+				#{createTime},
+				#{createBy},
+				#{updateTime},
+				#{updateBy}
+			)
+    </insert>
+    
+    <update id="update" parameterType="com.escst.material.entity.MaterialBudgetEntity">
+    	update t_basic_material_budget t
+    	<set>
+    		<if test="quantity!=null">
+    			t.quantity =#{quantity},
+    		</if>
+    		<if test="amount!=null">
+				t.amount =#{amount},
+    		</if>
+			t.update_time=#{updateTime},t.update_by=#{updateBy}
+    	</set>
+    	where t.id=#{id}
+    </update>
+    
+    <select id="selectBudgetById" parameterType="String" resultType="map">
+    	SELECT
+    		mb.id as id,
+			t.name as terrName,
+			c.name as constructionName,
+			m.name as name,
+			mm.`name` as modelName,
+			m.unit as unit,
+			mb.amount as amount,
+			mb.quantity
+		FROM
+			t_basic_material_budget mb
+		LEFT JOIN t_basic_material m ON mb.material_id = m.id
+		LEFT JOIN t_basic_material_model mm on mb.model_id = mm.id
+		LEFT JOIN t_basic_construction c ON mb.construction_id = c.id
+		LEFT JOIN t_sys_territory t on c.belong_area=t.id
+		WHERE
+			mb.model_id = #{id}
+    </select>
+    
+   <update id="updateByIds" parameterType="com.escst.material.entity.MaterialBudgetEntity">
+    	update t_basic_material_budget t
+    	<set>
+    		<if test="quantity!=null">
+    			t.quantity =#{quantity},
+    		</if>
+    		<if test="amount!=null">
+				t.amount =#{amount},
+    		</if>
+			t.update_time=#{updateTime},t.update_by=#{updateBy}
+    	</set>
+    	where t.material_id=#{materialId} and t.construction_id=#{constructionId}
+    </update>
+    
+    <insert id="batchInsert" parameterType="com.escst.material.entity.MaterialBudgetEntity">
+        INSERT INTO t_basic_material_budget (
+			`id`,
+			`construction_id`,
+			`material_id`,
+			`quantity`,
+			`amount`,
+			`create_time`,
+			`create_by`,
+			`update_time`,
+			`update_by`
+		)
+		VALUES
+		 <foreach collection="list" item="item" index="" separator=",">
+			(
+				#{item.id},
+				#{item.constructionId},
+				#{item.materialId},
+				#{item.quantity},
+				#{item.amount},
+				#{item.createTime},
+				#{item.createBy},
+				#{item.updateTime},
+				#{item.updateBy}
+			)
+			</foreach>
+    </insert>
+</mapper>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.person.mapper.QualificatioMapper">
+	<insert id="insert" parameterType="com.escst.person.entity.QualificatioEntity">
+		INSERT INTO t_basic_qualification
+		(id,number,type,issue_date,valid_date,issue_organs,construction_id,user_id,status,create_time,create_by)
+		VALUES
+		(#{id},#{number},#{type},#{issueDate},#{validDate},#{issueOrgans},#{constructionId},#{userId},#{status},#{createTime},#{createBy})
+	</insert>
+	<select id="selectById" parameterType="string" resultType="com.escst.person.entity.QualificatioEntity">
+		select id,number,type,issue_date issueDate,valid_date validDate,issue_organs issueOrgans,user_id userId,status
+		from t_basic_qualification
+		where id = #{id}
+	</select>
+	<select id="selectByUserId" parameterType="string" resultType="com.escst.person.entity.QualificatioEntity">
+		select id,number,type,issue_date issueDate,valid_date validDate,issue_organs issueOrgans,user_id userId,status
+		from t_basic_qualification
+		where user_id = #{userId}
+		order by status desc
+	</select>
+
+	<update id="update" parameterType="com.escst.person.entity.QualificatioEntity">
+		UPDATE T_BASIC_QUALIFICATION
+		<trim prefix="set" suffixOverrides=",">
+			<if test="number!=null and number!=''">number=#{number},</if>
+			<if test="type!=null and type!=''">type=#{type},</if>
+			<if test="issueDate!=null and issueDate!=''">issue_date=#{issueDate},</if>
+			<if test="validDate!=null and validDate!=''">valid_date=#{validDate},</if>
+			<if test="issueOrgans!=null and issueOrgans!=''">issue_organs=#{issueOrgans},</if>
+			<if test="updateTime!=null">update_time=#{updateTime},</if>
+		</trim>
+		WHERE ID = #{id}
+	</update>
+</mapper>

@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.hook.mapper.HookMapper">
+	<insert id="copyRealtime" parameterType="map">
+    	insert into t_da_hook_realtime(id,construction_id, equipment_id,acquisition_time,extent,height,create_time)
+		select r.id,r.construction_id,#{hookEquipmentId},r.acquisition_time,extent,height,SYSDATE()
+		from t_basic_towercrane_realtime r
+		where r.equipment_id = #{towercraneEquipmentId}
+			<![CDATA[
+		  		and r.acquisition_time >= #{startDate} and r.acquisition_time <= #{endDate}
+		  	]]>
+		  and not exists (select 1 from t_da_hook_realtime h where h.id = r.id)
+    </insert>
+
+	<insert id="insertEquipment" parameterType="com.escst.hook.entity.HookEquipmentEntity">
+		INSERT INTO t_hook_equipment (id,name,number,construction_id,model,manufacturer,remark,status,create_time)
+		VALUES (#{id},#{name},#{number},#{constructionId},#{model},#{manufacturer},#{remark},#{status},#{createTime})
+	</insert>
+
+	<update id="updateEquipment" parameterType="com.escst.hook.entity.HookEquipmentEntity">
+		UPDATE t_hook_equipment
+		<set>
+			<if test="name !=null and name !=''">
+				name =#{name},
+			</if>
+			<if test="number !=null and number !=''">
+				number =#{number},
+			</if>
+			<if test="model !=null and model !=''">
+				model =#{model},
+			</if>
+			<if test="manufacturer !=null and manufacturer !=''">
+				manufacturer =#{manufacturer},
+			</if>
+			<if test="remark !=null and remark !=''">
+				remark =#{remark},
+			</if>
+			<if test="status !=null and status !=0">
+				status =#{status},
+			</if>
+			<if test="updateTime !=null and updateTime !=''">
+				update_time =#{updateTime}
+			</if>
+		</set>
+		WHERE  id = #{id}
+	</update>
+
+
+	<select id="selectHookEquipmentList" parameterType="map" resultType="com.escst.hook.vo.HookEquipmentVo">
+		SELECT
+		IFNULL(the.id, "")                id,
+		IFNULL(the.name, "")              name,
+		IFNULL(the.number, "")           number,
+		IFNULL(the.model, "")      model,
+		IFNULL(the.remark, "")      remark,
+		IFNULL(the.manufacturer, "")      manufacturer,
+		IFNULL(the.construction_id, "")   constructionId,
+		IFNULL(tbc.name, "") constructionName,
+		IFNULL(tst.id, "")                areaId,
+		IFNULL(tst.name, "")              areaName,
+		IFNULL( DATE_FORMAT(the.create_time,'%Y-%m-%d %H:%m:%s'), "")      createTime
+		FROM t_hook_equipment the
+		LEFT JOIN t_basic_construction tbc ON tbc.id = the.construction_id
+		LEFT JOIN t_sys_territory tst ON tst.id = tbc.belong_area
+		<where>
+			the.status =1
+			<if test="constructionId !=null and constructionId != ''">
+				AND the.construction_id =#{constructionId}
+			</if>
+			<if test="name !=null and name != ''">
+				AND the.name like CONCAT("%",#{name},"%")
+			</if>
+			<if test="number !=null and number != ''">
+				AND the.number like CONCAT("%",#{number},"%")
+			</if>
+			<if test="areaId !=null and areaId != ''">
+				AND tbc.belong_area = #{areaId}
+			</if>
+			<if test="userId !=null and userId !=''">
+				AND exists(
+				select 1
+				from t_sys_user u
+				inner join t_sys_organization p on p.id = u.org_id
+				inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+				where s.construction_id = the.construction_id and u.id = #{userId} and s.status =1
+				)
+			</if>
+		</where>
+		ORDER BY the.create_time DESC
+		LIMIT #{offset},#{rows}
+	</select>
+
+	<select id="HookEquipmentCount" parameterType="map" resultType="Integer">
+		SELECT count(the.id) as count FROM t_hook_equipment the
+		LEFT JOIN t_basic_construction tbc ON tbc.id = the.construction_id
+		LEFT JOIN t_sys_territory tst ON tst.id = tbc.belong_area
+		<where>
+			the.status =1
+			<if test="constructionId !=null and constructionId != ''">
+				AND the.construction_id =#{constructionId}
+			</if>
+			<if test="name !=null and name != ''">
+				AND the.name like CONCAT("%",#{name},"%")
+			</if>
+			<if test="number !=null and number != ''">
+				AND the.number = #{number}
+			</if>
+			<if test="areaId !=null and areaId != ''">
+				AND tbc.belong_area = #{areaId}
+			</if>
+			<if test="userId !=null and userId !=''">
+				AND exists(
+				select 1
+				from t_sys_user u
+				inner join t_sys_organization p on p.id = u.org_id
+				inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+				where s.construction_id = the.construction_id and u.id = #{userId} and s.status =1
+				)
+			</if>
+		</where>
+	</select>
+
+	<select id="selectHookEquipmentDetail" parameterType="String" resultType="com.escst.hook.vo.HookEquipmentVo">
+		SELECT
+		IFNULL(the.id, "")                id,
+		IFNULL(the.name, "")              name,
+		IFNULL(the.number, "")           number,
+		IFNULL(the.model, "")      model,
+		IFNULL(the.remark, "")      remark,
+		IFNULL(the.manufacturer, "")      manufacturer,
+		IFNULL(the.construction_id, "")   constructionId,
+		IFNULL(tbc.name, "") constructionName,
+		IFNULL(tst.id, "")                areaId,
+		IFNULL(tst.name, "")              areaName
+		FROM t_hook_equipment the
+		LEFT JOIN t_basic_construction tbc ON tbc.id = the.construction_id
+		LEFT JOIN t_sys_territory tst ON tst.id = tbc.belong_area
+		WHERE the.id =#{id}
+	</select>
+
+	<select id="selectHookEquipmentByConstructionId" parameterType="String" resultType="com.escst.commons.vo.BaseVO">
+		SELECT id,name FROM t_hook_equipment WHERE construction_id =#{constructionId} AND status =1
+	</select>
+
+	<insert id="insertHookNvr" parameterType="com.escst.hook.entity.HookNvrEntity">
+		INSERT INTO t_hook_nvr (id,name,construction_id,ip,web_port,app_port,user_name,user_password,port,create_time)
+		VALUES(#{id},#{name},#{constructionId},#{ip},#{webPort},#{appPort},#{userName},#{userPassword},#{port},#{createTime})
+	</insert>
+
+	<update id="updateHookNvr" parameterType="com.escst.hook.entity.HookNvrEntity">
+		UPDATE t_hook_nvr
+		<set>
+			<if test="name !=null and name !=''">
+				name =#{name},
+			</if>
+			<if test="ip !=null and ip !=''">
+				ip =#{ip},
+			</if>
+			<if test="webPort !=null and webPort !=''">
+				web_port =#{webPort},
+			</if>
+			<if test="appPort !=null and appPort !=''">
+				app_port =#{appPort},
+			</if>
+			<if test="userName !=null and userName !=''">
+				user_name =#{userName},
+			</if>
+			<if test="userPassword !=null and userPassword !=''">
+				user_password =#{userPassword},
+			</if>
+			<if test="port !=null and port !=''">
+				port =#{port}
+			</if>
+		</set>
+		WHERE id =#{id}
+	</update>
+
+	<insert id="batchInsertHookCamera" parameterType="com.escst.hook.entity.HookCameraEntity">
+		INSERT INTO t_hook_camera(id,construction_id,construction_name,equipment_id,name,supplier,flag,channel_no,status,create_time)
+		VALUES
+		<foreach collection="list" item="item" index="" separator=",">
+			(#{item.id},
+			#{item.constructionId},
+			#{item.constructionName},
+			#{item.equipmentId},
+			#{item.name},
+			#{item.supplier},
+			#{item.flag},
+			#{item.channelNo},
+			#{item.status},
+			#{item.createTime}
+			)
+		</foreach>
+	</insert>
+
+	<update id="batchUpdateHookCamera" parameterType="com.escst.hook.entity.HookCameraEntity">
+		update t_hook_camera
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix="name =case" suffix="end,">
+				<foreach collection="list" item="item" index="index">
+					<if test="item.name != null and item.name != ''">
+						when id=#{item.id} then #{item.name}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="flag =case" suffix="end,">
+				<foreach collection="list" item="item" index="index">
+					<if test="item.flag != null">
+						when id=#{item.id} then #{item.flag}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="channel_no =case" suffix="end,">
+				<foreach collection="list" item="item" index="index">
+					<if test="item.channelNo != null and item.channelNo != ''">
+						when id=#{item.id} then #{item.channelNo}
+					</if>
+				</foreach>
+			</trim>
+		</trim>
+		where id in
+		<foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+			#{item.id}
+		</foreach>
+	</update>
+
+	<delete id="batchDeleteHookCamera" parameterType="java.util.List">
+		delete from t_hook_camera where id in
+		<foreach collection="list" item="arr" index="no" open="("
+				 separator="," close=")">
+			#{arr}
+		</foreach>
+	</delete>
+
+	<select id="selectCameraIds" parameterType="map" resultType="String">
+		SELECT  id FROM  t_hook_camera WHERE  construction_id =#{constructionId} AND equipment_id =#{equipmentId}
+	</select>
+
+	<select id="selectHookNvrList" parameterType="map" resultType="com.escst.hook.entity.HookNvrEntity">
+		SELECT IFNULL(thn.id,"") id,
+			   IFNULL(thn.name,"") name,
+			   IFNULL(tbc.name,"") constructionName,
+			   IFNULL(thn.construction_id,"") constructionId,
+			   IFNULL(thn.ip,"") ip,
+			   IFNULL(thn.web_port ,"") webPort,
+			   IFNULL(thn.app_port,"") appPort,
+		       IFNULL(thn.user_name,"") userName,
+			   IFNULL(thn.user_password,"") userPassword
+		FROM t_hook_nvr thn
+		LEFT JOIN t_basic_construction tbc ON tbc.id = thn.construction_id
+		LEFT JOIN t_sys_territory tst ON tst.id = tbc.belong_area
+		<where>
+			<if test="constructionId !=null and constructionId !=''">
+				thn.construction_id =#{constructionId}
+			</if>
+			<if test="areaId !=null and areaId !=''">
+				AND tbc.belong_area =#{areaId}
+			</if>
+		</where>
+		ORDER BY thn.create_time DESC
+		LIMIT #{offset},#{rows}
+	</select>
+
+	<select id="selectHookNvrCount" parameterType="map" resultType="Integer">
+		SELECT count(thn.id) as count
+		FROM t_hook_nvr thn
+		LEFT JOIN t_basic_construction tbc ON tbc.id = thn.construction_id
+		LEFT JOIN t_sys_territory tst ON tst.id = tbc.belong_area
+		<where>
+			<if test="constructionId !=null and constructionId !=''">
+				thn.construction_id =#{constructionId}
+			</if>
+			<if test="areaId !=null and areaId !=''">
+				AND tbc.belong_area =#{areaId}
+			</if>
+		</where>
+	</select>
+
+	<select id="selectHookCameraList" parameterType="String" resultType="com.escst.hook.entity.HookCameraEntity">
+		SELECT IFNULL(thc.id,"") id,
+			   IFNULL(thc.name,"") name,
+			   IFNULL(thc.flag,0) flag,
+			   IFNULL(thc.channel_no,0) channelNo,
+			   IFNULL(the.name,"") equipmentName,
+			   IFNULL(thc.status,0) status,
+			   IFNULL(thc.equipment_id ,"") equipmentId,
+			   IFNULL(the.name ,"") equipmentName
+		FROM t_hook_camera thc
+		LEFT JOIN t_hook_equipment the ON the.id = thc.equipment_id
+		WHERE thc.construction_id=#{constructionId}
+	</select>
+
+	<select id="selectNvrDetail" parameterType="String" resultType="com.escst.hook.entity.HookNvrEntity">
+		SELECT IFNULL(thn.id,"") id,
+			   IFNULL(thn.name,"") name,
+			   IFNULL(tbc.name,"") constructionName,
+			   IFNULL(thn.construction_id,"") constructionId,
+			   IFNULL(thn.ip,"") ip,
+			   IFNULL(thn.web_port ,"") webPort,
+			   IFNULL(thn.app_port,"") appPort,
+		       IFNULL(thn.user_name,"") userName,
+			   IFNULL(thn.user_password,"") userPassword,
+			    IFNULL(tst.id,"") areaId,
+			     IFNULL(tst.name,"") areaName
+		FROM t_hook_nvr thn
+		LEFT JOIN t_basic_construction tbc ON tbc.id = thn.construction_id
+		LEFT JOIN t_sys_territory tst ON tst.id = tbc.belong_area
+		WHERE thn.id =#{id}
+	</select>
+
+	<select id="selectEquipmentName" parameterType="String" resultType="String">
+		SELECT name FROM t_hook_equipment where id =#{id}
+	</select>
+</mapper>

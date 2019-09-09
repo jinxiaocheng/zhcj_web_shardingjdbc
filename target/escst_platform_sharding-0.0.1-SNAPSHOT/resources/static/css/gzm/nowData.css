@@ -1,0 +1,30 @@
+.biyue-bg {
+  background: #f2f2f2;
+}
+.biyue-left-ztree {
+  position: absolute;
+  left: 10px;
+  width: 300px;
+  top: 10px;
+  bottom: 10px;
+  background: #fff;
+  overflow: auto;
+  padding: 5px 0;
+  box-sizing: border-box;
+}
+.biyue-right-table {
+  position: absolute;
+  left: 320px;
+  right: 10px;
+  top: 10px;
+  bottom: 10px;
+  background: #fff;
+}
+.ztree li a {
+  margin-bottom: 3px;
+  letter-spacing: 1px;
+}
+.ztree * {
+  font-size: 13px;
+  color: #404040;
+}

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.person.mapper.DoorMapper">
+
+    <select id="getDoorIdBySerial" parameterType="string" resultType="string">
+        select door_id as doorId
+        from t_basic_equipment
+        where number = #{serial}
+    </select>
+
+    <select id="getCount" parameterType="string" resultType="int">
+        select count(*)
+        from t_basic_door
+        where construction_id = #{constructionId}
+    </select>
+
+    <select id="listAll" parameterType="com.escst.person.entity.DoorEntity"
+            resultType="com.escst.person.entity.DoorEntity">
+        select *
+        from t_basic_door
+        where construction_id = #{constructionId}
+        limit #{startIndex}, #{rowNum}
+    </select>
+
+    <select id="listDoor" parameterType="string" resultType="com.escst.person.entity.DoorEntity">
+        select id as doorId, name as doorName
+        from t_basic_door
+        where construction_id = #{constructionId}
+    </select>
+
+    <select id="listDoorByPersonId" parameterType="string" resultType="com.escst.person.entity.DoorEntity">
+        select door_id as doorId
+        from t_basic_person_door
+        where person_id = #{personId}
+    </select>
+
+    <select id="listControllerName" parameterType="string" resultType="string">
+        select name
+        from t_basic_equipment
+        where door_id = #{doorId}
+    </select>
+
+    <insert id="add" parameterType="com.escst.person.entity.DoorEntity">
+        insert into t_basic_door (id, name, construction_id, construction_name, create_time)
+        values (#{id}, #{name}, #{constructionId}, #{constructionName}, #{createTime})
+    </insert>
+
+    <update id="saveDoorAndController" parameterType="com.escst.person.entity.DoorEntity">
+        update t_basic_equipment set door_id = #{id},update_time = #{updateTime}
+        where id in
+        <foreach collection="controllerId" item="item" index="index" open="("
+                 separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="listController" parameterType="string" resultType="com.escst.person.entity.DoorEntity">
+        select
+            e.id                as id,
+            e.name              as name,
+            e.door_id           as doorId,
+            d.name              as doorName,
+            e.construction_id   as constructionId,
+            e.construction_name as constructionName,
+            t.name              as areaName
+        from t_basic_equipment e inner join t_basic_door d on e.door_id = d.id
+            inner join t_basic_construction c on e.construction_id = c.id
+            inner join t_sys_territory t on t.id = c.belong_area
+        where door_id = #{doorId}
+    </select>
+
+    <update id="delete" parameterType="com.escst.person.entity.DoorEntity">
+        update t_basic_equipment
+        set door_id = null
+        where door_id = #{id}
+    </update>
+
+    <update id="updateById" parameterType="com.escst.person.entity.DoorEntity">
+        update t_basic_door
+        set name = #{name}
+        where id = #{id}
+    </update>
+
+    <select id="getConstructionId" parameterType="string" resultType="string">
+        select construction_id as constructionId
+        from t_basic_construction_person
+        where person_id = #{personId}
+    </select>
+
+    <delete id="deleteByPersonId" parameterType="string">
+        delete from t_basic_person_door
+        where person_id = #{personId}
+    </delete>
+
+    <insert id="saveDoorAndPerson" parameterType="list">
+        insert into t_basic_person_door (id, person_id, door_id, create_time) values
+        <foreach collection="list" index="index" item="item" open=""
+                 separator="," close="">
+            (#{item.id},#{item.personId},#{item.doorId},#{item.createTime})
+        </foreach>
+    </insert>
+
+    <select id="getDoorDetail" parameterType="string" resultType="com.escst.person.entity.DoorEntity">
+        select
+            d.id                as id,
+            d.name              as doorName,
+            d.construction_name as constructionName,
+            t.name              as areaName
+        from t_basic_door d inner join t_basic_construction c on d.construction_id = c.id
+            inner join t_sys_territory t on c.belong_area = t.id
+        where d.id = #{doorId}
+    </select>
+
+</mapper>

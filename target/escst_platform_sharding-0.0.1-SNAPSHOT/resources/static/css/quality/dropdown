@@ -1,0 +1,107 @@
+@border-color:rgb(204, 204, 204);
+@padding:6px 12px;
+@color:#333;
+@move_width:150px+12px*2;
+@move_height:20px+6px*2;
+.rolate(@deg){
+  -webkit-transform: rotate(@deg);
+  -moz-transform: rotate(@deg);
+  -ms-transform: rotate(@deg);
+  -o-transform: rotate(@deg);
+  transform: rotate(@deg);
+}
+.transtion(@property,@time){
+  -webkit-transition: @property @time;
+  -moz-transition: @property @time;
+  -ms-transition: @property @time;
+  -o-transition: @property @time;
+  transition: @property @time;
+}
+.K_select{
+  position: relative;
+  .k_dropdown{
+    position: absolute;
+    top: 35px;
+    border:1px solid @border-color;
+    border-radius: 3px;
+    z-index: 100;
+    background: #fff;
+    display: none;
+    li{
+      box-sizing: border-box;
+      padding: @padding;
+      border-bottom:1px solid @border-color ;
+      position: relative;
+      cursor: pointer;
+      span{
+        .rolate(270deg);
+        .transtion(transform,0.3s);
+        position: absolute;
+        top: 14px;
+        right: 6px;
+      }
+      a{
+        color:@color;
+        width: 150px;
+        height: 20px;
+        line-height: 20px;
+        overflow:hidden;
+        text-overflow: ellipsis;
+        display:block;
+      }
+    }
+    li:last-of-type{
+      border-bottom: 0;
+    }
+    &>li.focus{
+      &>ul{
+        opacity: 1;
+        display:block;
+      }
+      &>span{
+        .rolate(315deg);
+      }
+    }
+  }
+  .k_dropdown_1{
+    &:extend(.K_select .k_dropdown);
+    left:@move_width;
+    top:@move_height;
+    opacity: 0;
+    .transtion(opacity,0.3s);
+    li{
+      span{
+        .rolate(0);
+      }
+    }
+    &>li.focus{
+      &>ul{
+        opacity: 1;
+        display: block;
+        margin-top:6px;
+        height: auto;
+      }
+      &>span{
+        .rolate(180deg);
+      }
+    }
+
+
+  }
+  .k_dropdown_2{
+    background: #DFDFDF;
+    border:1px solid @border-color;
+    border-radius: 5px;
+    opacity: 0;
+    overflow: hidden;
+    height: 0;
+    .transtion(all,0.5s);
+    li{
+      border-bottom: 0px;
+      border-top:1px solid @border-color;
+    }
+    li:first-of-type{
+      border: 0px;
+    }
+  }
+}

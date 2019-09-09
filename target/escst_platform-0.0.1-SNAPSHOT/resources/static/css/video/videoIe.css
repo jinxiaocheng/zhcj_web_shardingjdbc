@@ -1,0 +1,75 @@
+#video_contorl .orientation .or {
+    background: none;
+    width: 20px;
+}
+
+#video_contorl .orientation .or_center {
+    margin-left: -48px;
+    margin-top: -50px;
+}
+
+#video_contorl .orientation .or_0 {
+    background: url("../../images/video/key/right.png") no-repeat;
+    margin-left: 65px;
+    margin-top: -10px;
+}
+#video_contorl .orientation .or_1 {
+    background: url("../../images/video/key/right_down.png") no-repeat;
+    margin-left: 39.49px;
+    margin-top: 39.49px;
+}
+#video_contorl .orientation .or_2 {
+    background: url("../../images/video/key/down.png") no-repeat;
+    margin-left: -15px;
+    margin-top: 70px;
+}
+#video_contorl .orientation .or_3 {
+    background: url("../../images/video/key/left_down.png") no-repeat;
+    margin-left: -62.49px;
+    margin-top:40.49px;
+}
+#video_contorl .orientation .or_4 {
+    background: url("../../images/video/key/left.png") no-repeat;
+    margin-left: -85px;
+    margin-top: -10px;
+}
+#video_contorl .orientation .or_5 {
+    background: url("../../images/video/key/left_up.png") no-repeat;
+    margin-left: -63.49px;
+    margin-top: -55.49px;
+}
+#video_contorl .orientation .or_6 {
+    background: url("../../images/video/key/up.png") no-repeat;
+    margin-left: -15px;
+    margin-top: -80px;
+}
+#video_contorl .orientation .or_7 {
+    background: url("../../images/video/key/right_up.png") no-repeat;
+    margin-left: 35.49px;
+    margin-top: -56.49px;
+}
+
+#video_contorl .orientation .or_0.or_hover {
+    background: url("../../images/video/key/right_hover.png") no-repeat;
+}
+#video_contorl .orientation .or_1.or_hover {
+    background: url("../../images/video/key/right_down_hover.png") no-repeat;
+}
+#video_contorl .orientation .or_2.or_hover {
+    background: url("../../images/video/key/down_hover.png") no-repeat;
+}
+#video_contorl .orientation .or_3.or_hover {
+    background: url("../../images/video/key/left_down_hover.png") no-repeat;
+}
+#video_contorl .orientation .or_4.or_hover {
+    background: url("../../images/video/key/left_hover.png") no-repeat;
+}
+#video_contorl .orientation .or_5.or_hover {
+    background: url("../../images/video/key/left_up_hover.png") no-repeat;
+}
+#video_contorl .orientation .or_6.or_hover {
+    background: url("../../images/video/key/up_hover.png") no-repeat;
+}
+#video_contorl .orientation .or_7.or_hover {
+    background: url("../../images/video/key/right_up_hover.png") no-repeat;
+}

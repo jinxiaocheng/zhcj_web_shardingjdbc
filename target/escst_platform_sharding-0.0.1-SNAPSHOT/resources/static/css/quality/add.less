@@ -1,0 +1,314 @@
+@color:#dfdfdf;
+@font1:16px;
+@font2:14px;
+@space:10px;
+@left:33.33%;
+@top:35px;
+@dropdown_box_width:62%;
+.transtion(@property,@time){
+  -webkit-transition: @property @time;
+  -moz-transition: @property @time;
+  -ms-transition: @property @time;
+  -o-transition: @property @time;
+  transition: @property @time;
+}
+.transform(@x,@y){
+  -webkit-transform: translate(@x,@y);
+  -moz-transform: translate(@x,@y);
+  -ms-transform: translate(@x,@y);
+  -o-transform: translate(@x,@y);
+  transform: translate(@x,@y);
+}
+//检查部位树形图
+.k_dropdown{
+    position: absolute;
+    width: @dropdown_box_width;
+    left: @left;
+    top:@top;
+    z-index: 2147483647;
+    float: left;
+    min-width: 160px;
+    max-height: 400px;
+    overflow: auto;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, .15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    display: none;
+}
+#construction,#documentType{
+    label{
+      padding: 0;
+      margin: 0;
+    }
+}
+.dropdown-menu{
+  left: @left;
+}
+//整体结构
+.add_form{
+  padding:0 25px;
+}
+
+.add_title{
+  border-bottom: 1px solid @color;
+  font-size: @font1;
+  position: relative;
+  p{
+    border-left: 3px solid #36a1da;
+    margin:5px 0;
+    text-indent: 0.5em;
+    line-height: 24px;
+  }
+/*  p:before{
+    content: "";
+    border: 3px solid #00a0e9;
+    position: absolute;
+    top: 9px;
+    left: -2px;
+    border-radius: 50%;
+  }*/
+}
+.add_list{
+  margin-top:@space;
+}
+.form-group{
+  label{
+    padding: 6px 0 6px 12px;
+  }
+}
+
+.form-group.all_block.row{
+  display: block;
+  width: 100%;
+  margin-top:20px;
+  label{
+    width: 10%;
+    float: left;
+  }
+  textarea{
+    width: 90%;
+    float: left;
+  }
+}
+
+.submit_img{
+  width: 100%;
+  margin: 10px 0;
+  .input-group {
+      width: 100%;
+  }
+/*  border: 1px dashed @color;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  p{
+    text-align: center;
+    line-height: 100px;
+    color: @color;
+  }*/
+}
+//检查结果
+.result{
+  width: 100%;
+  margin-top: @space;
+  padding: 12px;
+  padding-left: 0;
+  box-sizing: border-box ;
+  &>*{
+    display: inline-block;
+  }
+  label{
+    width: 10%;
+  }
+  ul li{
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 1px solid #4E5465;
+    line-height: 50px;
+    text-align: center;
+    border-radius: 50%;
+    margin-left: 20px;
+    cursor: pointer;
+    .transtion(all,0.3s)
+  }
+  ul li.focus{
+    background: rgba(138, 138, 138, 0.73);
+    color: #fff;
+    -webkit-box-shadow: 0 0 2px #9c9c9c ;
+    -moz-box-shadow: 0 0 2px #9c9c9c ;
+    box-shadow: 0 0 2px #9c9c9c ;
+  }
+  ul li:hover{
+    background: rgba(100, 100, 100, 0.87);
+    color: #fff;
+    -webkit-box-shadow: 0 0 10px #9c9c9c ;
+    -moz-box-shadow: 0 0 10px #9c9c9c ;
+    box-shadow: 0 0 10px #9c9c9c ;
+  }
+}
+//整改
+.Abarbeitung{
+  width: 100%;
+  display: none;
+  .Abarbeitung_time{
+    margin-left: -12px;
+  }
+}
+
+  //尾部
+footer{
+  width: 100%;
+  height: 50px;
+  background: #fff;
+  position: fixed;
+  bottom: 0;
+  text-align: right;
+  padding: 7px;
+  -webkit-box-shadow: -2px 0 2px #9c9c9c;
+  -moz-box-shadow: -2px 0 2px #9c9c9c;
+  box-shadow: -2px 0 2px #9c9c9c;
+  z-index: 10000;
+}
+
+/*//隐藏图片上传标志
+.kv-file-upload{
+  display: none;
+}
+.fileinput-upload-button{
+  &:extend(.kv-file-upload);
+}
+.file-upload-indicator>i{
+  &:extend(.kv-file-upload);
+}
+.kv-upload-progress{
+  display: none;
+}
+.kv-fileinput-error{
+  display: none !important;
+}
+.submit_img .file-caption{
+  padding:0 12px;
+}
+.has-error .form-control{
+  border:1px solid #ccc !important;
+}*/
+
+
+//修改boostrap
+.dropdown-toggle{
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+  &>span{
+    float: right;
+    margin-top: 9px;
+    margin-left: 0;
+    position: absolute;
+    right: 5px;
+  }
+}
+.input-group-btn{
+  width: 113px !important;
+}
+.form-control .file-caption .kv-fileinput-caption{
+    padding: 0 12px;
+}
+.alert-danger{
+    position: fixed;
+    left: 50%;
+    top:45%;
+   .transform(-50%,-50%);
+   width: 300px;
+   box-shadow: 0 0 10px #f2dede;
+   display: none;
+}
+#personform{
+  .row{
+    &>i{
+      &>input{
+        width: 100%;
+      }
+    }
+  }
+}
+
+//必选框样式
+.require{
+  position: relative;
+}
+.require:before{
+  content: "*";
+  color: red !important;
+  position: absolute;
+  left: 5px;
+  top: 8px;
+}
+
+.kk_error{
+  border: 1px solid #ff5358 !important;
+  box-shadow: 0 0 5px #ff5358 !important;
+}
+
+//加载load
+.my_load{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.06);
+  z-index: 1000;
+  display: none;
+  img{
+    .transform(-50%,-50%);
+    position: absolute;
+    top:50%;
+    left: 50%;
+  }
+}
+.skewing{
+  button{
+    position: relative;
+    left: -4px;
+  }
+  &>ul{
+    left: 16.66666% !important;
+    width: 83.3333%;
+  }
+}
+
+#getPersonInfo{
+  position: absolute;
+  top: -4px;
+  right: 0;
+  height: 30px;
+  line-height: 0px;
+}
+.username .layui-upload-file{
+  display: none;
+}
+
+#layer-photos-demo{
+  position: absolute;
+  top:0;
+  left: 150px;
+  width: 80px;
+  height: 90px;
+  img{
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+}

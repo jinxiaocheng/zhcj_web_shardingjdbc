@@ -1,0 +1,40 @@
+.glyphicon-folder-open{
+    display: none;
+}
+.glyphicon.glyphicon-trash::before{
+    content:"\f014"
+}
+.glyphicon.glyphicon-trash{
+    font-family:"FontAwesome"
+}
+.listBox{
+    border: 1px solid #dfdfdf;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+.listBox>h1{
+    font-size: 18px;
+    margin: 0;
+    margin-bottom: 5px;
+    color: #9a9a9a;
+    font-weight: bold;
+}
+.listBox_next{
+    border-bottom: 1px solid #dfdfdf;
+    margin: 15px;
+    box-sizing: border-box;
+}
+.listBox_next>h2{
+    font-size: 16px;
+    margin:10px 0;
+    color: #3a87ad;
+    border-left: 3px solid #3a87ad;
+    box-sizing: border-box;
+    padding-left: 10px;
+}
+.listBox>.listBox_next:last-of-type{
+    border: none;
+}

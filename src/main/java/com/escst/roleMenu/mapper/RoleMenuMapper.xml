@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>    
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.roleMenu.mapper.RoleMenuMapper">
+	<insert id="insert" parameterType="com.escst.role.entity.RoleEntity">
+		INSERT INTO t_sys_role_menu (
+			`id`,
+			`role_id`,
+			`menu_id`,
+			`operation_authority`
+		)
+		VALUES
+			(
+				#{id},
+				#{roleId},
+				#{menuId},
+				#{operationAuthority}
+			);
+	</insert>
+	
+	 <insert id ="batchInsert" parameterType="java.util.List" >
+             insert into t_sys_role_menu
+             (
+			`id`,
+			`role_id`,
+			`menu_id`,
+		     menu_name,
+			`operation_authority`,
+		     sort_num
+			)
+             values
+             <foreach collection ="list" item="org" index= "index" separator =",">
+                 (
+                 #{org.id}, 
+                 #{org.roleId},
+                 #{org.menuId},
+				 #{org.name},
+                 #{org.operationAuthority},
+				 #{org.sortNum}
+                 )
+             </foreach >
+     </insert >
+	
+	<select id="selectByRoleId" parameterType="String" resultType="com.escst.roleMenu.entity.RoleMenuEntity">
+		SELECT
+			t.id as id,
+			t.role_id AS roleId,
+			t.menu_id AS menuId,
+			t.menu_name as name,
+			t.sort_num as sortNum,
+			ifnull(t.operation_authority, "") AS operationAuthority
+		FROM
+			t_sys_role_menu t
+		where t.role_id=#{roleId}
+	</select>
+	
+	 <update id="update" parameterType="com.escst.roleMenu.entity.RoleMenuEntity">
+        UPDATE t_sys_role_menu set operation_authority = #{operationAuthority} WHERE ID = #{id}
+    </update>
+    
+    <delete id="batchRemove" parameterType="java.util.List">
+		delete from t_sys_role_menu where id in
+		<foreach item="item" index="index" collection="list" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<delete id="deleteMenuIdByRoleId" parameterType="map">
+		delete from t_sys_role_menu WHERE menu_id = #{menuId} and role_id = #{roleId}
+	</delete>
+
+	<update id="updateOperationAuthority" parameterType="map">
+		UPDATE t_sys_role_menu set operation_authority = #{operationAuthority} where role_id = #{roleId} and menu_id = #{menuId}
+	</update>
+
+	<delete id="removeById" parameterType="String">
+		DELETE FROM `t_sys_role_menu`
+		WHERE role_id = #{roleId}
+	</delete>
+</mapper>

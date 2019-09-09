@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.environment.mapper.EnvironmentMapper">
+	<select id="queryRealtimeList" parameterType="com.escst.equipment.vo.AcquisitionDataQueryVO" resultType="com.escst.environment.vo.EnvironmentRealtimeVO">
+		SELECT DATE_FORMAT(acquisition_time,'%Y-%m-%d %H:%i:%s') time,pm10,pm25,noise,temperature,humidity,wind_speed windSpeed
+		FROM t_basic_environment_realtime a
+		<where>
+			<if test="constructionId != null and constructionId != '' ">
+				and a.construction_id = #{constructionId}
+			</if>
+			<if test="equipmentId != null and equipmentId != ''">
+				AND a.equipment_id = #{equipmentId}
+			</if>
+			<if test="startDate != null and startDate != ''">
+				<![CDATA[
+				AND a.acquisition_time > str_to_date(#{startDate}, '%Y-%m-%d')
+				]]>
+			</if>
+			<if test="endDate != null and endDate != ''">
+				<![CDATA[
+				AND a.acquisition_time < date_add(str_to_date(#{endDate}, '%Y-%m-%d'), interval 1 day)
+				]]>
+			</if>
+		</where>
+		order by acquisition_time desc
+		LIMIT #{startIndex},#{rowNum}
+	</select>
+	<select id="getRealtimeCount" parameterType="com.escst.equipment.vo.AcquisitionDataQueryVO" resultType="int">
+		SELECT count(1) count
+		FROM t_basic_environment_realtime a
+		<where>
+			<if test="constructionId != null and constructionId != '' ">
+				a.construction_id = #{constructionId}
+			</if>
+			<if test="equipmentId != null and equipmentId != ''">
+				AND a.equipment_id = #{equipmentId}
+			</if>
+			<if test="startDate != null and startDate != ''">
+				<![CDATA[
+				AND a.acquisition_time > str_to_date(#{startDate}, '%Y-%m-%d')
+				]]>
+			</if>
+			<if test="endDate != null and endDate != ''">
+				<![CDATA[
+				AND a.acquisition_time < date_add(str_to_date(#{endDate}, '%Y-%m-%d'), interval 1 day)
+				]]>
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectTimeDiffByIds" resultType="int" parameterType="map">
+		SELECT
+			 count(1)
+		FROM
+			t_basic_environment_realtime t
+		WHERE t.construction_id=#{constructionId} and t.equipment_id=#{equipmentId} and t.create_time>#{createTime}
+    </select>
+</mapper>

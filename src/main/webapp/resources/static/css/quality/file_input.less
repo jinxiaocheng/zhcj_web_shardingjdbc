@@ -1,0 +1,22 @@
+//隐藏图片上传标志
+.kv-file-upload{
+  display: none;
+}
+.fileinput-upload-button{
+  &:extend(.kv-file-upload);
+}
+.file-upload-indicator>i{
+  &:extend(.kv-file-upload);
+}
+.kv-upload-progress{
+  display: none;
+}
+.kv-fileinput-error{
+  display: none !important;
+}
+.submit_img .file-caption{
+  padding:0 12px;
+}
+.has-error .form-control{
+  border:1px solid #ccc !important;
+}

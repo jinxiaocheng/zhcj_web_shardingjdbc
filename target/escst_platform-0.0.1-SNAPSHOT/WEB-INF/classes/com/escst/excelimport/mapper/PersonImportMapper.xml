@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.excelimport.mapper.PersonImportMapper">
+    <insert id="createTempTable" parameterType="string">
+    	create table ${value}
+    	 (
+    	 	name varchar(50)
+    	 	,mobile varchar(20)
+    	 	,position_worktype_name varchar(20)
+    	 	,company_name varchar(50)
+    	 	,construction_id varchar(32)
+    	 	,user_id varchar(50)
+    	 	,user_password varchar(50)
+    	 	,person_id varchar(50)
+    	 	,construction_person_id varchar(50)
+    	 	,position_worktype_id varchar(50)
+    	 	,company_id varchar(50)
+    	 	,team_id varchar(50)
+    	 	,team_name varchar(50)
+    	 	,job_number varchar(50)
+    	 )
+    </insert>
+    <insert id="batchInsert" parameterType="map">
+    	insert into ${tableName}(name, mobile, position_worktype_name,company_name,construction_id,position_worktype_id
+    				,user_password, job_number)
+    	VALUES
+    	<foreach collection="list" item="item" index="" separator=",">
+    		(
+		        #{item.name},
+		        #{item.mobile},
+		        #{item.positionWorkTypeName},
+		        #{item.companyName},
+		        #{item.constructionId},
+		        #{item.positionWorkTypeId},
+		        #{item.userPassword},
+		        #{item.jobNumber}
+	        )
+    	</foreach>
+    </insert>
+    <update id="updateUserId" parameterType="string">
+    	update ${value} a 
+		left join t_sys_user u on u.mobile = a.mobile
+		set a.user_id = case when u.id is null then CONCAT('new_',REPLACE(UUID(), '-','')) else u.id end
+    </update>
+    <update id="updateConstructionPersonId" parameterType="string">
+    	update ${value} a 
+		left join (
+			select t.user_id,max(p.id) person_id, max(cp.id) construction_person_id
+			from ${value} t 
+			inner join t_basic_person p on p.user_id = t.user_id
+			inner join t_basic_construction_person cp on cp.person_id = p.id and cp.construction_id = t.construction_id
+			group by t.user_id
+		) b on b.user_id = a.user_id
+		set a.person_id = case when b.person_id is null then CONCAT('new_',REPLACE(UUID(), '-','')) else b.person_id end
+		   ,a.construction_person_id = case when b.construction_person_id is null then CONCAT('new_',REPLACE(UUID(), '-','')) else b.construction_person_id end
+    </update>
+    <update id="updateCompanyId" parameterType="string">
+    	update ${value} a
+		join (
+			select b.company_name,case when c.id is null then CONCAT('new_',REPLACE(UUID(), '-','')) else c.id end company_id
+			from ${value} b 
+			left join t_basic_project_company c on c.construction_id = b.construction_id and c.name = b.company_name
+			group by b.company_name,c.id
+		) t on a.company_name = t.company_name
+		set a.company_id = t.company_id
+    </update>
+    <update id="updateTeamInfo" parameterType="string">
+    	<![CDATA[
+    	update ${value} a
+		join t_basic_team t on t.construction_id = a.construction_id and t.project_company_id = a.company_id 
+								and t.position_worktype = case when a.position_worktype_id < 100 then 0 else a.position_worktype_id end
+		set a.team_id = t.id,a.team_name = t.name
+		]]>
+    </update>
+    <update id="updateNewTeam" parameterType="string">
+    	<![CDATA[
+    	update ${value} a
+    	join (
+    		select t.name team_name, b.company_id, t.position_worktype,uuid() team_id
+    		from ${value} b
+    		inner join t_basic_team t on t.construction_id is null and t.position_worktype = case when b.position_worktype_id < 100 then 0 else b.position_worktype_id end
+    		where b.team_id is null
+    		group by t.name,b.company_id, t.position_worktype
+    	) m on m.company_id = a.company_id and m.position_worktype = case when a.position_worktype_id < 100 then 0 else a.position_worktype_id end
+		set a.team_id = CONCAT('new_',REPLACE(m.team_id, '-','')),a.team_name = m.team_name
+		where a.team_id is null
+		]]>
+    </update>
+    <update id="disabledPerson" parameterType="string">
+    	<![CDATA[
+    	update t_basic_person p
+		set p.status = 0, p.update_time = sysdate()
+		where exists (
+			select 1 
+			from ${value} a
+			where a.user_id = p.user_id and a.person_id <> p.id
+		)
+		]]>
+    </update>
+    <update id="disabledConstructionPerson" parameterType="string">
+    	<![CDATA[
+    	update t_basic_construction_person cp
+		set cp.status = 0
+		where exists (
+			select 1 
+			from ${value} a 
+			inner join t_basic_person p on p.user_id = a.user_id
+			where cp.person_id = p.id and cp.construction_id <> a.construction_id
+		)
+		]]>
+    </update>
+    <insert id="insertUser" parameterType="string">
+    	insert into t_sys_user(id,org_id,user_name,user_password,status,name,mobile,create_time)
+		select SUBSTR(a.user_id FROM 5),max(o.id),a.mobile,a.user_password,1,a.name,a.mobile,sysdate()
+		from ${value} a 
+		inner join t_sys_organization o on o.construction_id = a.construction_id
+		where locate('new_', a.user_id)
+		group by a.user_id,a.mobile,a.user_password,a.name
+    </insert>
+    <insert id="insertPerson" parameterType="string">
+    	insert into t_basic_person(id,name,mobile,status, user_id,position_worktype,create_time)
+		select SUBSTR(a.person_id FROM 5),a.name,a.mobile,1,
+			case when locate('new_', a.user_id) then SUBSTR(a.user_id FROM 5) else a.user_id end,
+			a.position_worktype_id,SYSDATE()
+		from ${value} a 
+		where locate('new_', a.person_id)
+    </insert>
+    <insert id="insertConstructionPerson" parameterType="string">
+    	insert into t_basic_construction_person(id,person_id,construction_id, project_company_id,team_id, status
+    				,job_number,card_number)
+		select SUBSTR(a.construction_person_id FROM 5),
+			case when locate('new_', a.person_id) then SUBSTR(a.person_id FROM 5) else a.person_id end,
+			a.construction_id,case when locate('new_', a.company_id) then SUBSTR(a.company_id FROM 5) else a.company_id end,
+			case when locate('new_', a.team_id) then SUBSTR(a.team_id FROM 5) else a.team_id end,1, job_number,job_number
+		from ${value} a 
+		where locate('new_', a.construction_person_id)
+    </insert>
+    <insert id="insertCompany" parameterType="string">
+    	insert into t_basic_project_company(id,construction_id, type,name, create_time)
+		select SUBSTR(a.company_id FROM 5),construction_id,1,company_name,SYSDATE()
+		from ${value} a 
+		where locate('new_', a.company_id)
+		group by company_id,construction_id,company_name
+    </insert>
+    <insert id="insertTeam" parameterType="string">
+    	insert into t_basic_team(id,construction_id, project_company_id,name, position_worktype,create_time)
+		select SUBSTR(team_id FROM 5),construction_id,case when locate('new_', company_id) then SUBSTR(company_id FROM 5) else company_id end
+				,team_name,position_worktype_id,SYSDATE()
+		from  (		
+	    	<![CDATA[
+			select team_id,construction_id,company_id,team_name, case when position_worktype_id < 100 then 0 else position_worktype_id end position_worktype_id
+			from ${value} 
+			where locate('new_', team_id)
+			]]>
+		) t
+		group by team_id,construction_id,company_id,team_name,position_worktype_id
+    </insert>
+</mapper>

@@ -1,0 +1,833 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.inspection.mapper.InspectionMapper">
+    <select id="selectList" parameterType="map" resultType="map">
+        SELECT A.ID as id,
+        T.NAME AS areaName,
+        A.CONSTRUCTION_ID as constructionId,
+        F.name as constructionName,
+        A.type as type,
+        A.INSPECT_DATE as businessDate,
+        A.ITEMS as items,
+        A.results as results,
+        C.NAME as projectStructureName,
+        D.NAME as projectCompanyName,
+        E.NAME as teamName,
+        A.CONTACT_ID as contactId,
+        B.NAME as contactName,
+        A.CONTACT_MOBILE as contactMobile,
+        A.IS_ATTACH as isAttach,
+        A.PROCESSING_OPINION as status,
+        A.CORRECTIVE_STATUS AS correctiveStatus,
+        A.CORRECTIVE_COMPLETION_DATE as correctiveCompletionDate,
+        A.CORRECTIVE_REQUEST as correctiveRequest,
+        A.CREATE_TIME as createTime,
+        A.CREATE_BY as createBy,
+        u.name createUserName,
+        a.order_no as orderNo
+        FROM T_BASIC_INSPECTION_RECORD A
+        LEFT JOIN t_sys_user B ON B.id = A.CONTACT_ID
+        LEFT JOIN T_BASIC_PROJECT_STRUCTURE C ON C.ID = A.PROJECT_STRUCTURE_ID
+        LEFT JOIN T_BASIC_PROJECT_COMPANY D ON D.ID = A.PROJECT_COMPANY_ID
+        LEFT JOIN T_BASIC_TEAM E ON E.ID = A.TEAM_ID
+        LEFT JOIN T_BASIC_CONSTRUCTION F ON F.ID = A.CONSTRUCTION_ID
+        LEFT JOIN t_sys_territory T ON T.ID = F.belong_area
+        LEFT JOIN t_sys_user u ON u.id = A.CREATE_BY
+        <where>
+            <if test="processingOpinion != null and processingOpinion != 0 ">
+                AND A.PROCESSING_OPINION = #{processingOpinion}
+            </if>
+            <if test="_parameter.containsKey('constructionId') and constructionId != null ">
+                AND A.CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="projectCompanyId != '' and projectCompanyId != null ">
+                AND A.project_company_id = #{projectCompanyId}
+            </if>
+            <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                AND A.CONSTRUCTION_ID IN
+                <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                    (#{constructionVo.id})
+                </foreach>
+            </if>
+            <if test="areaId != null and areaId != ''">
+                AND F.BELONG_AREA = #{areaId}
+            </if>
+            <if test="types != null and types != '' ">
+                AND find_in_set(A.TYPE, #{types})
+            </if>
+            <if test="correctiveStatus != null and correctiveStatus != 0 ">
+                AND A.CORRECTIVE_STATUS = #{correctiveStatus}
+            </if>
+            <if test="contactId != null and contactId != ''">
+                AND (A.CONTACT_ID = #{contactId} OR A.CREATE_BY = #{contactId})
+            </if>
+
+            <if test="correctStartDate != null and correctStartDate != '' ">
+                AND A.CORRECTIVE_COMPLETION_DATE &gt;= #{correctStartDate}
+            </if>
+
+            <if test="correctEndDate != null and correctEndDate != '' ">
+                AND A.CORRECTIVE_COMPLETION_DATE &lt;= #{correctEndDate}
+            </if>
+
+            <if test="startDate != null and startDate != '' ">
+                AND A.INSPECT_DATE &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != '' ">
+                AND A.INSPECT_DATE &lt;= #{endDate}
+            </if>
+            <if test="items != null and items != '' ">
+                <if test="type == 1">
+                    AND LOCATE(#{items},A.ITEMS) > 0
+                </if>
+                <if test="type == 2 or type == 3">
+                    AND EXISTS (select 1 from t_basic_inspection_results r where r.inspection_id = A.id and
+                    r.parent_items_id = #{items})
+                </if>
+            </if>
+        </where>
+        ORDER BY A.CREATE_TIME DESC
+        LIMIT #{offset},#{rows}
+
+    </select>
+
+    <select id="queryInspectionCount" parameterType="map" resultType="int">
+        SELECT count(A.ID)
+        FROM T_BASIC_INSPECTION_RECORD A
+        LEFT JOIN t_sys_user B ON B.id = A.CONTACT_ID
+        LEFT JOIN T_BASIC_PROJECT_STRUCTURE C ON C.ID = A.PROJECT_STRUCTURE_ID
+        LEFT JOIN T_BASIC_PROJECT_COMPANY D ON D.ID = A.PROJECT_COMPANY_ID
+        LEFT JOIN T_BASIC_TEAM E ON E.ID = A.TEAM_ID
+        LEFT JOIN T_BASIC_CONSTRUCTION F ON F.ID = A.CONSTRUCTION_ID
+        LEFT JOIN t_sys_territory T ON T.ID = F.belong_area
+        <where>
+            <if test="processingOpinion != null and processingOpinion != 0 ">
+                AND A.PROCESSING_OPINION = #{processingOpinion}
+            </if>
+            <if test="_parameter.containsKey('constructionId') and constructionId != null ">
+                AND A.CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="projectCompanyId != '' and projectCompanyId != null ">
+                AND A.project_company_id = #{projectCompanyId}
+            </if>
+            <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                AND A.CONSTRUCTION_ID IN
+                <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                    (#{constructionVo.id})
+                </foreach>
+            </if>
+            <if test="areaId != null and areaId != ''">
+                AND F.BELONG_AREA = #{areaId}
+            </if>
+            <if test="types != null and types != '' ">
+                AND find_in_set(A.TYPE, #{types})
+            </if>
+            <if test="correctiveStatus != null and correctiveStatus != 0 ">
+                AND A.CORRECTIVE_STATUS = #{correctiveStatus}
+            </if>
+            <if test="contactId != null and contactId != ''">
+                AND (A.CONTACT_ID = #{contactId} OR A.CREATE_BY = #{contactId})
+            </if>
+
+            <if test="correctStartDate != null and correctStartDate != '' ">
+                AND A.CORRECTIVE_COMPLETION_DATE &gt;= #{correctStartDate}
+            </if>
+
+            <if test="correctEndDate != null and correctEndDate != '' ">
+                AND A.CORRECTIVE_COMPLETION_DATE &lt;= #{correctEndDate}
+            </if>
+
+            <if test="startDate != null and startDate != '' ">
+                AND A.INSPECT_DATE &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != '' ">
+                AND A.INSPECT_DATE &lt;= #{endDate}
+            </if>
+            <if test="items != null and items != '' ">
+                <if test="type == 1">
+                    AND LOCATE(#{items},A.ITEMS) > 0
+                </if>
+                <if test="type == 2 or type == 3">
+                    AND EXISTS (select 1 from t_basic_inspection_results r where r.inspection_id = A.id and
+                    r.parent_items_id = #{items})
+                </if>
+            </if>
+        </where>
+        ORDER BY A.INSPECT_DATE DESC
+    </select>
+
+
+    <select id="queryCount" parameterType="com.escst.inspection.entity.InspectionEntity" resultType="int">
+        SELECT COUNT(ID) FROM T_BASIC_INSPECTION_RECORD
+        <where>
+            <if test="constructionId != null and constructionId != '' ">
+                AND construction_id = #{constructionId}
+            </if>
+            <if test="processingOpinion != null and processingOpinion != 0 ">
+                AND PROCESSING_OPINION = #{processingOpinion}
+            </if>
+            <if test="projectCompanyId != '' and projectCompanyId != null ">
+                AND project_company_id = #{projectCompanyId}
+            </if>
+            <if test="type != null and type != 0 ">
+                AND TYPE = #{type}
+            </if>
+            <if test="contactId != null and contactId != ''">
+                AND (CONTACT_ID = #{contactId} OR CREATE_BY=#{contactId})
+            </if>
+            <if test="correctiveStatus != null and correctiveStatus != 0">
+                AND CORRECTIVE_STATUS = #{correctiveStatus}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectCorrectiveProcessList" parameterType="map"
+            resultType="com.escst.inspection.vo.CorrectiveDetailVO">
+        SELECT A.ID AS id,
+        A.REMARK AS remark,
+        A.IS_ATTACH AS isAttach,
+        A.CORRECTIVE_STATUS AS correctiveStatus,
+        A.CREATE_TIME AS createTime,
+        B.NAME AS createBy
+        FROM T_BASIC_INSPECTION_CORRECTIVE_PROCESS A
+        LEFT JOIN T_SYS_USER B ON B.ID = A.PERSON_ID
+        <where>
+            <if test="inspectionId != null and inspectionId != '' ">
+                AND A.INSPECTION_ID = #{inspectionId}
+            </if>
+            <if test="correctiveStatus != null and correctiveStatus != 0 ">
+                AND A.CORRECTIVE_STATUS = #{correctiveStatus}
+            </if>
+        </where>
+        ORDER BY A.CREATE_TIME DESC
+    </select>
+
+    <insert id="insert" parameterType="com.escst.inspection.entity.InspectionEntity">
+        INSERT INTO T_BASIC_INSPECTION_RECORD (ID, CONSTRUCTION_ID, TYPE, INSPECT_DATE, ITEMS_ID, ITEMS, RESULTS,
+                                               PROJECT_STRUCTURE_ID, PROJECT_COMPANY_ID, TEAM_ID, CONTACT_ID, CONTACT_MOBILE,
+                                               IS_ATTACH, REMARK, PROCESSING_OPINION, CORRECTIVE_STATUS, CORRECTIVE_COMPLETION_DATE, CORRECTIVE_REQUEST, CREATE_TIME, CREATE_BY, order_no, is_push, operation)
+        values (#{id}, #{constructionId}, #{type}, #{inspectDate}, #{itemsId}, #{items}, #{results},
+                       #{projectStructureId}, #{projectCompanyId}, #{teamId}, #{contactId}, #{contactMobile},
+                                                                                            #{isAttach}, #{remark},
+                                                                                            #{processingOpinion},
+                                                                                            #{correctiveStatus},
+                                                                                            #{correctiveCompletionDate},
+                                                                                            #{correctiveRequest},
+                                                                                            #{createTime}, #{createBy},
+                                                                                            #{orderNo}, #{isPush},
+                #{operation})
+    </insert>
+
+    <insert id="insertNotifyEntity" parameterType="com.escst.inspection.entity.NotifyEntity">
+        INSERT INTO T_BASIC_INSPECTION_NOTIFY (ID, INSPECTION_ID, USER_ID, PROJECT_COMPANY_ID, TEAM_ID, MOBILE)
+        VALUES (#{id}, #{inspectionId}, #{userId}, #{projectCompanyId}, #{teamId}, #{mobile})
+    </insert>
+
+    <insert id="insertCorrectiveProcess" parameterType="com.escst.inspection.entity.InspectionCorrectiveProcessEntity">
+        INSERT INTO T_BASIC_INSPECTION_CORRECTIVE_PROCESS (ID, INSPECTION_ID, PERSON_ID, CORRECTIVE_STATUS, REMARK, IS_ATTACH, CREATE_TIME)
+        VALUES (#{id}, #{inspectionId}, #{personId}, #{correctiveStatus}, #{remark}, #{isAttach}, #{createTime})
+    </insert>
+
+    <update id="update" parameterType="com.escst.inspection.entity.InspectionEntity">
+        UPDATE T_BASIC_INSPECTION_RECORD
+        <set>
+            <if test="updateTime != null ">
+                UPDATE_TIME = #{updateTime},
+            </if>
+            <if test="correctiveStatus != null and correctiveStatus != 0 ">
+                CORRECTIVE_STATUS = #{correctiveStatus},
+            </if>
+            <if test="operation != null and operation != ''">
+                operation = #{operation},
+            </if>
+            is_push = 0
+        </set>
+        WHERE ID = #{id}
+    </update>
+
+    <select id="listAsCount" parameterType="map" resultType="map">
+        SELECT
+            sum(
+                    CASE
+                    WHEN corrective_status = 1
+                        THEN
+                            1
+                    ELSE
+                        0
+                    END
+            )           correctiveCount,
+            count(1) as allCount
+        FROM
+            t_basic_inspection_record
+        WHERE
+            type = #{type}
+            AND construction_id = #{constructionId}
+
+    </select>
+
+    <select id="selectById" parameterType="String" resultType="com.escst.inspection.entity.InspectionEntity">
+        SELECT
+            a.id                 as id,
+            a.construction_id    as constructionId,
+            F.name               as constructionName,
+            a.type               as type,
+            a.items              as items,
+            a.results            as results,
+            a.contact_id         as userId,
+            a.corrective_status  as correctiveStatus,
+            a.corrective_request as correctiveRequest,
+            a.create_by          as createBy,
+            a.update_time        as updateTime
+        FROM T_BASIC_INSPECTION_RECORD a
+            LEFT JOIN T_BASIC_CONSTRUCTION F ON F.ID = a.CONSTRUCTION_ID
+        WHERE a.id = #{inspectionId}
+    </select>
+
+    <select id="selectDetailInfoById" parameterType="String" resultType="com.escst.inspection.vo.InspectionDetailVO">
+        SELECT
+            A.ID                                                  as id,
+            A.CONSTRUCTION_ID                                     as constructionId,
+            A.type                                                as type,
+            DATE_FORMAT(A.INSPECT_DATE, '%Y-%m-%d')               as businessDate,
+            A.ITEMS                                               as items,
+            A.results                                             as results,
+            C.NAME                                                as projectStructureName,
+            D.NAME                                                as projectCompanyName,
+            E.NAME                                                as teamName,
+            A.CONTACT_ID                                          as contactId,
+            B.NAME                                                as contactName,
+            A.CONTACT_MOBILE                                      as contactMobile,
+            A.IS_ATTACH                                           as isAttach,
+            A.PROCESSING_OPINION                                  as status,
+            A.CORRECTIVE_STATUS                                   AS correctiveStatus,
+            DATE_FORMAT(A.CORRECTIVE_COMPLETION_DATE, '%Y-%m-%d') as correctiveCompletionDate,
+            A.CORRECTIVE_REQUEST                                  as correctiveRequest,
+            A.CREATE_TIME                                         as createTime,
+            A.CREATE_BY                                           as createBy,
+            A.PROCESSING_OPINION                                  as processingOption,
+            A.REMARK,
+            a.order_no                                            as orderNo,
+            a.other_items                                         as otherItems
+        FROM T_BASIC_INSPECTION_RECORD A
+            LEFT JOIN t_sys_user B ON B.id = A.CONTACT_ID
+            LEFT JOIN T_BASIC_PROJECT_STRUCTURE C ON C.ID = A.PROJECT_STRUCTURE_ID
+            LEFT JOIN T_BASIC_PROJECT_COMPANY D ON D.ID = A.PROJECT_COMPANY_ID
+            LEFT JOIN T_BASIC_TEAM E ON E.ID = A.TEAM_ID
+        WHERE A.ID = #{id}
+        ORDER BY A.INSPECT_DATE DESC
+    </select>
+
+    <select id="selectNotifyEntityById" parameterType="String" resultType="com.escst.inspection.entity.NotifyEntity">
+        SELECT
+            N.ID,
+            N.INSPECTION_ID      AS INSPECTIONID,
+            N.USER_ID            AS USERID,
+            N.PROJECT_COMPANY_ID AS PROJECTCOMPANYID,
+            N.TEAM_ID            AS TEAMID,
+            N.MOBILE,
+            u.name
+        FROM T_BASIC_INSPECTION_NOTIFY N
+            INNER join t_sys_user u on u.id = n.USER_ID
+        WHERE N.INSPECTION_ID = #{id}
+    </select>
+    <select id="queryInspectionMonthQtyList" parameterType="com.escst.inspection.vo.InspectionQueryVO"
+            resultType="com.escst.inspection.vo.InspectionQtyVO">
+        select DATE_FORMAT(r.inspect_date,'%Y%m') `date`,count(r.id) qty,sum(case processing_opinion when 3 then 1 else
+        0 end) correctiveQty
+        from T_BASIC_INSPECTION_RECORD r
+        inner join t_basic_construction c on c.id = r.construction_id
+        where exists (
+        select 1
+        from t_sys_user u
+        inner join t_sys_organization p on p.id = u.org_id
+        inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+        where s.construction_id = c.id and u.id = #{userId}
+        )
+        <if test="types != null and types != '' ">
+            and FIND_IN_SET(r.type, #{types})
+        </if>
+        <if test="startDate != null and startDate != ''">
+            <![CDATA[
+			AND r.inspect_date >= str_to_date(#{startDate}, '%Y-%m-%d')
+			]]>
+        </if>
+        <if test="endDate != null and endDate != ''">
+            <![CDATA[
+			AND r.inspect_date <= str_to_date(#{endDate}, '%Y-%m-%d')
+			]]>
+        </if>
+        <if test="areaId != null and areaId != '' ">
+            and c.belong_area = #{areaId}
+        </if>
+        <if test="constructionId != null and constructionId != '' ">
+            and c.id = #{constructionId}
+        </if>
+        group by DATE_FORMAT(r.inspect_date,'%Y%m')
+    </select>
+
+    <select id="selectCheckItemsList" parameterType="com.escst.inspection.vo.CheckItemsVO"
+            resultType="com.escst.inspection.vo.CheckItemsVO">
+        SELECT id, name,parent_id parentId
+        FROM t_bd_check_items
+        WHERE type = #{type}
+        <if test="parentId !=null and parentId !=''">
+            AND parent_id = #{parentId}
+        </if>
+        <if test="constructionId !=null and constructionId !=''">
+            and (construction_id = #{constructionId} or construction_id is null )
+        </if>
+        order by sort_num
+    </select>
+
+    <!--  <select id="selectCheckResultsByParentItemsId" parameterType="string" resultType="com.escst.inspection.vo.CheckResultsVO">
+         select r.id,r.name, i.id itemsId, i.name itemsName
+         from t_bd_check_results r
+         inner join t_bd_check_items i on i.id = r.items_id
+         where i.parent_id = #{parentItemsId}
+     </select> -->
+
+    <select id="selectAllCheckResults" resultType="com.escst.inspection.vo.CheckResultsVO">
+        select
+            r.id,
+            r.name,
+            r.items_id itemsId
+        from t_bd_check_results r
+    </select>
+
+    <insert id="batchInsertCheckResults" parameterType="com.escst.inspection.entity.InspectionResultsEntity">
+        INSERT INTO t_basic_inspection_results(ID, inspection_id,results_id, results,
+        score,parent_items_id,parent_items_name)
+        values
+        <foreach item="item" collection="list" open="" separator="," close="">
+            (replace(uuid(), '-',
+            ''),#{item.inspectionId},#{item.resultsId},#{item.results},#{item.score},#{item.parentId},#{item.parentName})
+        </foreach>
+    </insert>
+
+    <select id="selectInspectionResultsByInspectionId" parameterType="string"
+            resultType="com.escst.inspection.entity.InspectionResultsEntity">
+        select
+            bir.id,
+            bir.inspection_id inspectionId,
+            bir.results_id    resultsId,
+            bir.results,
+            i.id   as         itemsId,
+            i.name as         itemsName
+        from t_basic_inspection_results bir
+            left join t_bd_check_results r on r.id = bir.results_id
+            left join t_bd_check_items i on i.id = r.items_id
+        where bir.inspection_id = #{inspectionId}
+    </select>
+
+    <select id="selectInspectionItemsAndResultsByInspectionId" parameterType="string"
+            resultType="com.escst.inspection.entity.InspectionResultsEntity">
+        SELECT
+            bir.id,
+            bir.results_id        resultsId,
+            bir.results           results,
+            bir.parent_items_id   parentItemsId,
+            bir.parent_items_name parentItemsName,
+            bcr.items_id          itemsId,
+            bci.`name`            itemsName
+        FROM `t_basic_inspection_results` bir
+            LEFT JOIN t_bd_check_results bcr ON bcr.id = bir.results_id
+            LEFT JOIN t_bd_check_items bci ON bci.id = bcr.items_id
+        WHERE bir.inspection_id = #{inspectionId}
+    </select>
+
+    <select id="selectAllCheckItemsList" resultType="com.escst.inspection.vo.CheckItemsVO">
+        select
+            I.id,
+            I.construction_id AS constructionId,
+            I.type,
+            I.name,
+            I.parent_id       AS parentId,
+            I.is_leaf         AS isLeaf,
+            I.create_time     AS createTime,
+            I.create_by       AS createBy,
+            I.update_time     AS updateTime,
+            I.update_by       AS updateBy
+        from t_bd_check_ITEMS I
+    </select>
+
+    <select id="selectWordInfo" resultType="map" parameterType="String">
+        SELECT
+            IFNULL(c.`name`, "")                                              AS constructionName,
+            IFNULL(l.development, "")                                         as development,
+            IFNULL(l.prospecting_header, "")                                  as prospectingHeader,
+            IFNULL(l.building, "")                                            as building,
+            IFNULL(l.project_manager, "")                                     as projectManager,
+            IFNULL(l.supervision, "")                                         as supervision,
+            IFNULL(l.supervise_director, "")                                  as superviseDirector,
+            IFNULL((select u.name
+                    from t_sys_user u
+                    where r.create_by = u.id), "")                            as inspectionName,
+            IFNULL(DATE_FORMAT(r.inspect_date, '%Y-%m-%d'), "")               as inspectionDate,
+            IFNULL(p.`name`, "")                                              AS responsibleName,
+            IFNULL(pc.`name`, "")                                             AS company,
+            CASE when r.processing_opinion = 1
+                then '通过'
+            WHEN r.processing_opinion = 2
+                then '警告'
+            else r.corrective_request end                                        result,
+            IFNULL(r.remark, "")                                              as remark,
+            r.is_attach                                                          isAttach,
+            IFNULL(DATE_FORMAT(r.CORRECTIVE_COMPLETION_DATE, '%Y-%m-%d'), "") as correctiveCompletionDate
+        FROM
+            t_basic_inspection_record r
+            INNER JOIN t_basic_construction c ON r.construction_id = c.id
+            LEFT JOIN t_basic_construction_license l ON c.construct_license_id = l.id
+            LEFT JOIN t_sys_user p ON r.contact_id = p.id
+            LEFT JOIN t_basic_project_company pc ON r.project_company_id = pc.id
+        where r.id = #{id}
+    </select>
+
+    <select id="queryResultsByInspectionId" parameterType="String"
+            resultType="com.escst.inspection.vo.InspectionResultsVO">
+        select
+            r.results_id        id,
+            r.results           name,
+            r.parent_items_id   parentItemsId,
+            r.parent_items_name parentItemsName,
+            i.id                itemsId,
+            i.name              itemsName
+        from t_basic_inspection_results r
+            inner join t_bd_check_results c on c.id = r.results_id
+            inner join t_bd_check_items i on i.id = c.items_id
+        where r.inspection_id = #{inspectionId}
+    </select>
+
+    <!--查询检查单对应的检查部位（子表）-->
+    <select id="selectProjectStructureByInspectionId" parameterType="String"
+            resultType="com.escst.task.entity.ScheduledPlanEntity">
+        SELECT project_structure_id AS id
+        FROM t_basic_inspection_structure
+        WHERE inspection_id = #{inspectionId}
+    </select>
+
+
+    <!--查询检查单对应的检查部位（主表）-->
+    <select id="queryProjectStructureByInspectionId" parameterType="String"
+            resultType="com.escst.task.entity.ScheduledPlanEntity">
+        SELECT project_structure_id AS id
+        FROM t_basic_inspection_record
+        WHERE id = #{inspectionId}
+    </select>
+
+    <!--批量添加检查部位信息-->
+    <insert id="batchInsertProjectStructure" parameterType="com.escst.inspection.vo.InspectionProjectStructureVO">
+        INSERT INTO t_basic_inspection_structure(ID, inspection_id,project_structure_id,project_structure_name)
+        values
+        <foreach item="item" collection="list" open="" separator="," close="">
+            (replace(uuid(), '-', ''),#{item.inspectionId},#{item.projectStructureId},#{item.projectStructureName})
+        </foreach>
+    </insert>
+
+    <select id="selectLatestOrderNo" resultType="String" parameterType="map">
+        select max(t.order_no)
+        from t_basic_inspection_record t
+        where t.construction_id = #{constructionId} and t.type = #{type}
+    </select>
+
+    <!--查询分项检查数量-->
+    <select id="getCheckItemCount" parameterType="com.escst.commons.tree.TreeEntity" resultType="int">
+        select count(*)
+        from t_bd_check_items
+        <include refid="conditionWhere"></include>
+    </select>
+
+
+    <sql id="conditionWhere">
+        <where>
+            type = #{type}
+            and (construction_id = #{constructionId} or construction_id is null)
+            <choose>
+                <when test="id != null and id != '' ">
+                    and parent_id = #{id}
+                </when>
+                <otherwise>
+                    and parent_id = '0'
+                </otherwise>
+            </choose>
+        </where>
+    </sql>
+
+    <!--查询分项检查树-->
+    <select id="listCheckItemTree" parameterType="com.escst.commons.tree.TreeEntity"
+            resultType="com.escst.commons.tree.TreeEntity">
+        SELECT
+        id as id,
+        construction_id as constructionId,
+        parent_id as pId,
+        name AS name
+        FROM
+        t_bd_check_items
+        <include refid="conditionWhere"></include>
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <!--判断是否为父节点-->
+    <select id="isParent" parameterType="com.escst.commons.tree.TreeEntity"
+            resultType="com.escst.commons.tree.TreeEntity">
+        SELECT
+        count( 1 ) as count,
+        parent_id as pId
+        FROM
+        t_bd_check_items
+        WHERE
+        parent_id IN
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item.id}
+        </foreach>
+        GROUP BY
+        parent_id
+    </select>
+
+    <!--添加分项检查-->
+    <insert id="addCheckItem" parameterType="com.escst.commons.tree.TreeEntity">
+        INSERT INTO
+            t_bd_check_items (id, construction_id, type, name, parent_id, is_leaf, create_time, create_by, update_time, update_by)
+        VALUES
+            (#{id}, #{constructionId}, #{type}, #{name}, #{pId}, #{isLeaf}, #{createTime},
+             #{createBy},
+             #{updateTime}, #{updateBy})
+    </insert>
+
+    <!--修改分项检查-->
+    <update id="updateCheckItem" parameterType="com.escst.commons.tree.TreeEntity">
+        update t_bd_check_items a
+        set a.name      = #{name},
+            a.parent_id = #{pId},
+            a.update_by = #{updateBy}, a.update_time = #{updateTime}
+        where a.id = #{id}
+    </update>
+
+
+    <!--查询所有id,父id-->
+    <select id="listAll" parameterType="com.escst.commons.tree.TreeEntity"
+            resultType="com.escst.commons.tree.TreeEntity">
+        SELECT
+            ID,
+            parent_id as pId
+        FROM t_bd_check_items
+        WHERE construction_id = #{constructionId}
+    </select>
+
+
+    <!--删除分项检查-->
+    <delete id="batchDelete" parameterType="com.escst.commons.tree.TreeEntity">
+        delete from t_bd_check_items where id in
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item.id}
+        </foreach>
+    </delete>
+
+
+    <select id="selectAll" resultType="com.escst.inspection.vo.CheckItemsVO">
+        select
+            id        as id,
+            type      as type,
+            name      as name,
+            parent_id as parentId,
+            is_leaf   as isLeaf
+        from t_bd_check_items
+    </select>
+
+    <insert id="batchInsertCheckItem" parameterType="com.escst.inspection.vo.CheckItemsVO">
+        insert into t_bd_check_items (id, construction_id, type,name,parent_id, is_leaf,sort_num,create_time, create_by,
+        update_time,
+        update_by)
+        VALUES
+        <foreach item="item" collection="list" open="" separator="," close="">
+            (#{item.id},#{item.constructionId},#{item.type},#{item.name},#{item.parentId},#{item.isLeaf},#{item.sortNum},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy})
+        </foreach>
+    </insert>
+
+    <select id="getConstructionId" parameterType="string" resultType="string">
+        select construction_id as constructionId
+        from t_bd_check_items
+        where id = #{id}
+    </select>
+
+    <select id="selectItemsByConstructionId" parameterType="map" resultType="com.escst.commons.vo.BaseVO">
+        SELECT a.items as name ,a.project_company_id as id FROM t_basic_inspection_record a
+        <where>
+            <if test="constructionId !=null and constructionId !=''">
+                a.construction_id = #{constructionId}
+            </if>
+            <if test="processingOpinion !=0 and processingOpinion !=''">
+                AND a.PROCESSING_OPINION =#{processingOpinion}
+            </if>
+            <if test="types !=null and types !=''">
+                AND find_in_set(A.TYPE, #{types})
+            </if>
+            <if test="name !=null and name !=''">
+                and a.items LIKE CONCAT("%",#{name},"%")
+            </if>
+            <if test="companyId !=null and companyId !=''">
+                and a.project_company_id =#{companyId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                <![CDATA[
+			AND a.inspect_date >= str_to_date(#{startDate}, '%Y-%m-%d')
+			]]>
+            </if>
+            <if test="endDate != null and endDate != ''">
+                <![CDATA[
+			AND a.inspect_date <= str_to_date(#{endDate}, '%Y-%m-%d')
+			]]>
+            </if>
+        </where>
+
+    </select>
+
+    <select id="selectProjectStructureNameByInspectionId" parameterType="String" resultType="String">
+        SELECT group_concat(t.project_structure_name)
+        FROM
+            t_basic_inspection_structure t
+        WHERE
+            inspection_id = #{inspectionId}
+    </select>
+
+    <select id="selectByType" parameterType="map" resultType="com.escst.inspection.entity.InspectionEntity">
+        select
+            id,
+            type
+        from t_basic_inspection_record
+        where construction_id = #{constructionId} and type = #{type}
+        order by create_time asc
+    </select>
+
+    <update id="updateOrderNo" parameterType="com.escst.inspection.entity.InspectionEntity">
+        update t_basic_inspection_record
+        set order_no = #{orderNo}
+        where id = #{id}
+    </update>
+
+
+    <insert id="batchInsertCheckItems" parameterType="com.escst.equipment.vo.InspectionVO">
+        INSERT INTO t_basic_inspection_results(ID, inspection_id,results_id, results, score, parent_items_id,
+        parent_items_name)
+        values
+        <foreach item="item" collection="list" open="" separator="," close="">
+            (replace(uuid(), '-',
+            ''),#{item.inspectionId},#{item.resultsId},#{item.results},#{item.score},#{item.iteamId},#{item.name})
+        </foreach>
+    </insert>
+
+    <select id="isHave" parameterType="com.escst.equipment.vo.InspectionVO"
+            resultType="int">
+        select count(results_id)
+        from t_basic_inspection_results
+        where inspection_id = #{id}
+    </select>
+
+    <select id="queryInspectionVOList" parameterType="com.escst.equipment.vo.InspectionVO"
+            resultType="com.escst.equipment.vo.InspectionVO">
+        SELECT id,construction_id constructionId,name,parent_id parentId
+        FROM t_bd_check_items
+        <where>
+            1 = 1
+            <if test="type !=null and type !=''">
+                AND type = #{type}
+            </if>
+            <if test="constructionId != null and constructionId != ''">
+                and (construction_id = #{constructionId} or construction_id is null )
+            </if>
+        </where>
+        ORDER BY sort_num
+    </select>
+
+    <select id="selectItemByInspectionId" parameterType="string"
+            resultType="com.escst.equipment.vo.InspectionVO">
+        SELECT parent_items_id AS id
+        FROM t_basic_inspection_results
+        WHERE inspection_id = #{inspectionId}
+    </select>
+
+    <select id="listResults" parameterType="string" resultType="com.escst.inspection.entity.InspectionResultsEntity">
+        select
+            items_id as itemsId,
+            name     as results
+        from t_bd_check_results
+        where items_id = #{itemsId}
+    </select>
+
+    <select id="listItems" resultType="com.escst.inspection.entity.InspectionEntity">
+        select
+            id       as itemsId,
+            name     as items,
+            sort_num as sortNum,
+            type     as type
+        from t_bd_check_items
+        ORDER BY sort_num
+    </select>
+
+    <select id="listInspection" parameterType="com.escst.inspection.entity.InspectionEntity"
+            resultType="com.escst.equipment.vo.InspectionVO">
+        SELECT DISTINCT
+            A.ID                                                  as id,
+            A.CONSTRUCTION_ID                                     as constructionId,
+            F.name                                                as constructionName,
+            A.ITEMS                                               as items,
+            C.NAME                                                as projectStructureName,
+            B.NAME                                                as dutyName,
+            A.CORRECTIVE_STATUS                                   AS correctiveStatus,
+            date_format(a.inspect_date, '%Y-%m-%d')               as inspectionDate,
+            date_format(a.corrective_completion_date, '%Y-%m-%d') as correctiveCompletionDate,
+            u.name                                                as checkName,
+            a.is_push                                             as isPush,
+            a.operation
+        FROM T_BASIC_INSPECTION_RECORD A
+            LEFT JOIN t_sys_user B ON B.id = A.CONTACT_ID
+            LEFT JOIN T_BASIC_PROJECT_STRUCTURE C ON C.ID = A.PROJECT_STRUCTURE_ID
+            LEFT JOIN T_BASIC_CONSTRUCTION F ON F.ID = A.CONSTRUCTION_ID
+            LEFT JOIN t_sys_user u ON u.id = A.CREATE_BY
+            left join t_basic_inspection_corrective_process p on a.id = p.inspection_id
+        where
+            A.CONSTRUCTION_ID = #{constructionId}
+            AND (date_format(A.CREATE_TIME, '%Y-%m-%d') = #{date} or date_format(p.CREATE_TIME, '%Y-%m-%d') = #{date})
+        ORDER BY A.create_time DESC
+    </select>
+
+    <select id="listInspectionIsPush" parameterType="com.escst.inspection.entity.InspectionEntity"
+            resultType="com.escst.equipment.vo.InspectionVO">
+        SELECT DISTINCT
+            A.ID                                                  as id,
+            A.CONSTRUCTION_ID                                     as constructionId,
+            F.name                                                as constructionName,
+            A.ITEMS                                               as items,
+            C.NAME                                                as projectStructureName,
+            B.NAME                                                as dutyName,
+            A.CORRECTIVE_STATUS                                   AS correctiveStatus,
+            date_format(a.inspect_date, '%Y-%m-%d')               as inspectionDate,
+            date_format(a.corrective_completion_date, '%Y-%m-%d') as correctiveCompletionDate,
+            u.name                                                as checkName,
+            a.is_push                                             as isPush,
+            a.operation
+        FROM T_BASIC_INSPECTION_RECORD A
+            LEFT JOIN t_sys_user B ON B.id = A.CONTACT_ID
+            LEFT JOIN T_BASIC_PROJECT_STRUCTURE C ON C.ID = A.PROJECT_STRUCTURE_ID
+            LEFT JOIN T_BASIC_CONSTRUCTION F ON F.ID = A.CONSTRUCTION_ID
+            LEFT JOIN t_sys_user u ON u.id = A.CREATE_BY
+            left join t_basic_inspection_corrective_process p on a.id = p.inspection_id
+        where
+            A.CONSTRUCTION_ID = #{constructionId}
+            AND (date_format(A.CREATE_TIME, '%Y-%m-%d') = #{date} or date_format(p.CREATE_TIME, '%Y-%m-%d') = #{date})
+            and A.is_push = 0
+        ORDER BY A.create_time DESC
+    </select>
+
+
+    <update id="batchUpdate" parameterType="com.escst.equipment.vo.InspectionVO">
+        update t_basic_inspection_record set is_push = 1 where id in(
+        <foreach collection="list" item="item" index="" separator=",">
+            #{item.id}
+        </foreach>
+        )
+    </update>
+
+</mapper>

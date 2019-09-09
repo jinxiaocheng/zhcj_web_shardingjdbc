@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.hook.mapper.HookCameraMapper">
+    <resultMap id="cameraResultMap" type="com.escst.hook.entity.HookCameraEntity">
+        <id column="ID" property="id"/>
+        <result column="CONSTRUCTION_ID" property="constructionId"/>
+        <result column="CONSTRUCTION_NAME" property="constructionName"/>
+        <result column="NAME" property="name" />
+        <result column="SUPPLIER" property="supplier" />
+        <result column="FLAG" property="flag" />
+        <result column="CHANNEL_NO" property="channelNo" />
+        <result column="STATUS" property="status" />
+        <result column="HIK_XML" property="hikXml" />
+        <result column="HIK_CAMERA_ID" property="hikCameraId" />
+        <result column="HIK_SYS_CODE" property="hikSysCode" />
+        <result column="HIK_GB_INDEXCODE" property="hikGbIndexcode" />
+        <result column="HIK_OUTSIDE_IP" property="hikOutsideIp" />
+        <result column="HIK_CAMERA_USERNAME" property="hikCameraUsername" />
+        <result column="HIK_CAMERA_PASSWORD" property="hikCameraPassword" />
+    </resultMap>
+    
+	<select id="selectCameraList" parameterType="String" resultMap="cameraResultMap">
+        select * from t_hook_camera c
+		where exists (
+					select 1 from t_basic_construction t
+					where t.id = c.construction_id and t.status = 1
+					)
+			AND NOT EXISTS (
+			SELECT 1 FROM  t_basic_role_camera tbrc
+			 WHERE  tbrc.role_id  = #{roleId} AND  tbrc.camera_id =c.id
+			)
+		order by c.construction_id,channel_no
+	</select>
+	
+	<select id="selectNvr" resultType="com.escst.video.vo.NvrVO">
+		 select ip,web_port as port,user_name userName,USER_password password,construction_id constructionId
+        from t_hook_nvr
+        where construction_id is not null
+	</select>
+</mapper>

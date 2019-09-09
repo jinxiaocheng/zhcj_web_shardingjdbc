@@ -1,0 +1,74 @@
+@themeColor:#ff9966;
+@lineColor:#cfcfcf;
+.aisle-box{
+  .faceContrast-box{
+    display: inline-block;
+    width: 500px;
+    height: 180px;
+    margin: 10px;
+    border: 1px solid @lineColor;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+    .imgA,.imgB,.faceContrast-info{
+      position: absolute;
+      display: inline-block;
+      height: 100%;
+      top:0;
+      padding: 5px;
+      box-sizing: border-box;
+    }
+    .imgA,.imgB{
+      img{
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .imgA{
+      left: 0;
+      width:140px;
+    }
+    .imgB{
+      left: 140px;
+      width:140px;
+    }
+    .faceContrast-info{
+      right: 0;
+      width: 220px;
+      color: #9d9d9d;
+      font-size: 12px;
+      padding-left: 15px;
+      padding-top: 10px;
+      p{
+        margin-bottom: 5px;
+        label{
+          margin-right: 5px;
+        }
+        span{
+
+        }
+      }
+      .percent{
+        font-size: 20px;
+        font-weight: bold;
+        color: #0b0b0b;
+      }
+      .name{
+        font-size: 14px;
+      }
+      .historical-route-btn{
+        display: block;
+        height: 24px;
+        line-height: 24px;
+        width: 60%;
+        border-radius: 30px;
+        text-align: center;
+        color: #fff;
+        background: #ff9966;
+        font-size: 12px;
+        letter-spacing: 2px;
+        margin: 15px auto 0;
+      }
+    }
+  }
+}

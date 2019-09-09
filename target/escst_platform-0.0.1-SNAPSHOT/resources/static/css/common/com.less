@@ -1,0 +1,280 @@
+
+//左边树形图样式+右边列表样式
+.com-l-ztree{
+  .menu-left-tree{
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    left: 10px;
+    padding: 5px 0px;
+    width: 280px;
+    overflow: auto;
+    border: 1px solid #cfcfcf;
+    border-radius: 6px;
+    box-sizing: border-box;
+    box-shadow: 0 0 4px #dfdfdf;
+    background: #fff;
+  }
+  .l-r-content{
+    position: absolute;
+    height: 100%;
+    overflow:hidden;
+    left: 300px;
+    right: 0;
+  }
+  .container-full{
+    position: absolute;
+    left: 0;
+    top:0;
+    bottom: 0;
+    right:0;
+    background: #fff;
+  }
+  .ui-filter label{
+    padding-left:10px;
+  }
+  .well-block{
+    min-height: 20px;
+    padding-bottom:15px;
+    border: 1px solid #cfcfcf;
+    border-bottom: none;
+    border-top:none;
+  }
+  .queryCondition .btn{
+    padding:3px 12px!important;
+  }
+  .w-110{
+    width:110px!important;
+    height: 28px;
+  }
+  .h-28{
+    height: 28px;
+  }
+  .com-list;
+}
+//公用列表
+.com-list{
+  .com-searchList;
+  .ui-report {
+    width: 100%;
+    position: absolute;
+    padding:10px 10px 0px 10px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top:0;
+    .jqGrid_wrapper{
+      position: absolute;
+      top: 70px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      border: 1px solid #ddd;
+    }
+  }
+  .ui-report .titlePanel {
+    border-radius:6px 6px 0px 0px;
+    -webkit-border-radius:6px 6px 0px 0px;
+    width:100%;
+    margin:0px;
+    border: 1px solid #cfcfcf;
+    border-bottom:0px;
+    padding:15px 0px;
+    height: 60px;
+    background: #fff;
+  }
+  .ui-report .ui-report-head{
+    color: #3897d9;
+  }
+  .titlePanel .title-search {
+    padding-left: 15px;
+  }
+  .ui-filter{
+    display: inline-block;
+  }
+  .ui-filter .form-control{
+    display:inline-block;
+  }
+  .search-more{
+    min-width:108px!important;
+  }
+  .w-120{
+    width: 120px!important;
+    height: 28px;
+  }
+  .w-200{
+    width: 200px;
+    height: 28px;
+  }
+  .titlePanel .toolbar {
+    float: right;
+    padding-right: 15px;
+  }
+  .win-box{
+    float: right;padding-right: 15px;
+  }
+  .ui-jqgrid-bdiv table{
+    width:100% !important;
+    overflow:hidden;
+  }
+  .ui-jqgrid-bdiv table td{
+    overflow:hidden;/* 内容超出宽度时隐藏超出部分的内容 */
+    text-overflow:ellipsis;/* 当对象内文本溢出时显示省略标记(...);需与overflow:hidden;一起使用。*/
+  }
+  .ui-jqgrid-bdiv {
+    height:100% !important;
+  }
+  .group-box{
+    width:100%;
+    padding:0px 10px 15px;
+    border-left:1px solid #cfcfcf;
+    border-right:1px solid #cfcfcf;
+    background:#fff;
+  }
+  .ui-jqgrid tr.ui-row-ltr td {
+    text-align: center !important;
+    font-size: 13px;
+    padding: 0;
+  }
+  .com-page;
+}
+
+//公用搜索样式
+.com-searchList{
+  #listTools,#chartTools{
+    position: relative;
+  }
+  .openSearchBtn,#tools-btn,#tools-btn-e{
+    position: absolute;
+    top: 10px;
+  }
+  .openSearchBtn{
+    left: 10px;
+    background: none;
+    border: 1px solid #00a0e9;
+    color: #00a0e9;
+  }
+  .openSearchBtn:hover
+  ,.openSearchBtn:focus{
+    color: #0281e9;
+  }
+  #tools-btn,#tools-btn-e{
+    right: 10px;
+  }
+  #search-input,#search-input-e{
+    position: absolute;
+    width: 100%;
+    top: 60px;
+    background: rgb(248, 248, 248);
+    box-sizing: border-box;
+    padding:0 10px;
+    z-index: 1000;
+    border-bottom: 1px solid #cfcfcf;
+    box-shadow: 0px 2px 10px #e4e4e4;
+  }
+  #search-input>div,#search-input-e>div{
+    margin: 10px 0;
+  }
+  .dropdown-menu{
+    max-height: 300px;
+  }
+  .queryCondition .btn{
+    padding:3px 12px!important;
+  }
+  .w-110{
+    width:110px!important;
+    height: 28px;
+  }
+  .h-28{
+    height: 28px;
+  }
+}
+
+//表单分页
+.com-page{
+  #gbox_gridTable {
+    height:100%;
+  }
+  #gridPager{
+    position: fixed;
+    bottom: 10px;
+  }
+  .ui-jqgrid tr.jqgrow td:last-child{
+    border-right:none;
+  }
+  .ui-jqgrid .ui-pg-selbox {
+    display: block;
+    font-size: 1em;
+    height: 25px;
+    line-height: 18px;
+    margin: 0;
+    width: auto;
+  }
+  .ui-jqgrid .ui-pg-selbox {
+    border: 1px solid #ccc;
+    margin: 0 6px;
+    width: auto;
+    height: 22px;
+    border-radius: 5px;
+  }
+  .ui-jqgrid .ui-pg-input {
+    font-weight: normal;
+    border: 1px solid #ccc;
+    margin: 0 4px;
+    padding-right: 2px;
+    width: 30px;
+    height: 20px;
+    line-height: 10px;
+    text-align: center;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border-radius: 5px 5px 5px 5px;
+  }
+  .ui-icon-seek-prev {
+    display: block;
+    height: 20px;
+    line-height: 18px;
+    width: 22px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    color: #666;
+    padding-right: 3px;
+  }
+  .ui-icon-seek-first {
+    display: block;
+    height: 20px;
+    line-height: 18px;
+    width: 22px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-right: 5px;
+    color: #666;
+  }
+  .ui-icon-seek-next {
+    display: block;
+    height: 20px;
+    line-height: 18px;
+    width: 22px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    color: #666;
+    padding-left: 2px;
+  }
+  .ui-icon-seek-end {
+    display: block;
+    height: 20px;
+    line-height: 18px;
+    width: 22px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-right: 5px;
+    color: #666;
+  }
+
+  .ui-jqgrid .ui-pg-table td {
+    font-weight: normal;
+    vertical-align: middle;
+    padding: 1px;
+  }
+}
+

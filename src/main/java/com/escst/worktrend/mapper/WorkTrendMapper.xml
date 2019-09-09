@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.worktrend.mapper.WorkTrendMapper">
+
+
+    <insert id="save" parameterType="com.escst.worktrend.entity.WorkTrendEntity">
+        INSERT INTO t_bd_worktrend (id,company_content,business_time,business_id,user_id,create_time,construction_id,construction_content)
+        VALUES (#{id},#{companyContent},#{businessTime},#{businessId},#{userId},#{createTime},#{constructionId},#{constructionContent})
+    </insert>
+
+    <select id="queryList" parameterType="map" resultType="com.escst.worktrend.entity.WorkTrendEntity">
+        SELECT
+				IFNULL(DATE_FORMAT(bd.business_time,'%Y-%m-%d %H:%m:%s'),"") businessTime,
+				IFNULL(tsu.name,"") userName,
+                IFNULL(bd.company_content,"") companyContent,
+                IFNULL(bd.construction_content,"") constructionContent
+        FROM  t_bd_worktrend  bd
+        LEFT JOIN t_basic_construction tbc ON tbc.id = bd.construction_id
+        LEFT JOIN t_sys_user tsu ON tsu.id = bd.user_id
+        <where>
+            <if test="constructionId !=null and constructionId !=''">
+                AND bd.construction_id = #{constructionId}
+            </if>
+            <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                AND bd.construction_id IN
+                <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                    #{constructionVo.id}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY bd.create_time DESC
+        <if test=" offset !=null and offset !=0">
+            limit 0,#{offset}
+        </if>
+    </select>
+
+    <select id="count" parameterType="map" resultType="Integer">
+        SELECT  COUNT(bd.id)
+         FROM  t_bd_worktrend  bd
+        LEFT JOIN t_basic_construction tbc ON tbc.id = bd.construction_id
+        LEFT JOIN t_sys_user tsu ON tsu.id = bd.user_id
+        <where>
+            <if test="constructionId !=null and constructionId !=''">
+                bd.construction_id = #{constructionId}
+            </if>
+            <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                AND bd.construction_id IN
+                <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                    #{constructionVo.id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+</mapper>

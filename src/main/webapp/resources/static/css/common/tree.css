@@ -1,0 +1,348 @@
+/**
+ * @desc
+ * @param 树形图样式修改
+ * @return
+ * @author kz
+ * @date 2018/5/15 9:34
+ */
+.imgP {
+  position: relative;
+  top: 2px;
+  left: 1px;
+}
+.imgPL {
+  position: relative;
+  left: 0;
+  top: -1px;
+}
+/*#tree.ztree{
+  li span.button{
+    font: normal normal normal 14px/1 FontAwesome;
+  }
+  li span.button.ico_close {
+    background: none;
+  }
+  li span.button.ico_close:before{
+    content: "\f07b";
+    color: @color;
+    .imgP;
+  }
+  li span.button.ico_open {
+    background: none;
+  }
+  li span.button.ico_open:before{
+    content: "\f07c";
+    color: @color;
+    .imgP;
+  }
+  li span.button.ico_docu{
+    background: none;
+  }
+  li span.button.ico_docu:before{
+    content: "\f097";
+    color: @color;
+    .imgP;
+    left: 3px;
+  }
+
+  !*
+  li span.button.roots_open {
+    background:none;
+  }
+  li span.button.roots_open:before {
+    content: "\f147";
+    color: @color;
+    .imgP;
+    left: 3px;
+  }
+  li span.button.center_open {
+    background:none;
+  }
+  li span.button.center_open:before {
+    content: "\f147";
+    color: @color;
+    .imgP;
+    left: 3px;
+  }
+  li span.button.bottom_open {
+    background:none;
+  }
+  li span.button.bottom_open:before {
+    content: "\f147";
+    color: @color;
+    .imgP;
+    left: 3px;
+  }
+  li span.button.roots_close {
+    background:none;
+  }
+  li span.button.roots_close:before {
+    content: "\f196";
+    color: @color;
+    .imgP;
+    left: 3px;
+  }
+  li span.button.center_close {
+    background:none;
+  }
+  li span.button.center_close:before {
+    content: "\f196";
+    color: @color;
+    .imgP;
+    left: 3px;
+  }
+  li span.button.bottom_close {
+    background:none;
+  }
+  li span.button.bottom_close:before {
+    content: "\f196";
+    color: @color;
+    .imgP;
+    left: 3px;
+  }
+
+  li span.button.chk.checkbox_false_full {
+    background:none;
+  }
+  li span.button.chk.checkbox_false_full:before {
+    content: "\f096";
+    color: @colorL;
+    .imgPL;
+    left: 3px;
+  }
+  li span.button.chk.checkbox_false_full {
+    background:none;
+  }
+  li span.button.chk.checkbox_false_full:before {
+    content: "\f096";
+    color: @colorL;
+    .imgPL;
+    left: 3px;
+  }
+  li span.button.chk.checkbox_false_full_focus {
+    background:none;
+  }
+  li span.button.chk.checkbox_false_full_focus:before {
+    content: "\f096";
+    color: @colorL;
+    .imgPL;
+    left: 3px;
+  }
+
+  li span.button.chk.checkbox_true_full {
+    background:none;
+  }
+  li span.button.chk.checkbox_true_full:before {
+    content: "\f046";
+    color: @colorL;
+    .imgPL;
+    left: 3px;
+  }
+  li span.button.chk.checkbox_true_full_focus {
+    background:none;
+  }
+  li span.button.chk.checkbox_true_full_focus:before {
+    content: "\f046";
+    color: @colorL;
+    .imgPL;
+    left: 3px;
+  }
+
+
+  li span.button.chk.checkbox_true_part {
+    background:none;
+  }
+  li span.button.chk.checkbox_true_part:before {
+    content: "\f14a";
+    color: @colorL;
+    .imgPL;
+    left: 3px;
+  }
+  li span.button.chk.checkbox_true_part_focus{
+    background:none;
+  }
+  li span.button.chk.checkbox_true_part_focus:before {
+    content: "\f14a";
+    color: @colorL;
+    .imgPL;
+    left: 3px;
+  }*!
+}*/
+#treeShow.ztree {
+  max-height: 300px;
+  overflow: auto;
+  position: relative;
+  padding: 5px 10px;
+}
+#treeShow.ztree li .switch {
+  display: none;
+}
+#treeShow.ztree li a {
+  height: 24px;
+  color: #787878;
+  letter-spacing: 2px;
+}
+#treeShow.ztree li a.curSelectedNode {
+  background: none;
+  border: none;
+}
+#treeShow.ztree li span.button {
+  background: none;
+  font: normal normal normal 14px/1 FontAwesome;
+}
+#treeShow.ztree li span.button.ico_close:before {
+  content: "\f054";
+  color: #ff8e12;
+  position: relative;
+  top: 2px;
+}
+#treeShow.ztree li span.button.ico_open:before {
+  content: "\f054";
+  color: #ff8e12;
+  position: relative;
+  top: 2px;
+}
+#treeShow.ztree li span.button.ico_docu:before {
+  content: "\f054";
+  color: #ff8e12;
+  position: relative;
+  top: 2px;
+  content: "\f111";
+  font-size: 12px;
+  color: #ffb15c;
+}
+#treeShow.ztree li span.button.ico_docu + span {
+  color: #000;
+}
+#treeShowResult.ztree {
+  max-height: 300px;
+  overflow: auto;
+  position: relative;
+  padding: 5px 10px;
+}
+#treeShowResult.ztree li .switch {
+  display: none;
+}
+#treeShowResult.ztree li a {
+  height: 24px;
+  color: #787878;
+  letter-spacing: 2px;
+}
+#treeShowResult.ztree li a.curSelectedNode {
+  background: none;
+  border: none;
+}
+#treeShowResult.ztree li span.button {
+  background: none;
+  font: normal normal normal 14px/1 FontAwesome;
+}
+#treeShowResult.ztree li span.button.ico_close:before {
+  content: "\f054";
+  color: #ff8e12;
+  position: relative;
+  top: 2px;
+}
+#treeShowResult.ztree li span.button.ico_open:before {
+  content: "\f054";
+  color: #ff8e12;
+  position: relative;
+  top: 2px;
+}
+#treeShowResult.ztree li span.button.ico_docu:before {
+  content: "\f054";
+  color: #ff8e12;
+  position: relative;
+  top: 2px;
+  content: "\f111";
+  font-size: 12px;
+  color: #ffb15c;
+}
+#treeShowResult.ztree li span.button.ico_docu + span {
+  color: #000;
+}
+.ztree_a li .switch {
+  display: none;
+}
+.ztree_a li a {
+  height: 24px;
+  color: #787878;
+  letter-spacing: 2px;
+}
+.ztree_a li a.curSelectedNode {
+  background: none;
+  border: none;
+}
+.ztree_a li span.button {
+  background: none;
+  font: normal normal normal 14px/1 FontAwesome;
+}
+.ztree_a li span.button.ico_close:before {
+  content: "\f054";
+  color: #ff8e12;
+  position: relative;
+  top: 2px;
+}
+.ztree_a li span.button.ico_open:before {
+  content: "\f054";
+  color: #ff8e12;
+  position: relative;
+  top: 2px;
+}
+.ztree_a li span.button.ico_docu:before {
+  content: "\f054";
+  color: #ff8e12;
+  position: relative;
+  top: 2px;
+  content: "\f111";
+  font-size: 12px;
+  color: #ffb15c;
+}
+.ztree_a li span.button.ico_docu + span {
+  color: #000;
+}
+.img {
+  content: "\f054";
+  color: #ff8e12;
+  position: relative;
+  top: 2px;
+}
+.biyue_tree li .switch {
+  display: none;
+}
+.biyue_tree li a {
+  height: 24px;
+  color: #787878;
+  letter-spacing: 2px;
+}
+.biyue_tree li a.curSelectedNode {
+  background: none;
+  border: none;
+}
+.biyue_tree li span.button {
+  background: none;
+  font: normal normal normal 14px/1 FontAwesome;
+}
+.biyue_tree li span.button.ico_close:before {
+  content: "\f054";
+  color: #ff8e12;
+  position: relative;
+  top: 2px;
+}
+.biyue_tree li span.button.ico_open:before {
+  content: "\f054";
+  color: #ff8e12;
+  position: relative;
+  top: 2px;
+}
+.biyue_tree li span.button.ico_docu:before {
+  content: "\f054";
+  color: #ff8e12;
+  position: relative;
+  top: 2px;
+  content: "\f111";
+  font-size: 12px;
+  color: #ffb15c;
+}
+.biyue_tree li span.button.ico_docu + span {
+  color: #000;
+}

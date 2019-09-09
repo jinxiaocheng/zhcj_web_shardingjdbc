@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.inspection.mapper.AccidentReportMapper">
+
+
+    <select id="selectList" parameterType="map" resultType="map">
+          SELECT  IFNULL(A.id,"") as id,
+                  IFNULL(T.NAME,"") as areaName,
+                  IFNULL(A.CONSTRUCTION_ID,"") as constructionId,
+                  IFNULL(F.name ,"") as constructionName,
+                  IFNULL(A.type ,0) as  type,
+                  A.ACCIDENT_DATE as businessDate,
+                  IFNULL(A.resume ,"") as items,
+                  IFNULL(A.FIRST_TREATMENT,"") as results,
+                  IFNULL(C.NAME,"") as projectStructureName,
+                  IFNULL(D.NAME,"") as projectCompanyName,
+                  IFNULL(E.NAME,"") as teamName,
+                  IFNULL(B.NAME,"") as contactName,
+                  IFNULL(A.CONTACT_MOBILE,"") as contactMobile,
+                  IFNULL(A.level,0) as status,
+                  IFNULL(A.IS_ATTACH,0) as isAttach,
+                  A.CREATE_TIME as createTime,
+                  IFNULL(A.CREATE_BY,"") as createBy
+          FROM T_BASIC_ACCIDENT_REPORT A
+          LEFT JOIN T_SYS_USER B ON B.ID = A.CONTACT_ID
+          LEFT JOIN T_BASIC_PROJECT_STRUCTURE C ON C.ID = A.PROJECT_STRUCTURE_ID
+          LEFT JOIN T_BASIC_PROJECT_COMPANY D ON D.ID = A.PROJECT_COMPANY_ID
+          LEFT JOIN T_BASIC_TEAM E ON E.ID = A.TEAM_ID
+          LEFT JOIN T_BASIC_CONSTRUCTION F ON F.ID = A.CONSTRUCTION_ID
+          LEFT JOIN t_sys_territory T ON T.ID = F.belong_area
+          <where>
+              <if test="level != null and level != 0 ">
+                  AND A.LEVEL = #{level}
+              </if>
+              <if test="_parameter.containsKey('constructionId') and constructionId != null ">
+                  AND A.CONSTRUCTION_ID = #{constructionId}
+              </if>
+              <if test="projectCompanyId != '' and projectCompanyId != null ">
+                  AND A.project_company_id = #{projectCompanyId}
+              </if>
+              <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                  AND A.CONSTRUCTION_ID IN
+                  <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                      (#{constructionVo.id})
+                  </foreach>
+              </if>
+              <if test="type != null and type != '' ">
+                  AND A.TYPE = #{type}
+              </if>
+          </where>
+          ORDER BY A.ACCIDENT_DATE DESC
+          LIMIT #{offset},#{rows}
+    </select>
+
+    <select id="selectById" parameterType="String" resultType="map">
+         SELECT   A.id as id,
+                  A.CONSTRUCTION_ID as constructionId,
+                  A.type as type,
+                  A.ACCIDENT_DATE as businessDate,
+                  A.resume as items,
+                  A.FIRST_TREATMENT as results,
+                  C.NAME as projectStructureName,
+                  D.NAME as projectCompanyName,
+                  E.NAME as teamName,
+                  B.NAME as contactName,
+                  A.CONTACT_MOBILE as contactMobile,
+                  A.level as status,
+                  A.IS_ATTACH as isAttach,
+                  A.CREATE_TIME as createTime,
+                  A.CREATE_BY as createBy
+          FROM T_BASIC_ACCIDENT_REPORT A
+          LEFT JOIN T_SYS_USER B ON B.ID = A.CONTACT_ID
+          LEFT JOIN T_BASIC_PROJECT_STRUCTURE C ON C.ID = A.PROJECT_STRUCTURE_ID
+          LEFT JOIN T_BASIC_PROJECT_COMPANY D ON D.ID = A.PROJECT_COMPANY_ID
+          LEFT JOIN T_BASIC_TEAM E ON E.ID = A.TEAM_ID
+          WHERE A.ID = #{id}
+    </select>
+
+    <select id="queryCount" parameterType="map" resultType="int">
+        SELECT  count(A.ID)
+        FROM T_BASIC_ACCIDENT_REPORT A
+        LEFT JOIN T_SYS_USER B ON B.ID = A.CONTACT_ID
+        LEFT JOIN T_BASIC_PROJECT_STRUCTURE C ON C.ID = A.PROJECT_STRUCTURE_ID
+        LEFT JOIN T_BASIC_PROJECT_COMPANY D ON D.ID = A.PROJECT_COMPANY_ID
+        LEFT JOIN T_BASIC_TEAM E ON E.ID = A.TEAM_ID
+        <where>
+            <if test="level != null and level != 0 ">
+                AND A.LEVEL = #{level}
+            </if>
+            <if test="_parameter.containsKey('constructionId') and constructionId != null ">
+                AND A.CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="projectCompanyId != '' and projectCompanyId != null ">
+                AND A.project_company_id = #{projectCompanyId}
+            </if>
+            <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                AND A.CONSTRUCTION_ID IN
+                <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                    (#{constructionVo.id})
+                </foreach>
+            </if>
+            <if test="type != null and type != '' ">
+                AND A.TYPE = #{type}
+            </if>
+        </where>
+        ORDER BY A.ACCIDENT_DATE DESC
+    </select>
+
+    <insert id="insert" parameterType="com.escst.inspection.entity.AccidentReportEntity">
+        INSERT INTO T_BASIC_ACCIDENT_REPORT(ID,CONSTRUCTION_ID,TYPE,ACCIDENT_DATE,RESUME,FIRST_TREATMENT,
+                                            project_structure_id,project_company_id,team_id,contact_id,contact_mobile,
+                                            IS_ATTACH,LEVEL,CREATE_TIME,CREATE_BY)
+                    values(#{id},#{constructionId},#{type},#{accidentDate},#{resume},#{firstTreatment},
+                           #{projectStructureId},#{projectCompanyId},#{teamId},#{contactId},#{contactMobile},
+                           #{isAttach},#{level},#{createTime},#{createBy})
+    </insert>
+
+    <insert id="batchInsertAccidentLoss" parameterType="map">
+        INSERT INTO T_BASIC_ACCIDENT_LOSS_DETAIL(ID,ACCIDENT_REPORT_ID,TYPE,PERSON_ID,REMARK) VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (#{item.id},#{item.accidentReportId},#{item.type},#{item.personId},#{item.remark})
+        </foreach>
+    </insert>
+
+    <select id="selectByLossType" parameterType="com.escst.inspection.entity.AccidentLossDetailEntity" resultType="Map">
+        SELECT B.ID AS personId,B.NAME AS name,B.TITLE AS title,B.WORK_AGE AS workAge,
+        B.WORK_TYPE AS workType,B.MOBILE AS mobile,C.PATH AS headPortrait
+        FROM T_BASIC_ACCIDENT_LOSS_DETAIL A
+        LEFT JOIN T_BASIC_PERSON B ON B.ID = A.PERSON_ID
+        LEFT JOIN T_BASIC_FILE C ON C.ID = B.HEAD_PORTRAIT_ID
+        <where>
+            <if test="accidentReportId != null and accidentReportId != '' ">
+                AND A.ACCIDENT_REPORT_ID = #{accidentReportId}
+            </if>
+            <if test="type != null and type != 0 ">
+                AND A.TYPE = #{type}
+            </if>
+        </where>
+    </select>
+
+    <update id="update" parameterType="com.escst.inspection.entity.AccidentReportEntity">
+        UPDATE T_BASIC_ACCIDENT_REPORT
+        <set>
+            <if test="accidentDate != null">
+                ACCIDENT_DATE = #{accidentDate},
+            </if>
+            <if test="resume != null and resume != '' ">
+                RESUME = #{resume},
+            </if>
+            <if test="firstTreatment != null and firstTreatment != '' ">
+                FIRST_TREATMENT = #{firstTreatment},
+            </if>
+            <if test="isAttach != null ">
+                IS_ATTACH = #{isAttach},
+            </if>
+            <if test="level != null and level != 0 ">
+                LEVEL = #{level},
+            </if>
+            <if test="updateTime != null ">
+                UPDATE_TIME = #{updateTime},
+            </if>
+        </set>
+        WHERE ID = #{id}
+    </update>
+
+    <select id="selectPersonNameByLossType" parameterType="com.escst.inspection.entity.AccidentLossDetailEntity" resultType="com.escst.person.vo.PersonVO">
+        SELECT B.ID AS id,B.NAME AS name,B.TITLE AS title,B.WORK_TYPE AS workType
+        FROM T_BASIC_ACCIDENT_LOSS_DETAIL A
+        LEFT JOIN T_BASIC_PERSON B ON B.ID = A.PERSON_ID
+        LEFT JOIN T_BASIC_FILE C ON C.ID = B.HEAD_PORTRAIT_ID
+        <where>
+            <if test="accidentReportId != null and accidentReportId != '' ">
+                AND A.ACCIDENT_REPORT_ID = #{accidentReportId}
+            </if>
+            <if test="type != null and type != 0 ">
+                AND A.TYPE = #{type}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

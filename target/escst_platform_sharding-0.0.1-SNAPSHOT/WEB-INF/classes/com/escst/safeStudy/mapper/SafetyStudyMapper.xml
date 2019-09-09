@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.safeStudy.mapper.SafetyStudyMapper">
+    <select id="selectList" parameterType="map" resultType="map">
+          SELECT A.ID as id,
+                 C.NAME AS areaName,
+                 A.CONSTRUCTION_ID as constructionId,
+                 B.name as constructionName,
+                 A.type AS type,
+                 A.start_date as startDate,A.end_date as endDate,
+                 A.theme as theme,
+                 A.place as place,
+                 A.contact_person as contactPerson,
+                 A.IS_ATTACH as isAttach,
+                 A.remark as remark,
+                 A.CREATE_TIME as createTime,
+                 A.create_by as createBy
+          FROM T_BASIC_SAFETY_STUDY A
+          LEFT JOIN T_BASIC_CONSTRUCTION B ON B.ID = A.CONSTRUCTION_ID
+          LEFT JOIN t_sys_territory C ON C.ID = B.belong_area
+          <where>
+              <if test="_parameter.containsKey('constructionId') and constructionId != null ">
+                  AND A.CONSTRUCTION_ID = #{constructionId}
+              </if>
+              <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                  AND A.CONSTRUCTION_ID IN
+                  <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                      (#{constructionVo.id})
+                  </foreach>
+              </if>
+              <if test="type != null and type != 0 ">
+                  AND A.TYPE = #{type}
+              </if>
+          </where>
+          ORDER BY A.CREATE_TIME DESC
+          LIMIT #{offset},#{rows}
+    </select>
+
+    <select id="selectCount" parameterType="map" resultType="int">
+        SELECT  COUNT(id)
+        FROM T_BASIC_SAFETY_STUDY
+        <where>
+            <if test="_parameter.containsKey('constructionId') and constructionId != null ">
+                AND CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                AND CONSTRUCTION_ID IN
+                <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                    (#{constructionVo.id})
+                </foreach>
+            </if>
+            <if test="type != null and type != 0 ">
+                AND TYPE = #{type}
+            </if>
+        </where>
+        ORDER BY CREATE_TIME DESC
+    </select>
+
+    <select id="selectPersonListById" parameterType="String" resultType="map">
+        SELECT B.ID AS personId,B.NAME AS name,B.MOBILE AS mobile
+        FROM T_BASIC_SAFETY_STUDY_PERSON A
+        LEFT JOIN T_SYS_USER B ON B.ID = A.person_id
+        WHERE A.SAFETY_STUDY_ID = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.escst.safeStudy.entity.SafetyStudyEntity">
+        INSERT INTO T_BASIC_SAFETY_STUDY(ID,CONSTRUCTION_ID,TYPE,START_DATE,END_DATE,
+                                              THEME,PLACE,CONTACT_PERSON,IS_ATTACH,REMARK,CREATE_TIME,CREATE_BY)
+                    values(#{id},#{constructionId},#{type},#{startDate},#{endDate},
+                           #{theme},#{place},#{contactPerson},#{isAttach},#{remark},#{createTime},#{createBy})
+    </insert>
+
+    <insert id="batchInsertSafetyStudyPerson" parameterType="map">
+         INSERT INTO T_BASIC_SAFETY_STUDY_PERSON(ID,SAFETY_STUDY_ID,PERSON_ID) VALUES
+         <foreach collection="list" item="studyPerson" index="" separator=",">
+             (#{studyPerson.id},#{studyPerson.safetyStudyId},#{studyPerson.personId})
+         </foreach>
+    </insert>
+
+    <update id="update" parameterType="com.escst.safeStudy.entity.SafetyStudyEntity">
+        UPDATE T_BASIC_SAFETY_STUDY
+        <set>
+            <if test="accidentDate != null">
+                START_DATE = #{startDate},
+            </if>
+            <if test="resume != null and resume != '' ">
+                END_DATE = #{endDate},
+            </if>
+            <if test="theme != null and theme != '' ">
+                THEME = #{theme},
+            </if>
+            <if test="place != null and place != '' ">
+                PLACE = #{place},
+            </if>
+            <if test="contactPerson != null and contactPerson != '' ">
+                CONTACT_PERSON = #{contactPerson},
+            </if>
+            <if test="remark != null and remark != '' ">
+                remark = #{remark},
+            </if>
+            <if test="updateTime != null ">
+                UPDATE_TIME = #{updateTime},
+            </if>
+        </set>
+        WHERE ID = #{id}
+    </update>
+
+    <select id="selectDetailInfoById" parameterType="String" resultType="com.escst.safeStudy.vo.SafetyStudyDetailVO">
+        SELECT DATE_FORMAT(start_date,'%Y-%m-%d %H:%i') as startDate,DATE_FORMAT(end_date,'%Y-%m-%d %H:%i') as endDate,theme,place,
+        contact_person as contactPerson,IS_ATTACH as isAttach,remark
+        FROM T_BASIC_SAFETY_STUDY
+        WHERE ID = #{id}
+    </select>
+
+
+</mapper>

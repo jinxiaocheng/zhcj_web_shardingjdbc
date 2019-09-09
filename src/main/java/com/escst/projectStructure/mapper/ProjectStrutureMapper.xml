@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.projectStructure.mapper.ProjectStructureMapper">
+    <select id="queryProjectStructrue" parameterType="map" resultType="com.escst.commons.tree.TreeEntity">
+        SELECT id,name,parent_id pId
+        FROM T_BASIC_PROJECT_STRUCTURE
+        <where>
+            <if test="constructionId != null and constructionId != ''">
+                AND construction_id = #{constructionId}
+            </if>
+            <if test="parentId != null and parentId != '' ">
+                AND parent_id = #{parentId}
+            </if>
+        </where>
+        order by sort_num
+    </select>
+
+    <select id="queryScheduledPlanList" parameterType="map" resultType="com.escst.projectStructure.entity.ProjectStructureEntity">
+        SELECT id,construction_id constructionId,name,parent_id parentId,DATE_FORMAT(start_date,'%Y-%m-%d') startDate,DATE_FORMAT(end_date,'%Y-%m-%d') endDate
+        FROM T_BASIC_PROJECT_STRUCTURE
+        <where>
+            <if test="constructionId != null and constructionId != ''">
+                construction_id = #{constructionId}
+            </if>
+            <if test="parentId != null and parentId != ''">
+              AND  parent_id = #{parentId}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="queryParentProjectStructrue" parameterType="map" resultType="com.escst.commons.tree.TreeEntity">
+      SELECT id,name,parent_id pId FROM T_BASIC_PROJECT_STRUCTURE
+      WHERE construction_id = #{constructionId} and (parent_id is null or parent_id = '')
+    </select>
+
+    <select id="selectProjectStructureById" parameterType="map" resultType="map">
+        SELECT a.name AS  name,DATE_FORMAT(a.start_date,'%Y-%m-%d') AS startDate,DATE_FORMAT(a.end_date,'%Y-%m-%d') AS endDate,b.name AS constructionName FROM t_basic_project_structure a
+        LEFT JOIN t_basic_construction b ON  b.id=a.construction_id
+        <where>
+        <if test="constructionId != null and constructionId != ''">
+            AND b.id = #{constructionId}
+        </if>
+            <if test="parentId !=null and parentId !=''">
+                AND a.parent_id=#{parentId}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectProjectById" parameterType="map" resultType="map">
+        SELECT a.name AS  name,DATE_FORMAT(a.start_date,'%Y-%m-%d') AS startDate,DATE_FORMAT(a.end_date,'%Y-%m-%d') AS endDate,b.name AS constructionName FROM t_basic_project_structure a
+        LEFT JOIN t_basic_construction b ON  b.id=a.construction_id
+       WHERE b.id = #{constructionId} AND (a.parent_id is null or a.parent_id = '')
+
+    </select>
+
+
+
+    <select id="selectProjectStructureByParentId" parameterType="map" resultType="map">
+       SELECT MIN(start_date) AS minStartDate,MAX(end_date) AS maxEndDate FROM T_BASIC_PROJECT_STRUCTURE
+        <where>
+            <if test="parentId !=null and parentId !=''">
+               and (id=#{parentId} OR parent_id=#{parentId})
+            </if>
+            <if test="constructionId !=null and constructionId !=''">
+            AND construction_id=#{constructionId}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectByParentIdCount" parameterType="String" resultType="Integer">
+        SELECT count(1) FROM T_BASIC_PROJECT_STRUCTURE WHERE PARENT_ID = #{parentId}
+    </select>
+    <insert id="insertProjectStructure" parameterType="com.escst.projectStructure.entity.ProjectStructureEntity">
+      INSERT  INTO  T_BASIC_PROJECT_STRUCTURE (id,construction_id,parent_id,name,start_date,end_date,create_time,create_by,update_time,update_by) VALUES (#{id},#{constructionId},#{parentId},#{name},#{startDate},#{endDate},#{createTime},#{createBy},#{updateTime},#{updateBy})
+    </insert>
+
+    <insert id="batchInsert" parameterType="map">
+        INSERT INTO T_BASIC_PROJECT_STRUCTURE(ID,NAME,construction_id,parent_id,start_date,end_date,sort_num,create_time,create_by,update_time,update_by) VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (#{item.id},#{item.name},#{item.constructionId},#{item.parentId},#{item.startDate},#{item.endDate},#{item.sortNum},#{item.createTime},#{item.createBy},
+            #{item.updateTime},#{item.updateBy})
+        </foreach>
+    </insert>
+
+    <select id="selectByParentId" resultType="com.escst.projectStructure.entity.ProjectStructureEntity">
+        SELECT
+        t.id AS id,
+        t.parent_id AS parentId,
+        b.id AS constructionId,
+        b.name AS constructionName,
+        t.name AS name,
+        t.start_date startDate,
+        t.end_date endDate
+        FROM
+        T_BASIC_PROJECT_STRUCTURE t
+        LEFT JOIN t_basic_construction b ON t.construction_id = b.id
+        WHERE t.construction_id = #{constructionId} and
+        <choose>
+            <when test="parentId !=null and parentId !=''">
+                t.parent_id = #{parentId}
+            </when>
+            <otherwise>
+                (t.parent_id ='' or t.parent_id is null)
+            </otherwise>
+        </choose>
+        order by t.sort_num
+    </select>
+
+    <update id="updateBatch" parameterType="map">
+        update T_BASIC_PROJECT_STRUCTURE
+        set name =
+        <foreach collection="list" item="item" index="index"
+                 separator=" " open="case ID" close="end">
+            <if test="item.name !=null and item.name != ''">
+                when #{item.id} then #{item.name}
+            </if>
+        </foreach>
+        where id in
+        <foreach collection="list" index="index" item="item"
+                 separator="," open="(" close=")">
+            #{item.id}
+        </foreach>
+
+    </update>
+
+    <select id="selectConstructionIdList" resultType="String">
+        SELECT DISTINCT construction_id
+        FROM t_basic_project_structure;
+    </select>
+
+    <select id="queryByName" parameterType="map" resultType="String">
+        SELECT name
+        FROM t_basic_project_structure
+        WHERE construction_id = #{constructionId} AND parent_id = #{parentId}
+
+    </select>
+
+
+    <select id="queryBySortNum" parameterType="map"
+            resultType="com.escst.projectStructure.entity.ProjectStructureEntity">
+        SELECT id,name FROM t_basic_project_structure WHERE construction_id=#{constructionId} AND parent_id=#{parentId}
+        <if test="sortStart !=null and sortStart !=''">
+            and  <![CDATA[ sort_num >= #{sortStart}
+          ]]>
+        </if>
+        <if test="sortEnd !=null and sortEnd !=''">
+            and <![CDATA[ sort_num <= #{sortEnd} ]]>
+        </if>
+        ORDER BY sort_num
+
+    </select>
+
+    <select id="selectCount" parameterType="com.escst.construction.entity.ProjectScheduleEntity" resultType="Integer">
+        SELECT
+        count(1)
+        FROM
+        t_basic_project_structure a
+        LEFT JOIN t_basic_construction b ON a.construction_id = b.id
+        <include refid="conditionWhere"></include>
+    </select>
+
+
+    <sql id="conditionWhere">
+        <where>
+            a.construction_id = #{constructionId}
+            <if test="name!=null and name!=''">
+                and a.name like '%${name}%'
+            </if>
+            <choose>
+                <when test="id != null and id != '' ">
+                    and parent_id = #{id}
+                </when>
+                <otherwise>
+                    and parent_id = '0'
+                </otherwise>
+            </choose>
+        </where>
+    </sql>
+
+    <!--查询检查部位树-->
+    <select id="listProjectStructureTree" parameterType="com.escst.construction.entity.ProjectScheduleEntity"
+            resultType="com.escst.commons.tree.TreeEntity">
+        SELECT
+        a.id as id,
+        a.construction_id as constructionId,
+        a.parent_id as pId,
+        a.name AS name,
+        a.sort_num as sortNum
+        FROM
+        t_basic_project_structure a
+        LEFT JOIN t_basic_construction b ON a.construction_id = b.id
+        <include refid="conditionWhere"></include>
+        order by a.sort_num
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+
+    <!--判断是否为父节点-->
+    <select id="isParent" parameterType="com.escst.commons.tree.TreeEntity"
+            resultType="com.escst.commons.tree.TreeEntity">
+        SELECT
+        count( 1 ) as count,
+        parent_id as pId
+        FROM
+        t_basic_project_structure
+        WHERE
+        parent_id IN
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item.id}
+        </foreach>
+        GROUP BY
+        parent_id
+    </select>
+
+
+    <!--添加工程结构-->
+    <insert id="insertStructure" parameterType="com.escst.commons.tree.TreeEntity">
+        INSERT INTO
+            T_BASIC_PROJECT_STRUCTURE (ID, NAME, construction_id, parent_id, sort_num, create_time, create_by, update_time, update_by)
+        VALUES
+            (#{id}, #{name}, #{constructionId}, #{pId}, #{sortNum}, #{createTime},
+             #{createBy},
+             #{updateTime}, #{updateBy})
+
+    </insert>
+
+    <!--修改工程结构-->
+    <update id="updateStructure" parameterType="com.escst.commons.tree.TreeEntity">
+        update T_BASIC_PROJECT_STRUCTURE a
+        set a.name      = #{name}, a.sort_num = #{sortNum},
+            a.parent_id = #{pId},
+            a.update_by = #{updateBy}, a.update_time = #{updateTime}
+        where a.id = #{id}
+    </update>
+
+    <!--查询所有工程结构id,父id-->
+    <select id="listAll" parameterType="com.escst.commons.tree.TreeEntity" resultType="com.escst.commons.tree.TreeEntity">
+        SELECT
+            ID,
+            parent_id as pId
+        FROM T_BASIC_PROJECT_STRUCTURE
+        WHERE construction_id = #{constructionId}
+    </select>
+
+    <!--删除工程结构-->
+    <delete id="batchDelete" parameterType="com.escst.commons.tree.TreeEntity">
+        delete from T_BASIC_PROJECT_STRUCTURE where id in
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item.id}
+        </foreach>
+    </delete>
+
+</mapper>

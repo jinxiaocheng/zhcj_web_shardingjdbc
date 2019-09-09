@@ -1,0 +1,150 @@
+@shadowColor:#dfdfdf;
+.transform(@prop){
+  -webkit-transform: @prop;
+  -moz-transform: @prop;
+  -ms-transform: @prop;
+  -o-transform: @prop;
+  transform: @prop;
+}
+.transition(@prop){
+  -webkit-transition: @prop;
+  -moz-transition: @prop;
+  -ms-transition: @prop;
+  -o-transition: @prop;
+  transition: @prop;
+}
+
+.transform-origin(@prop){
+  -webkit-transform-origin: @prop;
+  -moz-transform-origin: @prop;
+  -ms-transform-origin: @prop;
+  -o-transform-origin: @prop;
+  transform-origin: @prop;
+}
+.box-shadow(){
+  display: block;
+  box-shadow: 0 0 1px @shadowColor;
+  border: 1px solid #efefef;
+}
+.biyue_body{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top:0;
+  background: #fff;
+
+  @toolHeight: 60px;
+  .biyue_search{
+    position: absolute;
+    left: 0;
+    top:0;
+    right: 0;
+    height:@toolHeight;
+    line-height: 60px;
+    box-shadow: 0 3px 6px #dfdfdf;
+    z-index: 1000;
+    background: #fff;
+    &>label{
+      height: 60px;
+      line-height: 60px;
+      padding: 0 15px;
+    }
+    .layui-input-inline{
+      width: 200px;
+    }
+    #search{
+      margin-left: 20px;
+    }
+
+    .search-more-box{
+      position: absolute;
+      top: @toolHeight + 10px;
+      box-shadow: 0 0 6px #dfdfdf;
+      padding: 15px 0 0 0;
+      box-sizing: border-box;
+      width: 334px;
+      z-index: 2000;
+      background: #fff;
+      display: none;
+    }
+
+    #search-more{
+      .fa-angle-double-down{
+        .transition(all 0.2s ease-out);
+      }
+      .fa-angle-double-down.active{
+        .transform(rotate(-180deg));
+      }
+    }
+  }
+
+  .biyue-main-box{
+    position: absolute;
+    top:@toolHeight;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+    padding: 10px;
+    box-sizing: border-box;
+    .title-box{
+      .box-shadow();
+      .layui-form-label{
+        line-height: 30px;
+        width: 70px;
+        padding-left: 0;
+      }
+      .layui-form-select{
+        top: -2px;
+      }
+      position: relative;
+      text-indent: 15px;
+      height: 50px;
+      line-height: 50px;
+      padding: 0 10px;
+      box-sizing: border-box;
+      letter-spacing: 2px;
+    }
+    .lineData{
+      width: 100%;
+      margin-top: 20px;
+      background: #fff;
+    }
+    .lineDataEcharts{
+      width: 100%;
+      position: relative;
+      height: 300px;
+      box-sizing: border-box;
+      .box-shadow();
+      &>div{
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .tableData{
+      width: 100%;
+      margin-top: 20px;
+      background: #fff;
+    }
+    .table-box{
+      width: 100%;
+      margin-top: 15px;
+      position: relative;
+      font-size: 0;
+      letter-spacing: 0;
+      .box-shadow();
+      .layui-table-view{
+        margin: 0;
+      }
+    }
+  }
+}
+
+.layui-table-view .layui-table{
+  width: 100%;
+}
+.layui-laypage .layui-laypage-curr .layui-laypage-em {
+  background-color: #1e88e5;
+}
+

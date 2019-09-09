@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>    
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.escst.attendance.mapper.AttendanceResultMapper">
+     <select id="selectAttendanceList" parameterType="com.escst.attendance.entity.AttendanceResultEntity" resultType="map">
+          SELECT
+			a.id id,
+			a.person_name personName,
+			a.attendance_date attendanceDate,
+			a.am_up_time amUpTime,
+			a.am_down_time amDownTime,
+			a.pm_up_time pmUpTime,
+		    d.title as title,
+			b.`name` projectCompanyName,
+			tbc.name AS constructionName,
+		 	tst.name AS areaName,
+			c.`name` teamName
+		FROM
+			t_basic_attendance_result a
+		LEFT JOIN t_basic_project_company b ON a.project_company_id = b.id
+		 LEFT JOIN t_basic_construction tbc ON tbc.id = a.construction_id
+		LEFT JOIN t_basic_team c ON a.team_id = c.id
+		LEFT JOIN t_basic_person d on a.person_id=d.id
+		LEFT JOIN t_sys_territory tst ON tst.id=tbc.belong_area
+		<include refid="conditionWhere"></include>
+        order by a.attendance_date DESC,a.person_name
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="selectCount" parameterType="com.escst.attendance.entity.AttendanceResultEntity" resultType="Integer">
+       SELECT count(1)
+		FROM
+			t_basic_attendance_result a
+		LEFT JOIN t_basic_project_company b ON a.project_company_id = b.id
+		LEFT JOIN t_basic_team c ON a.team_id = c.id
+		LEFT JOIN t_basic_person d on a.person_id=d.id
+		LEFT JOIN t_basic_construction_person tbc ON tbc.construction_id = a.construction_id
+		<include refid="conditionWhere"></include>
+     </select>
+
+	<sql id="conditionWhere">
+		<where>
+			1=1
+			<if test="personName!=null and personName!=''">
+	    		and a.person_name like '%${personName}%'
+	    	</if>
+	    	<if test="projectCompanyId!=null and projectCompanyId!=''">
+	    		and a.project_company_id=#{projectCompanyId}
+	    	</if>
+			<if test="constructionId !=null and constructionId !=''">
+				AND a.construction_id = #{constructionId}
+			</if>
+			<if test="areaId !=null and areaId !=''">
+				AND tbc.belong_area = #{areaId}
+			</if>
+			<if test="attendanceDate != null and attendanceDate !=''">
+			   AND  DATE_FORMAT(a.attendance_date,'%Y-%m-%d %H') = #{attendanceDate}
+			</if>
+			<if test="cardNum !=null and cardNum != ''">
+			   AND tbc.card_number =#{cardNum}
+			</if>
+		</where>
+		 and exists (
+						select 1
+						from t_sys_user u
+						inner join t_sys_organization p on p.id = u.org_id
+						inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+						where s.construction_id = a.construction_id and u.id = #{userId}
+					)
+	</sql>    
+    
+</mapper>

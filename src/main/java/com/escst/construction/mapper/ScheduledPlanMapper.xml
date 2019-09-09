@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.construction.mapper.ScheduledPlanMapper">
+
+    <!--查询工地下的进度计划树-->
+    <select id="listScheduledPlanTree" parameterType="com.escst.construction.entity.ScheduledPlanEntity"
+            resultType="com.escst.construction.vo.ScheduledPlanTree">
+        SELECT
+        a.id as id,
+        a.construction_id as constructionId,
+        a.parent_id as pId,
+        a.name AS name,
+        a.sort_num as sortNum,
+        b.name AS constructionName,
+        DATE_FORMAT(a.start_time,'%Y-%m-%d') AS startTime,
+        DATE_FORMAT(a.end_time,'%Y-%m-%d') AS endTime
+        FROM
+        t_basic_scheduled_plan a
+        LEFT JOIN t_basic_construction b ON a.construction_id = b.id
+        <include refid="conditionWhere"></include>
+        order by a.sort_num
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+
+    <!--判断是否为父节点-->
+    <select id="isParent" parameterType="com.escst.construction.vo.ScheduledPlanTree" resultType="com.escst.construction.vo.ScheduledPlanTree">
+        SELECT
+        count( 1 ) as count,
+        parent_id as pId
+        FROM
+        t_basic_scheduled_plan
+        WHERE
+        parent_id IN
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item.id}
+        </foreach>
+        GROUP BY
+        parent_id
+    </select>
+
+
+    <!--修改工地下的进度计划树节点名称-->
+    <update id="updateScheduledPlanTreeName" parameterType="com.escst.construction.vo.ScheduledPlanTree">
+        update t_basic_scheduled_plan a
+        set a.name      = #{name}, a.start_time = #{startTime}, a.end_time = #{endTime}, a.sort_num = #{sortNum},
+            a.parent_id = #{pId},
+            a.update_by = #{updateBy}, a.update_time = #{updateTime}
+        where a.id = #{id}
+    </update>
+
+    <!--添加工地下的进度计划树节点-->
+    <insert id="addScheduledPlanTree" parameterType="com.escst.construction.vo.ScheduledPlanTree">
+        INSERT INTO t_basic_scheduled_plan (
+            `id`,
+            parent_id,
+            `construction_id`,
+            `name`,
+            `start_time`,
+            `end_time`,
+            sort_num,
+            `create_time`,
+            `create_by`,
+            `update_time`,
+            `update_by`
+        )
+        VALUES
+            (
+                #{id},
+                #{pId},
+                #{constructionId},
+                #{name},
+                #{startTime},
+                #{endTime},
+                #{sortNum},
+                #{createTime},
+                #{createBy},
+                #{updateTime},
+                #{updateBy}
+            )
+    </insert>
+
+    <!--查询工地下所有进度计划id,父id-->
+    <select id="listAll" parameterType="string" resultType="com.escst.construction.vo.ScheduledPlanTree">
+        SELECT
+            ID,
+            parent_id as pId
+        FROM t_basic_scheduled_plan
+        WHERE construction_id = #{constructionId}
+    </select>
+
+    <!--删除工地下的进度计划树节点-->
+    <delete id="batchDelete" parameterType="com.escst.construction.vo.ScheduledPlanTree">
+        delete from t_basic_scheduled_plan where id in
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item.id}
+        </foreach>
+    </delete>
+
+    <select id="selectCount" parameterType="com.escst.construction.entity.ScheduledPlanEntity" resultType="Integer">
+        SELECT
+        count(1)
+        FROM
+        t_basic_scheduled_plan a
+        LEFT JOIN t_basic_construction b ON a.construction_id = b.id
+        <include refid="conditionWhere"></include>
+    </select>
+
+    <sql id="conditionWhere">
+        <where>
+            a.construction_id = #{constructionId}
+            <if test="name!=null and name!=''">
+                and a.name like '%${name}%'
+            </if>
+            <choose>
+                <when test="id!=null and id!=''">
+                    and parent_id = #{id}
+                </when>
+                <otherwise>
+                    and parent_id = '0'
+                </otherwise>
+            </choose>
+        </where>
+    </sql>
+
+    <insert id="insert" parameterType="com.escst.construction.entity.ScheduledPlanEntity">
+        INSERT INTO t_basic_scheduled_plan (
+            `id`,
+            parent_id,
+            `construction_id`,
+            `name`,
+            `start_time`,
+            `end_time`,
+            `create_time`,
+            `create_by`,
+            `update_time`,
+            `update_by`
+        )
+        VALUES
+            (
+                #{id},
+                #{parentId},
+                #{constructionId},
+                #{name},
+                #{startTime},
+                #{endTime},
+                #{createTime},
+                #{createBy},
+                #{updateTime},
+                #{updateBy}
+            )
+    </insert>
+
+    <insert id="batchInsert" parameterType="map">
+        INSERT INTO t_basic_scheduled_plan(
+        `id`,
+        parent_id,
+        `construction_id`,
+        `name`,
+        `start_time`,
+        `end_time`,
+        `sort_num`,
+        `create_time`,
+        `create_by`,
+        `update_time`,
+        `update_by`
+        )
+        VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (
+            #{item.id},
+            #{item.parentId},
+            #{item.constructionId},
+            #{item.name},
+            #{item.startTime},
+            #{item.endTime},
+            #{item.sortNum},
+            #{item.createTime},
+            #{item.createBy},
+            #{item.updateTime},
+            #{item.updateBy}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectByConstructionId" parameterType="String"
+            resultType="com.escst.construction.entity.ScheduledPlanEntity">
+        SELECT
+            id              as id,
+            name            as name,
+            parent_id       as parentId,
+            construction_id as constructionId,
+            sort_num        as sortNum
+        FROM
+            t_basic_scheduled_plan a
+        where a.construction_id = #{constructionId}
+        order by a.sort_num
+    </select>
+
+    <select id="selectByParentId" parameterType="String" resultType="map">
+        SELECT
+            a.id                                  as id,
+            a.parent_id                           as parentId,
+            a.name                                AS name,
+            b.name                                AS constructionName,
+            DATE_FORMAT(a.start_time, '%Y-%m-%d') AS startTime,
+            DATE_FORMAT(a.end_time, '%Y-%m-%d')   AS endTime
+        FROM
+            t_basic_scheduled_plan a
+            LEFT JOIN t_basic_construction b ON a.construction_id = b.id
+        where parent_id = #{parentId}
+        order by a.sort_num
+    </select>
+
+    <select id="selectDiffDaysByMap" parameterType="map" resultType="map">
+        select
+        min(b.start_time) as initTime,
+        TIMESTAMPDIFF(DAY,min(b.start_time),max(b.end_time)) as diffDays
+        from t_basic_scheduled_plan b
+        <where>
+            b.construction_id = #{constructionId}
+            <choose>
+                <when test="parentId!=null and parentId!=''">
+                    and b.parent_id = #{parentId}
+                </when>
+                <otherwise>
+                    and b.parent_id = '0'
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+
+</mapper>

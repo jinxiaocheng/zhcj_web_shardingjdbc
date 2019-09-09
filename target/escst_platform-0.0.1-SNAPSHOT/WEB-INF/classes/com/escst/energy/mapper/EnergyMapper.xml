@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.energy.mapper.EnergyMapper">
+    <select id="queryElectricQty" parameterType="map" resultType="com.escst.energy.vo.DateQtyVO">
+        SELECT d.equipment_id id,r.name,d.energy qty
+        <if test="type == 3">
+            ,DATE_FORMAT(d.acquisition_time,'%Y%m00') date
+        </if>
+        <if test="type == 1 or type == 2">
+            ,DATE_FORMAT(d.acquisition_time,'%Y%m%d') date
+        </if>
+        FROM t_da_ammeter_day d
+        inner join t_basic_equipment_register r on r.id = d.equipment_id
+        where d.construction_id = #{constructionId}
+        <![CDATA[
+			and d.acquisition_time >= #{startDate}
+			and d.acquisition_time <= #{endDate}
+		]]>
+        group by d.equipment_id, r.name
+        <if test="type == 3">
+            ,DATE_FORMAT(d.acquisition_time,'%Y%m00')
+        </if>
+        <if test="type == 1 or type == 2">
+            ,DATE_FORMAT(d.acquisition_time,'%Y%m%d')
+        </if>
+        order by date,r.name
+    </select>
+    <select id="queryWaterQty" parameterType="map" resultType="com.escst.energy.vo.DateQtyVO">
+        SELECT d.equipment_id id,r.name,d.mater_flow qty
+        <if test="type == 3">
+            ,DATE_FORMAT(d.acquisition_time,'%Y%m00') date
+        </if>
+        <if test="type == 1 or type == 2">
+            ,DATE_FORMAT(d.acquisition_time,'%Y%m%d') date
+        </if>
+        FROM t_da_water_day d
+        inner join t_basic_equipment_register r on r.id = d.equipment_id
+        where d.construction_id = #{constructionId}
+        <![CDATA[
+			and d.acquisition_time >= #{startDate}
+			and d.acquisition_time <= #{endDate}
+		]]>
+        group by d.equipment_id, r.name
+        <if test="type == 3">
+            ,DATE_FORMAT(d.acquisition_time,'%Y%m00')
+        </if>
+        <if test="type == 1 or type == 2">
+            ,DATE_FORMAT(d.acquisition_time,'%Y%m%d')
+        </if>
+        order by date,r.name
+    </select>
+	<select id="getElectricCount" parameterType="com.escst.energy.vo.EnergyQueryVO" resultType="int">
+		SELECT count(d.id)
+		FROM t_da_ammeter_day d 
+		where d.construction_id = #{constructionId}
+		<if test="startDate != null and startDate != ''">
+			<![CDATA[
+			and d.acquisition_time >= STR_TO_DATE(#{startDate},'%Y-%m-%d')
+			]]>
+		</if>
+		<if test="endDate != null and endDate != ''">
+			<![CDATA[
+			and d.acquisition_time <= STR_TO_DATE(#{endDate},'%Y-%m-%d')
+			]]>
+		</if>
+	</select>
+	<select id="queryElectricList" parameterType="com.escst.energy.vo.EnergyQueryVO" resultType="com.escst.energy.vo.DateQtyVO">
+		SELECT equipment_id id, DATE_FORMAT(d.acquisition_time,'%Y-%m-%d') date,energy qty
+		FROM t_da_ammeter_day d 
+		where d.construction_id = #{constructionId}
+		<if test="startDate != null and startDate != ''">
+			<![CDATA[
+			and d.acquisition_time >= STR_TO_DATE(#{startDate},'%Y-%m-%d')
+			]]>
+		</if>
+		<if test="endDate != null and endDate != ''">
+			<![CDATA[
+			and d.acquisition_time <= STR_TO_DATE(#{endDate},'%Y-%m-%d')
+			]]>
+		</if>
+		order by d.acquisition_time desc
+		LIMIT #{startIndex},#{rowNum}
+	</select>
+	<select id="getWaterCount" parameterType="com.escst.energy.vo.EnergyQueryVO" resultType="int">
+		SELECT count(d.id)
+		FROM t_da_water_day d 
+		where d.construction_id = #{constructionId}
+		<if test="startDate != null and startDate != ''">
+			<![CDATA[
+			and d.acquisition_time >= STR_TO_DATE(#{startDate},'%Y-%m-%d')
+			]]>
+		</if>
+		<if test="endDate != null and endDate != ''">
+			<![CDATA[
+			and d.acquisition_time <= STR_TO_DATE(#{endDate},'%Y-%m-%d')
+			]]>
+		</if>
+	</select>
+	<select id="queryWaterList" parameterType="com.escst.energy.vo.EnergyQueryVO" resultType="com.escst.energy.vo.DateQtyVO">
+		SELECT equipment_id id, DATE_FORMAT(d.acquisition_time,'%Y-%m-%d') date,mater_flow qty
+		FROM t_da_water_day d 
+		where d.construction_id = #{constructionId}
+		<if test="startDate != null and startDate != ''">
+			<![CDATA[
+			and d.acquisition_time >= STR_TO_DATE(#{startDate},'%Y-%m-%d')
+			]]>
+		</if>
+		<if test="endDate != null and endDate != ''">
+			<![CDATA[
+			and d.acquisition_time <= STR_TO_DATE(#{endDate},'%Y-%m-%d')
+			]]>
+		</if>
+		order by d.acquisition_time desc
+		LIMIT #{startIndex},#{rowNum}
+	</select>
+</mapper>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.thirdPart.mapper.TrainMapper">
+
+    <update id="saveTrainRecord" parameterType="com.escst.thirdPart.entity.RecordEntity">
+        insert into
+        t_safe_training_record(ID,OperDate,CreateDate,AutoID,OperUser,CreateUser,TrainType,TeachType,TrainName,TrainPlace,StartTime,TrainTime,
+        TrainContent,PrecisName,TrainDepart,TrainPartType,TrainPeriod,TotalTime,DepartCode,ISFINISH,VideoID,
+        DemandID,BoxNo,standby1,standby2,standby3, standby4,standby5
+        ) values
+        <foreach collection="list" item="item" index="" separator=",">
+            (#{item.id},#{item.operDate},#{item.createDate}
+            ,#{item.autoID},#{item.operUser},#{item.createUser},#{item.trainType}
+            ,#{item.teachType},#{item.trainName},#{item.trainPlace},
+            #{item.startTime},#{item.trainTime},#{item.trainContent},#{item.precisName},
+            #{item.trainDepart},#{item.trainPartType},#{item.trainPeriod},#{item.totalTime},
+            #{item.departCode},#{item.isfinish},#{item.videoID},#{item.demandID},#{item.boxNo},
+            #{item.standby1},#{item.standby2},#{item.standby3},#{item.standby4},#{item.standby5})
+        </foreach>
+        on duplicate key update ID =
+        values(ID),operDate=values(operDate),createDate=values(createDate),autoID=values(autoID),
+        operUser=values(operUser),createUser=values(createUser),trainType=values(trainType),teachType=values(teachType),
+        trainName=values(trainName),trainPlace=values(trainPlace),startTime=values(startTime),trainTime=values(trainTime),trainContent=values(trainContent),
+        precisName=values(precisName),trainDepart=values(trainDepart),trainPartType=values(trainPartType),trainPeriod=values(trainPeriod),totalTime=values(totalTime),
+        departCode=values(departCode),videoID=values(videoID),demandID=values(demandID),boxNo=values(boxNo),standby1=values(standby1),standby2=values(standby2),standby3=values(standby3),
+        standby4=values(standby4),standby5=values(standby5)
+    </update>
+
+    <sql id="condition">
+        from t_safe_training_record r inner join t_safe_training_depart d on d.ID = r.DepartCode
+        where 1=1
+        <if test="departCode != null and departCode != ''">
+            and r.DepartCode = #{departCode}
+        </if>
+        <if test="trainName != null and trainName != ''">
+            and r.TrainName like CONCAT("%",#{trainName},"%")
+        </if>
+        <if test="trainType != null and trainType != ''">
+            and r.TrainType = #{trainType}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            and r.TrainTime >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and r.TrainTime <= #{endTime} ]]>
+        </if>
+    </sql>
+
+    <select id="getCount" parameterType="com.escst.thirdPart.entity.RecordEntity" resultType="int">
+        select count(r.ID)
+        <include refid="condition"></include>
+    </select>
+
+    <select id="listTrainRecord" parameterType="com.escst.thirdPart.entity.RecordEntity"
+            resultType="com.escst.thirdPart.entity.RecordEntity">
+        select
+        r.ID as id,
+        d.DepartName as departName,
+        r.OperDate as operDate,
+        r.CreateDate as createDate,
+        r.AutoID as autoID,
+        r.OperUser as operUser,
+        r.CreateUser as createUser,
+        r.TrainType as trainType,
+        r.TeachType as teachType,
+        r.TrainName as trainName,
+        r.TrainPlace as trainPlace,
+        r.StartTime as startTime,
+        date_format(r.TrainTime,'%Y-%m-%d %H:%i:%s') as trainTime,
+        r.TrainContent as trainContent,
+        r.PrecisName as precisName,
+        r.TrainDepart as trainDepart,
+        r.TrainPartType as trainPartType,
+        r.TrainPeriod as trainPeriod,
+        r.TotalTime as totalTime,
+        r.DepartCode as departCode,
+        r.ISFINISH as isfinish,
+        r.VideoID as videoID,
+        r.DemandID as demandID,
+        r.BoxNo as boxNo,
+        r.standby1 as standby1,
+        r.standby2 as standby2,
+        r.standby3 as standby3,
+        r.standby4 as standby4,
+        r.standby5 as standby5
+        <include refid="condition"></include>
+        order by trainTime desc
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+
+    <select id="listTrainType" parameterType="string" resultType="string">
+        select distinct TrainType as trainType
+        from t_safe_training_record
+        <if test="departCode != null and departCode != ''">
+            where DepartCode = #{departCode}
+        </if>
+    </select>
+
+
+    <update id="saveTrainRecordPerson" parameterType="com.escst.thirdPart.entity.RecordPersonEntity">
+        insert into
+        t_safe_training_record_person(ID,OperDate,CreateDate,OperUser,CreateUser,PersonName,Sex,IdentifyID,Nation,SchloolLevel,TrainDepart,Station,
+        Category,TraPrincipal,RegisteDate,FileName,CommendPerson,FingerId,ReadCardId,AvailabeDate,LeaveDate,DepartCode,Answer,SGrade,AllNum,PassNum,
+        ISPass,RecordID,ExamID,BoxNo,standby1,standby2,standby3,standby4,standby5
+        ) values
+        <foreach collection="list" item="item" index="" separator=",">
+            (#{item.id},#{item.operDate},#{item.createDate},
+            #{item.operUser},#{item.createUser},#{item.personName},
+            #{item.sex},#{item.identifyID},#{item.nation},
+            #{item.schloolLevel},#{item.trainDepart},#{item.station},#{item.category},
+            #{item.traPrincipal},#{item.registeDate},#{item.fileName},#{item.commendPerson},
+            #{item.fingerId},#{item.readCardId},#{item.availabeDate},#{item.leaveDate},#{item.departCode},
+            #{item.answer},#{item.sGrade},#{item.allNum},#{item.passNum},#{item.isPass},#{item.recordID},#{item.examID},
+            #{item.boxNo},#{item.standby1},#{item.standby2},#{item.standby3},#{item.standby4},#{item.standby5})
+        </foreach>
+        on duplicate key update ID =
+        values(ID),operDate=values(operDate),createDate=values(createDate),operUser=values(operUser),createUser=values(createUser),
+        personName=values(personName),sex=values(sex),identifyID=values(identifyID),nation=values(nation),
+        schloolLevel=values(schloolLevel),trainDepart=values(trainDepart),station=values(station),category=values(category),
+        traPrincipal=values(traPrincipal),registeDate=values(registeDate),fileName=values(fileName),commendPerson=values(commendPerson),
+        fingerId=values(fingerId),readCardId=values(readCardId),availabeDate=values(availabeDate),leaveDate=values(leaveDate),departCode=values(departCode),
+        answer=values(answer),sGrade=values(sGrade),allNum=values(allNum),passNum=values(passNum),iSPass=values(iSPass),recordID=values(recordID),
+        examID=values(examID),boxNo=values(boxNo),standby1=values(standby1),standby2=values(standby2),standby3=values(standby3),standby4=values(standby4),
+        standby5=values(standby5)
+    </update>
+
+    <select id="getPersonCount" parameterType="com.escst.thirdPart.entity.RecordEntity" resultType="int">
+        select count(*)
+        from t_safe_training_record_person
+        where RecordID = #{recordID}
+    </select>
+
+
+    <select id="listTrainRecordPerson" parameterType="com.escst.thirdPart.entity.RecordEntity"
+            resultType="com.escst.thirdPart.entity.RecordPersonEntity">
+        select
+            ID            as id,
+            OperDate      as operDate,
+            CreateDate    as createDate,
+            OperUser      as operUser,
+            CreateUser    as createUser,
+            PersonName    as personName,
+            Sex           as sex,
+            IdentifyID    as identifyID,
+            Nation        as nation,
+            SchloolLevel  as schloolLevel,
+            TrainDepart   as trainDepart,
+            Station       as station,
+            Category      as category,
+            TraPrincipal  as traPrincipal,
+            RegisteDate   as registeDate,
+            FileName      as fileName,
+            CommendPerson as commendPerson,
+            FingerId      as fingerId,
+            ReadCardId    as readCardId,
+            AvailabeDate  as availabeDate,
+            LeaveDate     as leaveDate,
+            DepartCode    as departCode,
+            Answer        as answer,
+            SGrade        as sGrade,
+            AllNum        as allNum,
+            PassNum       as passNum,
+            ISPass        as isPass,
+            RecordID      as recordID,
+            ExamID        as examID,
+            BoxNo         as boxNo,
+            standby1      as standby1,
+            standby2      as standby2,
+            standby3      as standby3,
+            standby4      as standby4,
+            standby5      as standby5
+        from t_safe_training_record_person
+        where RecordID = #{recordID}
+        order by RegisteDate desc
+        limit #{startIndex}, #{rowNum}
+    </select>
+
+
+</mapper>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>    
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.lifter.mapper.UnloadMapper">
+	<select id="queryRealtimeList" parameterType="com.escst.equipment.vo.AcquisitionDataQueryVO" resultType="com.escst.lifter.vo.UnloadRealtimeVO">
+		SELECT DATE_FORMAT(acquisition_time,'%Y-%m-%d %H:%i:%s') time,height,weight,obliquity,peopleNum,speed,floor_no floorNo
+			,driver_name driverName,driver_no driverNo,front_door_lock_state frontDoorLockState,back_door_lock_state backDoorLockState
+			,high_limit_state highLimitState,low_limit_state lowLimitState
+		FROM t_basic_unload_realtime a
+		<where>
+			<if test="constructionId != null and constructionId != '' ">
+				and a.construction_id = #{constructionId}
+			</if>
+			<if test="equipmentId != null and equipmentId != ''">
+				AND a.equipment_id = #{equipmentId}
+			</if>
+			<if test="startDate != null and startDate != ''">
+				<![CDATA[
+				AND a.acquisition_time > str_to_date(#{startDate}, '%Y-%m-%d')
+				]]>
+			</if>
+			<if test="endDate != null and endDate != ''">
+				<![CDATA[
+				AND a.acquisition_time < date_add(str_to_date(#{endDate}, '%Y-%m-%d'), interval 1 day)
+				]]>
+			</if>
+		</where>
+		order by acquisition_time desc
+		LIMIT #{startIndex},#{rowNum}
+	</select>
+	<select id="getRealtimeCount" parameterType="com.escst.equipment.vo.AcquisitionDataQueryVO" resultType="int">
+		SELECT count(1) count
+		FROM t_basic_unload_realtime a
+		<where>
+			<if test="constructionId != null and constructionId != '' ">
+				a.construction_id = #{constructionId}
+			</if>
+			<if test="equipmentId != null and equipmentId != ''">
+				AND a.equipment_id = #{equipmentId}
+			</if>
+			<if test="startDate != null and startDate != ''">
+				<![CDATA[
+				AND a.acquisition_time > str_to_date(#{startDate}, '%Y-%m-%d')
+				]]>
+			</if>
+			<if test="endDate != null and endDate != ''">
+				<![CDATA[
+				AND a.acquisition_time < date_add(str_to_date(#{endDate}, '%Y-%m-%d'), interval 1 day)
+				]]>
+			</if>
+		</where>
+	</select>
+	
+</mapper>

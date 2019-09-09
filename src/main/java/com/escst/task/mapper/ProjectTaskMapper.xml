@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.task.mapper.ProjectTaskMapper">
+    <select id="queryList" parameterType="map" resultType="java.util.Map">
+        SELECT  IFNULL(a.id,"") id,
+                IFNULL(a.remark,"") remark,
+                IFNULL(DATE_FORMAT(a.create_time,'%Y-%m-%d'),"") createTime,
+                IFNULL(b.name,"") projectStructureName,
+                IFNULL(c.name,"") projectCompanyName,
+                IFNULL(d.name,"") examinerName,
+                IFNULL(e.mobile,"") mobile,
+                IFNULL(d.id,"") userId,
+                IFNULL(e.name,"") contactsName,
+                IFNULL(f.name,"") createByName,
+                IFNULL(a.status,0)  status,
+                IFNULL(a.status,0) statusTask,
+                IFNULL(a.construction_id,"") constructionId,
+                IFNULL(g.name,"") constructionName,
+                IFNULL(a.order_no,"") orderNo
+         FROM   t_basic_project_task a
+        LEFT JOIN t_basic_project_structure b ON  b.id=a.project_structure_id
+        LEFT JOIN t_basic_project_company c ON c.id=a.project_company_id
+        LEFT JOIN t_sys_user d ON d.id=a.user_id
+        LEFT JOIN t_sys_user e ON e.id=a.person_id
+        LEFT JOIN t_sys_user f ON f.id=a.create_by
+        LEFT JOIN t_basic_construction g ON g.id=a.construction_id
+        <where>
+            <!--<if test="userId !=null and userId !=''">-->
+                <!--( a.user_id = #{userId} OR  a.person_id=#{userId} OR a.create_by=#{userId})-->
+            <!--</if>-->
+            <if test="status !=null and status !=0">
+               AND a.status=#{status}
+            </if>
+            <if test="areaId !=null and areaId !=''">
+                AND g.belong_area=#{areaId}
+            </if>
+            <if test="constructionId != null and constructionId != '' ">
+                AND a.CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                AND a.construction_id IN
+                <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                    (#{constructionVo.id})
+                </foreach>
+            </if>
+
+        </where>
+        ORDER BY a.create_time DESC
+        LIMIT #{offset},#{rows}
+    </select>
+
+    <select id="selectProjectStructureById" parameterType="String" resultType="map">
+            SELECT  * FROM  T_BASIC_PROJECT_STRUCTURE WHERE
+            id=#{id}
+    </select>
+
+    <select id="selectList" parameterType="map" resultType="com.escst.task.entity.ProjectTaskProcessEntity">
+        SELECT IFNULL(a.id,"") id,
+                IFNULL(a.remark,"") remark,
+                IFNULL(a.task_id,"")taskId,
+                IFNULL(DATE_FORMAT(a.create_time,'%Y-%m-%d'),"") createTime,
+                IFNULL(e.name,"") contactsName,
+                IFNULL(b.order_no,"") orderNo,
+                IFNULL(e.id,"") personId,
+                IFNULL(a.task_status,"") taskStatus,
+                IFNULL(e.mobile,"") contactsMobile,
+                IFNULL(a.is_attach,0) isAttach
+         FROM   t_basic_task_process a
+        LEFT JOIN t_sys_user e ON e.id=a.person_id
+        LEFT JOIN t_basic_project_task b ON b.id =a.task_id
+        <where>
+            <if test="taskId !=null and taskId !=''">
+                a.task_id=#{taskId}
+            </if>
+        </where>
+        ORDER BY a.create_time DESC
+
+    </select>
+
+    <select id="selectCount" parameterType="map" resultType="Integer">
+        SELECT count(pt.id) FROM  t_basic_project_task pt
+         LEFT JOIN t_basic_construction bc ON bc.id=pt.construction_id
+        <where>
+        <if test="userId !=null and userId !=''">
+            AND
+            ( pt.user_id = #{userId} OR  pt.person_id=#{userId} OR pt.create_by=#{userId})
+        </if>
+        <if test="areaId !=null and areaId !=''">
+             AND bc.belong_area=#{areaId}
+        </if>
+         <if test="status != null and status !=0">
+            AND pt.status=#{status}
+         </if>
+            <if test="constructionId != null and constructionId != '' ">
+                AND pt.CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="_parameter.containsKey('constructionList') and constructionList != null and constructionList.size() > 0">
+                AND pt.CONSTRUCTION_ID IN
+                <foreach collection="constructionList" item="constructionVo" open="(" separator="," close=")">
+                    (#{constructionVo.id})
+                </foreach>
+            </if>
+        </where>
+     </select>
+
+    <select id="queryProjectCompany" parameterType="map" resultType="com.escst.task.bean.PersonProjectCompanyBean">
+        SELECT A.USER_ID AS userId,A.NAME AS personName,A.MOBILE AS personMobile,C.ID AS teamId,C.NAME AS teamName
+        FROM T_BASIC_PERSON A
+        INNER JOIN t_basic_construction_person B ON B.PERSON_ID = A.ID
+        INNER JOIN T_BASIC_TEAM C ON C.ID = B.TEAM_ID
+        INNER JOIN T_BASIC_CONSTRUCTION_PERSON D ON D.PERSON_ID = A.ID
+        <where>
+            <if test="constructionId != null and constructionId != '' ">
+                AND D.CONSTRUCTION_ID = #{constructionId}
+            </if>
+            <if test="projectCompanyId != null and projectCompanyId != '' ">
+                AND A.PROJECT_COMPANY_ID = #{projectCompanyId}
+            </if>
+            <if test="userId != null and userId != '' ">
+                AND A.USER_ID = #{userId}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryProjectStructrue" parameterType="map" resultType="com.escst.commons.tree.TreeEntity">
+        SELECT id,name,parent_id pId
+        FROM T_BASIC_PROJECT_STRUCTURE
+        <where>
+            <if test="constructionId != null and constructionId != ''">
+                AND construction_id = #{constructionId}
+            </if>
+            <if test="parentId != null and parentId != '' ">
+                AND parent_id = #{parentId}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryParentProjectStructrue" parameterType="map" resultType="com.escst.commons.tree.TreeEntity">
+         SELECT id,name,parent_id pId
+         FROM T_BASIC_PROJECT_STRUCTURE
+         WHERE construction_id = #{constructionId} and (parent_id is null or parent_id = '')
+    </select>
+
+
+    <insert id="insertProjectTask" parameterType="com.escst.task.entity.ProjectTaskEntity">
+        INSERT INTO t_basic_project_task(id,construction_id,project_structure_id,project_quantity_unit,project_quantity_estimate,project_company_id,person_id,remark,team_id,user_id,status,create_time,create_by,update_time,update_by,order_no)
+        VALUES (#{id},#{constructionId},#{projectStructureId},#{projectQuantityUnit},#{projectQuantityEstimate},#{projectCompanyId},#{personId},#{remark},#{teamId},#{userId},#{status},#{createTime},#{createBy},#{updateTime},#{updateBy},#{orderNo})
+    </insert>
+
+    <insert id="insertProjectTaskProcess" parameterType="com.escst.task.entity.ProjectTaskProcessEntity">
+        INSERT INTO t_basic_task_process(id,task_id,person_id,task_status,remark,is_attach,create_time)
+        VALUES (#{id},#{taskId},#{personId},#{taskStatus},#{remark},#{isAttach},#{createTime})
+    </insert>
+
+    <update id="updateTaskStatus" parameterType="com.escst.task.entity.ProjectTaskEntity">
+        UPDATE t_basic_project_task
+        <set>
+            <if test="status != null and status != 0">
+                status = #{status}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectLatestOrderNo" parameterType="String" resultType="String">
+        SELECT max(t.order_no)as orderNo FROM t_basic_project_task t  where t.construction_id = #{constructionId}
+    </select>
+    
+    <select id="selectByConstructionId" parameterType="String" resultType="com.escst.task.entity.ProjectTaskEntity">
+    	select id as id from t_basic_project_task t where t.construction_id=#{constructionId}  order by create_time asc
+    </select>
+    
+    <update id="updateOrderNo" parameterType="com.escst.task.entity.ProjectTaskEntity">
+        update t_basic_project_task
+        set order_no = #{orderNo}
+        where id = #{id}
+    </update>
+</mapper>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.team.mapper.TeamMapper">
+	<select id="listByProjectCompanyId" parameterType="String" resultType="map">
+		select * from t_basic_team t where t.project_company_id =
+		#{projectCompanyId}
+	</select>
+	<select id="listTeam" parameterType="com.escst.team.entity.TeamEntity" resultType="map">
+		SELECT
+			a.id as id,
+			a. NAME AS name,
+			(
+				SELECT
+					d. NAME
+				FROM
+					T_BASIC_PROJECT_COMPANY d
+				WHERE
+					d.id = a.project_company_id
+			) AS projectCompanyName,
+			b.`name` AS constructionName,
+			c.`name` terrName
+		FROM
+			t_basic_team a
+		LEFT JOIN t_basic_construction b ON a.construction_id = b.id
+		LEFT JOIN t_sys_territory c ON b.belong_area = c.id
+		<include refid="conditionWhere"></include>
+		ORDER BY a.CREATE_TIME DESC
+		LIMIT #{startIndex},#{rowNum}
+	</select>
+
+	<select id="selectCount" parameterType="com.escst.team.entity.TeamEntity"
+		resultType="Integer">
+		SELECT count(1)
+		FROM
+			t_basic_team a
+		LEFT JOIN t_basic_construction b ON a.construction_id = b.id
+		LEFT JOIN t_sys_territory c ON b.belong_area = c.id
+		<include refid="conditionWhere"></include>
+	</select>
+
+	<sql id="conditionWhere">
+		<where>
+			1=1
+			<if test="name!=null and name!=''">
+				and a.name like CONCAT('%',#{name},'%')
+			</if>
+			<if test="areaId != null and areaId != '' ">
+				and c.id = #{areaId}
+			</if>
+			<if test="constructionId!=null and constructionId!=''">
+				and a.construction_id = #{constructionId}
+			</if>
+			<if test="projectCompanyId!=null and projectCompanyId!=''">
+				and a.project_company_id = #{projectCompanyId}
+			</if>
+				and exists (
+					select 1
+						from t_sys_user u
+						inner join t_sys_organization p on p.id = u.org_id
+						inner join t_sys_organization s on locate(p.sys_code, s.sys_code) = 1
+						where s.construction_id = b.id and u.id = #{userId}
+					)
+		</where>
+	</sql>
+	
+	<insert id="insert" parameterType="com.escst.team.entity.TeamEntity">
+		INSERT INTO t_basic_team (
+			`id`,
+			`construction_id`,
+			`project_company_id`,
+			`name`,
+			`sort_num`,
+			`create_time`,
+			`create_by`
+		)
+		VALUES
+			(
+				#{id},
+				#{constructionId},
+				#{projectCompanyId},
+				#{name},
+				#{sortNum},
+				#{createTime},
+				#{createBy}
+			)      
+    </insert>
+	<select id="selectTeamList" parameterType="map" resultType="com.escst.team.entity.TeamEntity">
+		SELECT id, construction_id constructionId,project_company_id projectCompanyId,name
+		FROM t_basic_team 
+		<where>
+			<if test="constructionId != null and constructionId != '' ">
+				and construction_id = #{constructionId}
+			</if>
+			<if test="projectCompanyId != null and projectCompanyId != '' ">
+				and project_company_id = #{projectCompanyId}
+			</if>
+			<if test="fullName != null and fullName != '' ">
+				and name = #{fullName}
+			</if>
+		</where>
+	</select>
+
+	<select id="selectDefaultTeamList" resultType="com.escst.team.entity.TeamEntity">
+    	SELECT DISTINCT name
+    	FROM t_basic_team
+    	where construction_id is null
+	</select>
+
+	<insert id="batchInsert" parameterType="com.escst.team.entity.TeamEntity">
+		INSERT INTO t_basic_team (
+		id,
+		construction_id,
+		project_company_id,
+		NAME,
+		create_time,
+		create_by
+		)
+		VALUES
+		<foreach collection="list" item="item" index="" separator=",">
+			(
+			#{item.id},
+			#{item.constructionId},
+			#{item.projectCompanyId},
+			#{item.name},
+			#{item.createTime},
+			#{item.createBy}
+			)
+		</foreach>
+	</insert>
+	<select id="selectById" parameterType="string" resultType="com.escst.team.entity.TeamEntity">
+		SELECT id,name,construction_id constructionId,project_company_id projectCompanyId
+    	FROM t_basic_team
+    	where id = #{id}
+	</select>
+	
+	<update id="update" parameterType="com.escst.team.entity.TeamEntity">
+		update t_basic_team t
+		<set>
+			<if test="name != null and name != '' ">
+				t.name = #{name},
+			</if>
+			update_time = #{updateTime},
+            update_by = #{updateBy}
+		</set>
+		where t.id=#{id}
+	</update>
+	
+	<select id="selectMapById" parameterType="string" resultType="map">
+		SELECT
+			t.id,
+			t.name as name,
+			t.construction_id constructionId,
+			t.project_company_id projectCompanyId,
+			c. NAME AS constructionName,
+			pc.`name` AS companyName,
+			st. NAME AS terrName
+		FROM
+			t_basic_team t
+		LEFT JOIN t_basic_construction c ON t.construction_id = c.id
+		LEFT JOIN t_sys_territory st ON c.belong_area = st.id
+		LEFT JOIN t_basic_project_company pc ON t.project_company_id = pc.id
+    	where t.id = #{id}
+	</select>
+
+
+	<update id="updatePositionWorkId" parameterType="map">
+		UPDATE t_basic_team t
+		SET t.position_work_id = #{positionWorkId}
+		WHERE
+			t.construction_id = #{constructionId}
+		AND T.position_worktype = #{positionWorkType}
+	</update>
+</mapper>

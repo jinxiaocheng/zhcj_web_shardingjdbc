@@ -1,0 +1,467 @@
+//Created by kongzheng on 2017/10/9.
+//variable
+li{
+  list-style-type:none;
+}
+.or_loop(@n,@r,@i:0) when(@i<@n) {
+  .or_@{i}{
+    -webkit-transform: translate(@r*cos(45deg*@i),@r*sin(45deg*@i)) rotate(@i*45deg);
+    -moz-transform: translate(@r*cos(45deg*@i),@r*sin(45deg*@i)) rotate(@i*45deg);
+    -ms-transform: translate(@r*cos(45deg*@i),@r*sin(45deg*@i)) rotate(@i*45deg);
+    -o-transform: translate(@r*cos(45deg*@i),@r*sin(45deg*@i)) rotate(@i*45deg);
+    transform: translate(@r*cos(45deg*@i),@r*sin(45deg*@i)) rotate(@i*45deg);
+  }
+  .or_loop(@n,@r,(@i+1));
+}
+.s_loop(@n,@s:1) when (@s<=@n){
+  .s@{s}{
+    width: 0;
+    height: 4px+@s;
+  }
+  .s_loop(@n,(@s+1));
+}
+
+//amend bootstrap css
+.dropdown-menu{
+  top:35px;
+}
+.caret{
+  display: none;
+}
+//images of video
+.orientation,.or_center,.or,.ml_more,.ml_less,.c_video>div>span,.search>span,.download_ico,.control_playback span,.on_off{
+  background: url("../../images/video/img.png");
+}
+//the video controller
+#video_contorl{
+  border: 1px solid #dfdfdf;
+  border-radius: 0 6px 0 0 ;
+  height: 100%;
+  padding:10px;
+  box-sizing: border-box;
+  letter-spacing: 1px;
+  color: #959595;
+  background: #f4f4f4;
+  overflow: auto;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  user-select: none;
+  box-shadow: 0 0 4px #dfdfdf;
+  //the name of a controller
+  .contorl_name{
+    color: #959595;
+  }
+  //split line
+  .line{
+    width: 100%;
+    height: 0;
+    border-top:1px solid #ededed ;
+    box-shadow: 0 1px 1px #fff;
+    margin: 10px 0;
+  }
+  //云控制
+  .PTZ{
+    box-sizing: border-box;
+    width: 100%;
+    height: 20px;
+    .queryCondition{
+      width: 80px;
+      button{
+        width: 100%;
+        height: 20px;
+        line-height: 20px;
+        border: 1px solid #48a5ea;
+        box-shadow: inset 0 0 3px #48a5ea;
+        border-radius: 20px;
+        background: #1ebfff;
+        color: #fff;
+      }
+      button:hover{
+        background: #5aafea;
+      }
+    }
+  }
+  //清晰度
+  .sharpness{
+    width: 100%;
+    position: relative;
+    cursor: pointer;
+    .con_sharpness{
+      width: 70px;
+      position: relative;
+      color: #fff;
+      text-align: center;
+      margin-right: 5px;
+      &>div{
+        width: 100%;
+        height: 18px;
+        line-height: 18px;
+        font-size: 12px;
+        border-radius: 20px;
+        overflow: hidden;
+        p{
+          position: relative;
+          width: 200%;
+          .sh1{
+            display: inline-block;
+            width: 50%;
+            background:#1ebfff;
+            border-radius: 20px;
+            box-shadow: inset 0 0 3px #8b8b8b;
+          }
+          .sh2{
+            display: inline-block;
+            width: 50%;
+            background: #cccccc;
+          }
+        }
+      }
+      &>.on_off{
+        position: absolute;
+        top: -5px;
+        right: -10px;
+        height:34px;width:34px;background-position: -66px 0;
+        display: block;
+      }
+    }
+  }
+  //旋转方向
+  .orientation{
+    display: none;
+    position: relative;
+    margin: auto;
+    width:226px;
+    height: 219px;
+    border-radius: 50%;
+    background-position: -1818px -1px;
+    background-repeat: no-repeat;
+    .or_center{
+      position:absolute;
+      left: 49%;
+      top: 51%;
+      -webkit-transform: translate(-50%,-50%);
+      -moz-transform: translate(-50%,-50%);
+      -ms-transform: translate(-50%,-50%);
+      -o-transform: translate(-50%,-50%);
+      transform: translate(-50%,-50%);
+      text-align: center;
+      height:98px;
+      width:93px;
+      line-height: 98px;
+      border-radius: 50%;
+      background-position: -1632px 0;
+      background-repeat: no-repeat;
+      cursor: pointer;
+    }
+    .or_center_hover{
+      background-position: -1725px 0;
+      color: #fff;
+    }
+    .or{
+      height:22px;width:16px;
+      background-position: -16px 0;
+      position: absolute;
+      top:50%;
+      left: 50%;
+      margin: -10px 0 0 -10px;
+      cursor: pointer;
+    }
+    .or_hover{
+      background-position: 0 0;
+    }
+    .or_loop(8,70px);
+  }
+  //光圈 变焦 变倍
+  .more_less{
+    width: 100%;
+    text-align: center;
+    list-style: none;
+    margin: 10px 0;
+    li{
+      padding: 0 !important;
+      label{
+        position: relative;
+        left: -20px;
+        top: 12px;
+      }
+    }
+    span{
+      display: inline-block;
+      height:47px;
+      width:42px;
+      margin: auto;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .ml_more{
+      background-position: -364px 0;
+      background-repeat: no-repeat;
+      position: relative;
+      left: 18px;
+      top:-10px;
+    }
+    .ml_more_hover{
+      background-position: -518px 0;
+    }
+    .ml_less{
+      background-position: -466px 0;
+      background-repeat: no-repeat;
+    }
+    .ml_less_hover{
+      background-position: -415px 0;
+    }
+
+  }
+  //云台速度
+  .YT_speed{
+    display: none;
+  }
+  .speed_controller{
+    width: 100%;
+    .sc{
+      width: 100%;
+      position: relative;
+      .c_p{
+        margin:15px 100/14%;
+        width: 100%-100/7%;
+        height: 15px;
+        background: #5aafea;
+        box-shadow: inset 0 0 5px #2797ea;
+        border-radius: 15px;
+        overflow: hidden;
+      }
+      .c_n{
+        width: 100%;
+        height: 100%;
+        background: #9d9d9d;
+        box-shadow: inset 0 0 5px #5c5b5e;
+        position: relative;
+        left: 142px;
+      }
+      .c_c{
+        position: absolute;
+        top: -10px;
+        left: 146px;
+        width: 28px;
+        height: 46px;
+        background: url("../../images/video/hualun.png") no-repeat;
+        cursor: pointer;
+      }
+    }
+    .scale{
+      width: 100%;
+      box-sizing: border-box;
+      padding-left: 10px;
+      span{
+        margin:10px 100/16.2%;
+        display: inline-block;
+        border-left:1px solid #9d9d9d;
+      }
+      .s_loop(7);
+    }
+  }
+  //录像
+  .c_video{
+    width: 100%;
+    letter-spacing: 0;
+    font-size: 0;
+    &>div{
+      display: inline-block;
+      height:100px;
+      text-align: center;
+      width: 33.3%;
+      span{
+        display: block;
+        margin: auto;
+        height:73px;width:68px;
+        cursor: pointer;
+      }
+      label{
+        font-size: 12px;
+      }
+    }
+    .on_video{
+      span{
+        background-position: -912px 0;
+      }
+    }
+    .on_video_hover{
+      span{
+        background-position: -1184px 0;
+      }
+    }
+    .off_video{
+      span{
+        background-position: -1252px 0;
+      }
+    }
+    .off_video_hover{
+      span{
+        background-position: -1116px 0;
+      }
+    }
+    .take_video{
+      span{
+        background-position: -1048px 0;
+      }
+    }
+    .take_video_hover{
+      span{
+        background-position: -980px 0;
+      }
+    }
+
+
+  }
+  //录像回放
+  .time{
+    width: 90%;
+    margin: 0 5%;
+    .search_time{
+      width: 80%;
+      float: left;
+      &>p{
+        width: 100%;
+        height: 20px;
+        line-height: 20px;
+        label{
+          display: inline-block;
+          width: 30%;
+        }
+        input{
+          border: 0px;
+          width: 70%;
+          display: inline-block;
+          background: transparent;
+        }
+      }
+      .start{
+        label{
+          color: #30cef3;
+        }
+      }
+      .end{
+        label{
+          color: #ff5358;
+        }
+      }
+    }
+    .search{
+      width: 20%;
+      height: 40px;
+      float: right;
+      span{
+        display: block;
+        margin: auto;
+        height:77px;width:72px;
+        background-position: -1392px 0;
+        position: relative;
+        top: -8px;
+        cursor: pointer;
+      }
+    }
+    .search_hover{
+      span{
+        background-position: -1320px 0;
+      }
+    }
+    .video_download{
+      width: 100%;
+      max-height: 300px;
+      overflow: auto;
+      li{
+        width: 100%;
+        height: 20px;
+        line-height: 20px;
+        font-size: 12px;
+        cursor: pointer;
+        p{
+          border-bottom:1px solid #ededed ;
+          box-shadow: 0 1px 1px #fff;
+          float: left;
+          width: 85%;
+          cursor: pointer;
+          label{
+            display: block;
+            width: 100%;
+            height: 20px;
+            line-height: 20px;
+          }
+        }
+        .download_ico{
+          display: block;
+          float: right;
+          height:18px;width:17px;background-position: -32px 0;
+          cursor: pointer;
+          position: relative;
+          top: 22px;
+          left: -10px;
+        }
+        .download_ico_hover{
+          background-position: -49px 0;
+        }
+      }
+    }
+  }
+  //播放 停止 快进。。。
+  .control_playback{
+    width: 100%;
+    text-align: center;
+    display: none;
+    #path{
+      margin-top: 30px;
+    }
+    &>div{
+      width: 100%;
+      span{
+        display: inline-block;
+        height:49px;width:44px;
+        cursor: pointer;
+        text-align: center;
+        i{
+          font-style: normal;
+          position: relative;
+          top: 44px;
+          font-size: 12px;
+        }
+      }
+      .cp1{
+        background-position: -276px 0;
+      }
+      .cp1_hover{
+        background-position: -578px -7px;
+      }
+      .cp2{
+        background-position: -188px 0;
+      }
+      .cp2_hover{
+        background-position: -635px -7px;
+      }
+      .cp3{
+        background-position: -100px 0;
+      }
+      .cp3_hover{
+        background-position: -692px -7px;
+      }
+      .cp4{
+        background: url("../../images/video/huifu.png");
+      }
+      .cp4_hover{
+        background: url("../../images/video/huifu_hover.png") -7px -7px;
+      }
+      .cp5{
+        background-position: -320px 0;
+      }
+      .cp5_hover{
+        background-position: -863px -7px;
+      }
+      .cp6{
+        background-position: -144px 0;
+      }
+      .cp6_hover{
+        background-position: -749px -7px;
+      }
+
+    }
+  }
+}

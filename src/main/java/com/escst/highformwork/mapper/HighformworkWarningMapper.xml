@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.highformwork.mapper.HighformworkWarningMapper">
+
+    <select id="getCount" parameterType="com.escst.highformwork.vo.HighformworkRealTimeVo"
+            resultType="com.escst.highformwork.vo.HighformworkFlowVo">
+        SELECT distinct fe.flow_id as flowId,
+        f.name as flowName,
+        f.construction_id as constructionId,
+        f.construction_name as constructionName
+        from t_highformwork_flow f inner join t_highformwork_flow_equipment fe on f.id = fe.flow_id
+        where f.construction_id = #{constructionId}
+        <if test="warning != null and warning != ''">
+            and fe.flow_status = 1
+        </if>
+        <if test="flowId != null and flowId != ''">
+            and f.id = #{flowId}
+        </if>
+        limit #{offset},#{pageSize}
+    </select>
+
+
+    <select id="getDataCount" parameterType="com.escst.highformwork.vo.HighformworkRealTimeVo" resultType="int">
+        select count(r.id)
+        <include refid="condition"></include>
+    </select>
+
+    <select id="listData" parameterType="com.escst.highformwork.vo.HighformworkRealTimeVo"
+            resultType="com.escst.highformwork.vo.HighformworkRealTimeVo">
+        SELECT
+        group_concat(DISTINCT r.id) AS id,
+        r.equipment_id AS equipmentId,
+        e.construction_name AS constructionName,
+        f.id AS flowId,
+        f.NAME AS flowName,
+        e.NAME AS equipmentName,
+        e.number as number,
+        r.type AS type,
+        r.x_type AS xType,
+        r.y_type AS yType,
+        r.kpa_type AS kpaType,
+        r.displace_type AS displaceType,
+        r.temperature_type AS temperatureType,
+        r.electric_type AS electricType,
+        r.x_angle AS xAngle,
+        r.y_angle AS yAngle,
+        r.kpa AS kpa,
+        r.displace AS displace,
+        r.temperature AS temperature,
+        r.electric AS electric,
+        DATE_FORMAT(r.acquisition_time,'%Y-%m-%d %H:%i') as createTime
+        <include refid="condition"></include>
+        GROUP BY
+        r.id
+        order by r.acquisition_time desc
+        limit #{offset},#{rowNum}
+    </select>
+
+    <sql id="condition">
+        FROM
+        t_highformwork_realtime r
+        INNER JOIN t_highformwork_equipment e ON r.equipment_id = e.id
+        INNER join t_highformwork_flow_equipment fe on e.id = fe.equipment_id
+        INNER JOIN t_highformwork_flow f ON f.id = fe.flow_id
+        WHERE
+        r.flow_id = #{flowId}
+        <if test="warning != null and warning != ''">
+            and fe.flow_status = 1 and r.type in (2,3,4)
+        </if>
+        <if test="type != null and type != ''">
+            and (r.type = #{type} or r.x_type = #{type}
+            OR r.y_type = #{type}
+            OR r.kpa_type = #{type}
+            OR r.displace_type = #{type}
+            OR r.temperature_type = #{type}
+            OR r.electric_type = #{type})
+        </if>
+        <if test="equipmentId != null and equipmentId != ''">
+            and r.equipment_id = #{equipmentId}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            and r.acquisition_time >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and r.acquisition_time <= #{endTime} ]]>
+        </if>
+    </sql>
+
+    <select id="listMeasurePoint" parameterType="com.escst.highformwork.vo.HighformworkRealTimeVo"
+            resultType="com.escst.highformwork.vo.HighformworkRealTimeVo">
+        SELECT
+            e.id     AS equipmentId,
+            e.NAME   AS equipmentName,
+            e.number AS number
+        FROM
+            t_highformwork_equipment e inner join t_highformwork_flow_equipment fe
+                on e.id = fe.equipment_id
+        WHERE
+            fe.flow_id = #{flowId}
+    </select>
+
+    <select id="selectAlarmDetail" parameterType="map"
+            resultType="com.escst.highformwork.vo.HighformworkRealTimeVo">
+        SELECT
+        r.x_angle xAngle,
+        r.y_angle yAngle,
+        r.kpa kpa,
+        r.displace displace,
+        r.temperature temperature,
+        r.electric electric,
+        e.id as equipmentId,
+        e.`name` equipmentName,
+        e.number number,
+        r.create_time as createTime,
+        r.x_type AS xType,
+        r.y_type yType,
+        r.kpa_type kpaType,
+        r.displace_type displaceType,
+        r.temperature_type temperatureType,
+        r.electric_type electricType,
+        f.file_id as fileId,
+        r.type
+        FROM
+        t_highformwork_realtime r
+        LEFT JOIN t_highformwork_equipment e ON r.equipment_id = e.id
+        LEFT JOIN t_highformwork_flow_equipment fe on r.equipment_id = fe.equipment_id
+        LEFT JOIN t_highformwork_flow f on fe.flow_id = f.id
+        WHERE
+        f.id = #{flowId}
+        <if test="startTime != null and startTime != ''">
+            and r.acquisition_time >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and r.acquisition_time <= #{endTime} ]]>
+        </if>
+        AND (
+        r.x_type = #{type}
+        OR r.y_type = #{type}
+        OR r.kpa_type = #{type}
+        OR r.displace_type = #{type}
+        OR r.temperature_type = #{type}
+        OR r.electric_type = #{type}
+        )
+    </select>
+
+    <select id="listFlow" parameterType="com.escst.highformwork.vo.HighformworkRealTimeVo"
+            resultType="com.escst.highformwork.vo.HighformworkFlowVo">
+        select
+        distinct f.id as flowId,
+        f.name as flowName,
+        ifnull(DATE_FORMAT(f.start_time,'%Y-%m-%d %H'),'') as startTime,
+        ifnull(DATE_FORMAT(f.end_time,'%Y-%m-%d %H'),'') as endTime
+        from t_highformwork_flow f inner join t_highformwork_flow_equipment fe on f.id = fe.flow_id
+        where f.construction_id = #{constructionId}
+        <if test="warning != null and warning != ''">
+            and fe.flow_status = 1
+        </if>
+        order by f.create_time desc
+    </select>
+
+    <select id="listFlowTree" parameterType="string" resultType="com.escst.highformwork.vo.HighformworkFlowVo">
+        select
+            id   as flowId,
+            name as flowName
+        from t_highformwork_flow
+        where construction_id = #{constructionId}
+        order by create_time desc
+    </select>
+
+    <select id="getTime" parameterType="string" resultType="com.escst.highformwork.vo.HighformworkFlowVo">
+        select
+            id                                                   as flowId,
+            name                                                 as flowName,
+            ifnull(DATE_FORMAT(start_time, '%Y-%m-%d %H'), '') as startTime,
+            ifnull(DATE_FORMAT(end_time, '%Y-%m-%d %H'), '')   as endTime
+        from t_highformwork_flow
+        where id = #{flowId}
+    </select>
+
+</mapper>

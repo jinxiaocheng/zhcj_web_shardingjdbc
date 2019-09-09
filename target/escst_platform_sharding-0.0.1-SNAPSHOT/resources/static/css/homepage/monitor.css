@@ -1,0 +1,677 @@
+.green {
+  color: #48ff89 !important;
+  text-shadow: 0 0 6px #48ff89 !important;
+}
+body {
+  background: #020619;
+}
+body .biyue-body {
+  background-image: -webkit-radial-gradient(circle at top, #2c213d, #0f0e23);
+  background-image: radial-gradient(circle at top, #2c213d, #0f0e23);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  overflow: auto;
+}
+body .biyue-body .body-box {
+  width: 100%;
+  height: 100%;
+  min-width: 1920px;
+  min-height: 850px;
+  position: relative;
+}
+body .biyue-body .body-box header.header {
+  width: 100%;
+  height: 80px;
+  position: relative;
+  background: url("../../images/monitor/bt.png") no-repeat;
+  background-size: cover;
+}
+body .biyue-body .body-box header.header .other {
+  width: 100%;
+  height: 46px;
+  position: absolute;
+  top: 7px;
+  left: 0;
+  font-size: 0;
+  letter-spacing: 0;
+}
+body .biyue-body .body-box header.header .other .weather {
+  width: 40%;
+  height: 40px;
+  line-height: 40px;
+  display: inline-block;
+  background-size: 100% auto;
+  position: absolute;
+  left: 0;
+  color: #fff;
+  text-shadow: 0 0 5px #fff;
+  font-size: 22px;
+  letter-spacing: 2px;
+}
+body .biyue-body .body-box header.header .other .weather i {
+  position: absolute;
+  left: 20px;
+  top: 2px;
+}
+body .biyue-body .body-box header.header .other .weather span {
+  margin: 0 6px 0 74px;
+}
+body .biyue-body .body-box header.header .other .time {
+  width: 40%;
+  height: 40px;
+  line-height: 40px;
+  display: inline-block;
+  background-size: 100% auto;
+  position: absolute;
+  right: 0;
+  color: #fff;
+  text-shadow: 0 0 5px #fff;
+  font-size: 22px;
+  letter-spacing: 2px;
+  text-align: right;
+}
+body .biyue-body .body-box header.header .other .time i {
+  position: absolute;
+  right: 280px;
+  top: -3px;
+}
+body .biyue-body .body-box header.header .other .time span {
+  margin: 0 24px 0 6px;
+}
+body .biyue-body .body-box header.header .title {
+  width: 700px;
+  height: 100%;
+  position: relative;
+  margin: auto;
+  z-index: 1000;
+}
+body .biyue-body .body-box header.header .title span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  font-size: 28px;
+  letter-spacing: 5px;
+  line-height: 70px;
+  color: #69caff;
+  text-shadow: 0 0 4px #69caff;
+  text-align: center;
+}
+body .biyue-body .body-box header.header .title i {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border: 1px solid #79a3bf;
+}
+body .biyue-body .body-box header.header .title .lt {
+  box-shadow: 1px 1px 1px #89bad6 inset;
+  border-right: transparent;
+  border-bottom: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+body .biyue-body .body-box header.header .title .rt {
+  box-shadow: -1px 1px 1px #89bad6 inset;
+  border-left: transparent;
+  border-bottom: transparent;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+body .biyue-body .body-box header.header .title .lb {
+  box-shadow: 1px -1px 1px #89bad6 inset;
+  border-right: transparent;
+  border-top: transparent;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+body .biyue-body .body-box header.header .title .rb {
+  box-shadow: -1px -1px 1px #89bad6 inset;
+  border-left: transparent;
+  border-top: transparent;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+body .biyue-body .body-box .content {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 80px;
+}
+body .biyue-body .body-box .content .m-box {
+  position: relative;
+  background: rgba(0, 31, 129, 0.1);
+  border: 2px solid #142f58;
+}
+body .biyue-body .body-box .content .m-box .m-title {
+  width: 100%;
+  border: 2px solid #2176ab;
+  background: #0a1e53;
+  height: 40px;
+  line-height: 36px;
+  letter-spacing: 4px;
+  color: #fff;
+  text-shadow: 0 0 5px #fff;
+  padding-left: 35px;
+  box-sizing: border-box;
+  font-size: 16px;
+  position: relative;
+}
+body .biyue-body .body-box .content .m-box .m-title i {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #dfdfdf;
+  position: absolute;
+  left: 16px;
+  top: 13px;
+  box-shadow: 0 0 5px #fff;
+}
+body .biyue-body .body-box .content .m-box .m-title i.blue {
+  background: #10f1ff;
+  box-shadow: 0 0 5px #10f1ff;
+}
+body .biyue-body .body-box .content .m-box .m-title i.yellow {
+  background: #ffd97f;
+  box-shadow: 0 0 5px #ffd97f;
+}
+body .biyue-body .body-box .content .m-box .m-title u {
+  display: block;
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  border-bottom: 20px solid #151433;
+  border-left: 20px solid transparent;
+  border-right: 0px solid transparent;
+}
+body .biyue-body .body-box .content .m-box .m-title u span {
+  display: block;
+  position: absolute;
+  background: #2176ab;
+  height: 27px;
+  width: 2px;
+  left: -11px;
+  top: -4px;
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+body .biyue-body .body-box .content .m-box .lt {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  border: 2px solid #0955a0;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px 0 0 0;
+  border-right: transparent;
+  border-bottom: transparent;
+}
+body .biyue-body .body-box .content .m-box .rt {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  border: 2px solid #0955a0;
+  width: 12px;
+  height: 12px;
+  border-radius: 0 3px 0 0;
+  border-left: transparent;
+  border-bottom: transparent;
+}
+body .biyue-body .body-box .content .m-box .lb {
+  position: absolute;
+  bottom: -2px;
+  left: -2px;
+  border: 2px solid #0955a0;
+  width: 12px;
+  height: 12px;
+  border-radius: 0 0 0 3px;
+  border-right: transparent;
+  border-top: transparent;
+}
+body .biyue-body .body-box .content .m-box .rb {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  border: 2px solid #0955a0;
+  width: 12px;
+  height: 12px;
+  border-radius: 0 0 3px 0;
+  border-left: transparent;
+  border-top: transparent;
+}
+body .biyue-body .body-box .content .count {
+  width: 100%;
+  font-size: 0;
+  letter-spacing: 0;
+}
+body .biyue-body .body-box .content .count > div {
+  display: inline-block;
+  margin: 0 0.5%;
+  height: 180px;
+  width: 22%;
+  font-size: 16px;
+}
+body .biyue-body .body-box .content .count .startTime .text-box {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+body .biyue-body .body-box .content .count .startTime .text-box i.icon-box {
+  position: absolute;
+  left: 35px;
+  top: 40px;
+  display: block;
+  width: 80px;
+  height: 80px;
+  background: url("../../images/monitor/ks.png") no-repeat;
+  background-size: contain;
+}
+body .biyue-body .body-box .content .count .startTime .text-box p.title-box {
+  position: absolute;
+  color: #fff;
+  text-shadow: 0 0 5px #fff;
+  font-size: 18px;
+  left: 130px;
+  top: 35px;
+  letter-spacing: 3px;
+}
+body .biyue-body .body-box .content .count .startTime .text-box p.content-box {
+  position: absolute;
+  letter-spacing: 2px;
+  font-size: 38px;
+  color: #48ff89;
+  text-shadow: 0 0 5px #48ff89;
+  top: 95px;
+  left: 130px;
+}
+body .biyue-body .body-box .content .count .endTime .text-box {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+body .biyue-body .body-box .content .count .endTime .text-box i.icon-box {
+  position: absolute;
+  left: 35px;
+  top: 50px;
+  display: block;
+  width: 80px;
+  height: 80px;
+  background: url("../../images/monitor/js.png") no-repeat;
+  background-size: contain;
+}
+body .biyue-body .body-box .content .count .endTime .text-box p.title-box {
+  position: absolute;
+  color: #fff;
+  text-shadow: 0 0 5px #fff;
+  font-size: 18px;
+  left: 130px;
+  top: 35px;
+  letter-spacing: 3px;
+}
+body .biyue-body .body-box .content .count .endTime .text-box p.content-box {
+  position: absolute;
+  letter-spacing: 2px;
+  font-size: 38px;
+  color: #ff8484;
+  text-shadow: 0 0 5px #ff8484;
+  top: 95px;
+  left: 130px;
+}
+body .biyue-body .body-box .content .count .dayNum .text-box {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+body .biyue-body .body-box .content .count .dayNum .text-box i.icon-box {
+  position: absolute;
+  left: 35px;
+  top: 50px;
+  display: block;
+  width: 80px;
+  height: 80px;
+  background: url("../../images/monitor/sj.png") no-repeat;
+  background-size: contain;
+}
+body .biyue-body .body-box .content .count .dayNum .text-box p.title-box {
+  position: absolute;
+  color: #fff;
+  text-shadow: 0 0 5px #fff;
+  font-size: 18px;
+  left: 130px;
+  top: 35px;
+  letter-spacing: 3px;
+}
+body .biyue-body .body-box .content .count .dayNum .text-box p.content-box {
+  position: absolute;
+  letter-spacing: 2px;
+  font-size: 38px;
+  color: #ffd97f;
+  text-shadow: 0 0 5px #ffd97f;
+  top: 95px;
+  left: 130px;
+}
+body .biyue-body .body-box .content .count .dayNum .text-box p.content-box span {
+  font-size: 30px;
+  position: relative;
+  top: -4px;
+  left: -6px;
+}
+body .biyue-body .body-box .content .count .progress {
+  width: 29%;
+}
+body .biyue-body .body-box .content .count .progress .text-box {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+body .biyue-body .body-box .content .count .progress .text-box i.icon-box {
+  position: absolute;
+  left: 35px;
+  top: 50px;
+  display: block;
+  width: 80px;
+  height: 80px;
+  background: url("../../images/monitor/tj.png") no-repeat;
+  background-size: contain;
+}
+body .biyue-body .body-box .content .count .progress .text-box p.title-box {
+  position: absolute;
+  color: #fff;
+  text-shadow: 0 0 5px #fff;
+  font-size: 18px;
+  left: 130px;
+  top: 35px;
+  letter-spacing: 3px;
+}
+body .biyue-body .body-box .content .count .progress .text-box div.content-box {
+  position: absolute;
+  letter-spacing: 2px;
+  font-size: 38px;
+  color: #c898ff;
+  text-shadow: 0 0 5px #c898ff;
+  top: 95px;
+  left: 130px;
+  width: 70%;
+}
+body .biyue-body .body-box .content .count .progress .text-box div.content-box .pro-box {
+  width: 100%;
+  height: 35px;
+  border: 1px solid #2176ab;
+  background: #0a1e53;
+}
+body .biyue-body .body-box .content .count .progress .text-box div.content-box .pro-box .pro-bar {
+  -webkit-transition: width 1s;
+  -moz-transition: width 1s;
+  -ms-transition: width 1s;
+  -o-transition: width 1s;
+  transition: width 1s;
+  height: 100%;
+  box-shadow: 0 0 10px #349dc3;
+  background: -webkit-linear-gradient(right, #b831ff, #429aef);
+  background: -o-linear-gradient(right, #b831ff, #429aef);
+  background: -moz-linear-gradient(right, #b831ff, #429aef);
+  background: -mos-linear-gradient(right, #b831ff, #429aef);
+  background: linear-gradient(right, #b831ff, #429aef);
+}
+body .biyue-body .body-box .content .count .progress .text-box div.content-box .pro-num {
+  position: absolute;
+  left: 64%;
+  top: -68px;
+}
+body .biyue-body .body-box .content .count .progress .text-box div.content-box span {
+  font-size: 38px;
+  position: relative;
+  top: -4px;
+  left: -6px;
+}
+body .biyue-body .body-box .content .danger {
+  position: absolute;
+  top: 225px;
+  left: 30px;
+  bottom: 20px;
+  width: 760px;
+  box-sizing: border-box;
+}
+body .biyue-body .body-box .content .danger .text-box {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  padding: 20px;
+  box-sizing: border-box;
+}
+body .biyue-body .body-box .content .danger .main-box {
+  position: absolute;
+  top: 80px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  overflow: hidden;
+}
+body .biyue-body .body-box .content .danger .main-box .danger-box {
+  width: 100%;
+  position: relative;
+}
+body .biyue-body .body-box .content .danger .main-box .danger-box .list-box {
+  width: 100%;
+  border-bottom: 1px solid #5973b7;
+  position: relative;
+  min-height: 100px;
+  padding-left: 20px;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+}
+body .biyue-body .body-box .content .danger .main-box .danger-box .list-box li {
+  white-space: pre-line;
+}
+body .biyue-body .body-box .content .danger .main-box .danger-box .list-box .c-icon {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 80px;
+  text-align: center;
+}
+body .biyue-body .body-box .content .danger .main-box .danger-box .list-box .c-icon img {
+  width: 55%;
+}
+body .biyue-body .body-box .content .danger .main-box .danger-box .list-box .c-title {
+  color: #10f1ff;
+  font-size: 22px;
+  letter-spacing: 5px;
+  text-shadow: 0px 0px 4px #10f1ff;
+  margin-bottom: 15px;
+}
+body .biyue-body .body-box .content .danger .main-box .danger-box .list-box .c-content {
+  color: #fff;
+  line-height: 22px;
+  font-size: 16px;
+  letter-spacing: 3px;
+}
+body .biyue-body .body-box .content .danger .main-box .danger-box .list-box:last-of-type {
+  border-bottom: none;
+}
+body .biyue-body .body-box .content .safe {
+  position: absolute;
+  top: 225px;
+  left: 810px;
+  bottom: 20px;
+  right: 32px;
+}
+body .biyue-body .body-box .content .safe .text-box {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  padding: 20px;
+  box-sizing: border-box;
+}
+body .biyue-body .body-box .content .safe .main-box {
+  position: absolute;
+  top: 80px;
+  left: 0px;
+  right: 0px;
+  bottom: 20px;
+  overflow: hidden;
+}
+body .biyue-body .body-box .content .safe .main-box > ul {
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+  position: relative;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li {
+  border: 2px solid #2176ab;
+  border-radius: 5px;
+  min-height: 200px;
+  color: #fff;
+  letter-spacing: 3px;
+  padding: 15px 10px;
+  position: relative;
+  margin-bottom: 20px;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li .b-title {
+  color: #10f1ff;
+  text-shadow: 0 0 5px #10f1ff;
+  position: relative;
+  padding-left: 40px;
+  letter-spacing: 4px;
+  font-size: 15px;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li .b-title i {
+  display: block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ff8484;
+  position: absolute;
+  left: 16px;
+  top: 5px;
+  box-shadow: 0 0 10px #10f1ff;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li .b-content {
+  padding-left: 40px;
+  padding-right: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  line-height: 24px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li .team {
+  width: 60%;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li .person {
+  position: absolute;
+  left: 60%;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li .person .check_person {
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 50%;
+  text-align: center;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li .person .duty_person {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  right: 0;
+  text-align: center;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li .person .line {
+  width: 2px;
+  background: #2176ab;
+  position: absolute;
+  left: 10px;
+  top: 20px;
+  bottom: 20px;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li .person .type {
+  font-size: 16px;
+  position: absolute;
+  width: 180px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  border-radius: 35px;
+  border: 2px solid #10f1ff;
+  top: 50%;
+  left: 50%;
+  margin-left: -90px;
+  box-shadow: 0 0 10px #10f1ff, 0 0 35px #007a82 inset;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li .type.green {
+  color: #48ff89;
+  text-shadow: 0 0 5px #48ff89;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li .type.red {
+  color: #ff8484;
+  text-shadow: 0 0 5px #ff8484;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li .type.yellow {
+  color: #ffd97f;
+  text-shadow: 0 0 5px #ffd97f;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li .type.zs {
+  color: #c898ff;
+  text-shadow: 0 0 5px #c898ff;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li .type.blue {
+  color: #10f1ff;
+  text-shadow: 0 0 5px #10f1ff;
+}
+body .biyue-body .body-box .content .safe .main-box > ul li:nth-of-type(2n) {
+  background: transparent;
+}
+body .biyue-body .body-box .content .safe .main-box > ul .c-title span {
+  font-size: 24px;
+  letter-spacing: 6px;
+  color: #10f1ff !important;
+  text-shadow: 0 0 4px #10f1ff !important;
+}
+body .m-null {
+  position: absolute;
+  color: #fff;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  text-align: center;
+  letter-spacing: 4px;
+  text-shadow: 0 0 4px #fff;
+}
+/* 美化滚动条*/
+::-webkit-scrollbar-track {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0);
+}
+::-webkit-scrollbar-thumb {
+  background-color: #bde6ff;
+  border-radius: 1px;
+  -webkit-box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1);
+}
+::-webkit-scrollbar {
+  width: 4px;
+  height: 8px;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}

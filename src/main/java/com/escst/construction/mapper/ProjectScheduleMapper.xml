@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.construction.mapper.ProjectScheduleMapper">
+
+    <select id="selectMapList" parameterType="com.escst.construction.entity.ProjectScheduleEntity" resultType="map">
+        SELECT
+        a.id AS id,
+        a.scheduled_plan_id scheduledPlanId,
+        a.name AS name,
+        (
+        SELECT
+        c. NAME
+        FROM
+        t_basic_construction c
+        WHERE
+        c.id = a.construction_id
+        LIMIT 1
+        ) AS constructionName,
+        a.plan_days AS planDays,
+        ifnull(a.real_days,0) AS realDays,
+        a.percent AS percent,
+        a.`status` status,
+        b.start_time startTime
+        FROM
+        t_basic_project_schedule a INNER JOIN t_basic_scheduled_plan b on a.scheduled_plan_id=b.id
+        <include refid="conditionWhere"></include>
+        order by b.sort_num
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <select id="selectMapCount" parameterType="com.escst.construction.entity.ProjectScheduleEntity"
+            resultType="Integer">
+        SELECT
+        count(1)
+        FROM
+        t_basic_project_schedule a INNER JOIN t_basic_scheduled_plan b on a.scheduled_plan_id=b.id
+        <include refid="conditionWhere"></include>
+    </select>
+
+    <sql id="conditionWhere">
+        <where>
+            a.construction_id = #{constructionId}
+            <choose>
+                <when test="parentId!=null and parentId!=''">
+                    and b.parent_id=#{parentId}
+                </when>
+                <otherwise>
+                    and b.parent_id='0'
+                </otherwise>
+            </choose>
+            <if test="name!=null and name!=''">
+                and b.name LIKE CONCAT("%",#{name},"%")
+            </if>
+        </where>
+    </sql>
+
+    <insert id="batchInsert" parameterType="map">
+        INSERT INTO t_basic_project_schedule(
+        `id`,
+        `scheduled_plan_id`,
+        `construction_id`,
+        `name`,
+        `plan_days`,
+        `real_days`,
+        `percent`,
+        `status`,
+        `create_time`,
+        `create_by`,
+        `update_time`,
+        `update_by`
+        )
+        VALUES
+        <foreach collection="list" item="item" index="" separator=",">
+            (
+            #{item.id},
+            #{item.scheduledPlanId},
+            #{item.constructionId},
+            #{item.name},
+            #{item.planDays},
+            #{item.realDays},
+            #{item.percent},
+            #{item.status},
+            #{item.createTime},
+            #{item.createBy},
+            #{item.updateTime},
+            #{item.updateBy}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateStatus" parameterType="String">
+        UPDATE t_basic_project_schedule
+        SET status = 2, percent = 100
+        WHERE scheduled_plan_id = #{id}
+    </update>
+
+    <sql id="param">
+        id as id,
+        scheduled_plan_id as scheduledPlanId,
+        construction_id as constructionId,
+        name,
+        plan_days as planDays,
+        real_days as realDays,
+        percent,
+        status
+    </sql>
+
+    <select id="selectById" parameterType="String" resultType="com.escst.construction.entity.ProjectScheduleEntity">
+        SELECT
+        <include refid="param"></include>
+        FROM t_basic_project_schedule
+        where scheduled_plan_id = #{id}
+    </select>
+
+    <update id="update" parameterType="com.escst.construction.entity.ProjectScheduleEntity">
+        UPDATE t_basic_project_schedule
+        <set>
+            <if test="percent != null and percent != ''">
+                <![CDATA[ percent = #{percent} ]]>,
+            </if>
+            <if test="status != null and status != ''">
+                `status` = #{status}
+            </if>
+        </set>
+        where scheduled_plan_id = #{id}
+    </update>
+
+    <update id="updateSubTreeStatus" parameterType="String">
+        update t_basic_project_schedule t
+        set t.percent = '100', t.status = 2
+        where
+            t.scheduled_plan_id IN (
+                SELECT tmp.id
+                from (SELECT p.id
+                      FROM
+                          t_basic_scheduled_plan p
+                          LEFT JOIN t_basic_project_schedule s ON p.parent_id = s.scheduled_plan_id
+                      WHERE
+                          s.scheduled_plan_id = #{id}) tmp
+            )
+    </update>
+
+    <!--修改工程进度名称，计划工期,实际工期-->
+    <update id="updateNameAndDays" parameterType="com.escst.construction.entity.ProjectScheduleEntity">
+        update t_basic_project_schedule t
+        set t.name = #{name}, t.plan_days = #{planDays}, t.real_days = #{realDays}
+        where scheduled_plan_id = #{scheduledPlanId}
+    </update>
+
+    <!--删除工程进度-->
+    <delete id="batchDelete" parameterType="com.escst.construction.vo.ScheduledPlanTree">
+        delete from t_basic_project_schedule where scheduled_plan_id in
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item.id}
+        </foreach>
+    </delete>
+
+    <!--添加工程进度-->
+    <insert id="insert" parameterType="com.escst.construction.entity.ProjectScheduleEntity">
+        INSERT INTO t_basic_project_schedule (
+            `id`,
+            `scheduled_plan_id`,
+            `construction_id`,
+            `name`,
+            `plan_days`,
+            `real_days`,
+            `percent`,
+            `status`,
+            `create_time`,
+            `create_by`,
+            `update_time`,
+            `update_by`
+        )
+        VALUES (
+            #{id},
+            #{scheduledPlanId},
+            #{constructionId},
+            #{name},
+            #{planDays},
+            #{realDays},
+            #{percent},
+            #{status},
+            #{createTime},
+            #{createBy},
+            #{updateTime},
+            #{updateBy}
+        )
+    </insert>
+
+    <select id="selectCount" parameterType="com.escst.construction.entity.ProjectScheduleEntity" resultType="Integer">
+        SELECT
+        count(1)
+        FROM
+        t_basic_project_schedule a
+        LEFT JOIN t_basic_construction b ON a.construction_id = b.id
+        inner join t_basic_scheduled_plan p on a.scheduled_plan_id = p.id
+        <include refid="sql"></include>
+    </select>
+
+    <sql id="sql">
+        <where>
+            a.construction_id = #{constructionId}
+            <if test="name!=null and name!=''">
+                and a.name like '%${name}%'
+            </if>
+            <choose>
+                <when test="id != null and id != '' ">
+                    and p.parent_id = #{id}
+                </when>
+                <otherwise>
+                    and p.parent_id = '0'
+                </otherwise>
+            </choose>
+        </where>
+    </sql>
+
+    <!--查询工程进度树-->
+    <select id="listProjectScheduleTree" parameterType="com.escst.construction.entity.ProjectScheduleEntity"
+            resultType="com.escst.construction.entity.ProjectScheduleEntity">
+        SELECT
+        a.scheduled_plan_id as id,
+        a.construction_id as constructionId,
+        a.name AS name,
+        p.parent_id as pId,
+        a.plan_days as planDays,
+        a.real_days as realDays,
+        ifnull(a.percent,0) as percent,
+        a.status as status,
+        b.name AS constructionName
+        FROM
+        t_basic_project_schedule a
+        LEFT JOIN t_basic_construction b ON a.construction_id = b.id
+        inner join t_basic_scheduled_plan p on a.scheduled_plan_id = p.id
+        <include refid="sql"></include>
+        order by p.sort_num
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <!--判断是否为父节点-->
+    <select id="isParent" parameterType="com.escst.construction.entity.ProjectScheduleEntity"
+            resultType="com.escst.construction.entity.ProjectScheduleEntity">
+        SELECT
+        count( 1 ) as count,
+        parent_id as pId
+        FROM
+        t_basic_scheduled_plan
+        WHERE
+        parent_id IN
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item.id}
+        </foreach>
+        GROUP BY
+        parent_id
+    </select>
+
+    <!--查询工程进度所有的id,父id-->
+    <select id="listAll" parameterType="com.escst.construction.entity.ProjectScheduleEntity" resultType="com.escst.construction.entity.ProjectScheduleEntity">
+        SELECT
+            s.scheduled_plan_id as id,
+            p.parent_id as pId
+        FROM t_basic_project_schedule s inner join t_basic_scheduled_plan p on s.scheduled_plan_id = p.id
+        WHERE s.construction_id = #{constructionId}
+    </select>
+
+    <!--批量修改工程进度为已完成-->
+    <update id="batchUpdate" parameterType="com.escst.construction.entity.ProjectScheduleEntity">
+        update t_basic_project_schedule t
+        set t.percent = '100', t.status = 2
+        where
+            t.scheduled_plan_id IN
+        <foreach item="item" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{item.id}
+        </foreach>
+    </update>
+
+</mapper>

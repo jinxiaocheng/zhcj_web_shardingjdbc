@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>    
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.role.mapper.RoleMapper">
+
+	<select id="selectByCondition" parameterType="com.escst.role.bean.RoleQueryBean"
+		resultType="map">
+		SELECT
+		t.id,
+		IFNULL(t.name, "") name,
+		IFNULL(t.remark, "") remark,
+		IFNULL(t.org_id, "") orgId,
+		IFNULL(t2. NAME, "") orgName
+		FROM
+		t_sys_role t
+		LEFT JOIN t_sys_organization t2 ON t.org_id = t2.id 
+		<include refid="commonCondition"></include>
+		order by t.create_time desc
+        LIMIT #{startIndex},#{rowNum}
+	</select>
+
+	<select id="selectCount" parameterType="com.escst.role.bean.RoleQueryBean"
+		resultType="Integer">
+		SELECT count(1) FROM t_sys_role t LEFT JOIN t_sys_organization t2 ON
+		t.org_id = t2.id 
+		<include refid="commonCondition"></include>
+	</select>
+
+	<sql id="commonCondition">
+		<where>
+			<if test="orgId!=null and orgId!=''">
+				<choose>
+					<when test="constructionId!=null and constructionId!=''">
+						t2.construction_id=#{constructionId} or t.org_id is null
+					</when>
+					<otherwise>
+						t.org_id=#{orgId}
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+	<insert id="insert" parameterType="com.escst.role.entity.RoleEntity">
+		INSERT INTO t_sys_role (
+		`id`,
+		`name`,
+		`remark`,
+		`org_id`,
+		`create_time`,
+		`create_by`,
+		`update_time`,
+		`update_by`
+		)
+		VALUES
+		(
+		#{id},
+		#{name},
+		#{remark},
+		#{orgId},
+		current_timestamp(),
+		#{createBy},
+		current_timestamp(),
+		#{updateBy}
+		);
+	</insert>
+	
+	<select id="selectMapById" parameterType="String" resultType="map">
+		select a.id,a.name as name, a.org_id as orgId,b.name as orgName 
+		from t_sys_role a LEFT JOIN t_sys_organization b on a.org_id = b.id
+		where a.id = #{id}
+	</select>
+	
+	<select id="selectById" parameterType="String" resultType="com.escst.role.entity.RoleEntity">
+		select a.id,a.name as name,a.org_id as orgId
+		from t_sys_role a where a.id = #{id}
+	</select>
+	
+	
+ 	<update id="update" parameterType="com.escst.role.entity.RoleEntity">
+        UPDATE t_sys_role
+        <set>
+            <if test="name != null and name != '' ">
+                name = #{name},
+            </if>
+            update_time = #{updateTime},
+            update_by = #{updateBy}
+        </set>
+        WHERE ID = #{id}
+    </update>
+
+	<select id="getCount" parameterType="com.escst.role.bean.RoleQueryBean" resultType="int">
+		SELECT count(1) FROM t_sys_role t WHERE org_id = #{orgId}
+	</select>
+
+	<select id="queryByCondition" parameterType="com.escst.role.bean.RoleQueryBean"
+			resultType="map">
+		SELECT
+		t.id,
+		IFNULL(t.name, "") name,
+		IFNULL(t.remark, "") remark,
+		IFNULL(t.org_id, "") orgId,
+		IFNULL(t2.NAME, "") orgName,
+		IFNULL(t.create_time, "") createTime
+		FROM
+		t_sys_role t LEFT JOIN t_sys_organization t2 ON t.org_id = t2.id
+		WHERE org_id = #{orgId}
+		LIMIT #{startIndex},#{rowNum}
+	</select>
+
+	<select id="queryByUserId" parameterType="String" resultType="String">
+	SELECT  role_id as roleId from t_sys_user_role WHERE  user_id =#{userId}
+	</select>
+
+	<delete id="deleteByOrgId" parameterType="string">
+		DELETE FROM t_sys_role WHERE org_id = #{orgId}
+	</delete>
+</mapper>

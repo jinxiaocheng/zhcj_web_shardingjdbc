@@ -1,0 +1,11 @@
+.toolbar.group-box {
+  height: 60px;
+  box-sizing: border-box;
+  padding: 15px;
+}
+.toolbar.group-box .win-box {
+  float: right;
+}
+#pop canvas {
+  width: 100%;
+}

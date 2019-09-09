@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="${ctx}/resources/static/plugins/zTree/v3/css/zTreeStyle/zTreeStyle.css">
+    <link rel="stylesheet" href="${ctx}/resources/static/plugins/layui/css/layui.css">
+    <style>
+        *{
+            margin: 0;padding:0;
+        }
+        .list{
+            width: 350px;
+            height: 100%;
+            position: absolute;
+            top:0;
+            left:0;
+            box-sizing: border-box;
+            padding: 10px;
+        }
+        .content{
+            width: 100%;
+            height: 100%;
+            padding-left: 400px;
+            padding-right: 100px;
+            box-sizing: border-box;
+        }
+        .footer{
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+        }
+        .list_name{
+            width:30%;
+            float: left;
+
+        }
+        .list_content{
+            width:70%;
+            float: left;
+        }
+        .list_name>p,.list_content>div{
+            height: 30px;
+            margin-bottom: 10px;
+        }
+        #useName{
+            height: 25px;
+            width: 70%;
+            border-radius: 2px;
+            border: 1px solid #808080;
+            text-indent: 5px;
+        }
+        .footer>button{
+            width: 80px;
+            height: 30px;
+            line-height: 30px;
+            border-radius: 6px;
+            border: 1px solid #808080;
+            cursor: pointer;
+            background: #fff;
+            margin:0 20px;
+        }
+        .footer>button:hover{
+            background: #dfdfdf;
+        }
+        .content_table{min-height: 400px;width: 100%;}
+        .content_table input[type="checkbox"]{
+            margin-right: 5px;
+            position: relative;
+            top:2px;
+        }
+        .content_table label{
+            margin-right: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="list">
+    <div class="list_name">
+        <p>角色名称：</p>
+        <p>所属机构：</p>
+        <p>权限：</p>
+    </div>
+    <div class="list_content">
+        <div><input id="useName" type="text" placeholder="定义您的角色名称"/></div>
+        <div><p id="org">武汉市建委</p></div>
+        <div class="Tree" style="width: 500px; height: 250px; float: left;">
+            <ul id="tree" class="ztree"></ul>
+        </div>
+    </div>
+</div>
+<div class="content">
+    <div class="content_table">
+        <table class="layui-table">
+            <colgroup>
+                <col width="150">
+                <col width="200">
+                <col>
+            </colgroup>
+            <thead>
+            <tr>
+                <th>父菜单</th>
+                <th>菜单名称</th>
+                <th>权限</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+    <div class="footer">
+        <button id="my_ture">确定</button>
+        <button id="my_false">取消</button>
+    </div>
+</div>
+
+<script src="${ctx}/resources/static/plugins/zTree/v3/js/jquery-1.4.4.min.js"></script>
+<script src="${ctx}/resources/static/plugins/zTree/v3/js/jquery.ztree.core-3.5.min.js"></script>
+<script src="${ctx}/resources/static/plugins/zTree/v3/js/jquery.ztree.excheck-3.5.min.js"></script>
+<script src="${ctx}/resources/static/plugins/layui/layui.js"></script>
+<script type="text/javascript">
+    var zTree,treeObj,dataArray=[],$table;
+    var setting = {
+        view: {
+            showLine: true,
+            selectedMulti: false //不可多选
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "id",
+                pIdKey: "pId",
+                rootPId: 0
+            }
+        },
+        async:{
+            autoParam:["id=catalogID"],
+            otherParam:["type","M"],
+            enable:true,
+            dataType:"json",
+            type:"get",
+            url:"${ctx}/document/queryCatalogTree"
+        },
+        check: {
+            enable: true
+        },
+
+        callback: {
+            onAsyncError: function () {
+                //请求失败处理函数
+                alert('异步加载请求失败!');
+            },
+            onCheck: zTreeOnCheck,
+            onClick: function (event, treeId, treeNode, clickFlag) {
+                treeObj.checkNode(treeNode, !treeNode.checked, true);
+                zTreeOnCheck(event, treeId, treeNode)
+            }
+        }
+    };
+    function zTreeOnCheck(event, treeId, treeNode) {
+        var num=0;
+        if(treeNode.checked){
+            var nodes = treeObj.getCheckedNodes(true);
+            for(var i=0 in nodes){
+                if(!nodes[i].children){
+                    var node_name=nodes[i].name;
+                    if(!dataArray[node_name]){
+                        dataArray[node_name]=[nodes[i].getParentNode().name,node_name,0,0,0];
+                    }
+                }
+            }
+        }else{
+            var TNch=treeNode.children
+            if(TNch){
+                for(var j=0 in TNch){
+                    if(dataArray[TNch[j].name]){
+                        delete  dataArray[TNch[j].name];
+                    }
+                    if(TNch[j].children){
+                        for(var z=0 in TNch[j].children){
+                            if(dataArray[TNch[j].children[z].name]){
+                                delete  dataArray[TNch[j].children[z].name];
+                            }
+                        }
+                    }else{
+                        delete dataArray[treeNode.name];
+                    }
+                }
+            }else{
+                delete dataArray[treeNode.name];
+            }
+        }
+        $table="";
+        function filter(num) {
+            if(num){
+                return "checked"
+            }else{
+                return ""
+            }
+        }
+        for(var k in dataArray){
+            $table+='<tr>'
+            $table+='<td>'+dataArray[k][0]+'</td>'
+            $table+='<td>'+dataArray[k][1]+'</td>'
+            $table+='<td>'
+            $table+='<input type="checkbox" name="'+k+'" id="input_1_'+num+'" title="查询" lay-skin="primary" '+filter(dataArray[k][2])+'><label for="input_1_'+num+'">查询</label>'
+            $table+='<input type="checkbox" name="'+k+'" id="input_2_'+num+'" title="新增" lay-skin="primary" '+filter(dataArray[k][3])+'><label for="input_2_'+num+'">新增</label>'
+            $table+='<input type="checkbox" name="'+k+'" id="input_3_'+num+'" title="编辑" lay-skin="primary" '+filter(dataArray[k][4])+'><label for="input_3_'+num+'">编辑</label>'
+            $table+='</td>'
+            $table+='</tr>'
+            num++
+        }
+        $(".content tbody").html($table);
+        //表单选择
+        $(".content_table input").click(function () {
+            var kk_num=+$(this).attr("id").charAt(6)+1;
+            var kk_name=$(this).attr("name")
+            if($(this).attr("checked")){
+                dataArray[kk_name][kk_num]=1;
+            }else{
+                dataArray[kk_name][kk_num]=0;
+            }
+        })
+    };
+    $(document).ready(function(){
+        var treeNodes="";
+        $.ajax({
+            async : false,
+            cache:false,
+            type: 'GET',
+            dataType : "json",
+            url:"json/test.json",
+            error: function () {
+                console.log('查询目录请求失败!');
+            },
+            success:function(data){
+                treeNodes = data;
+            }
+        });
+        //生成树形图
+        $.fn.zTree.init($("#tree"), setting, treeNodes);
+        treeObj = $.fn.zTree.getZTreeObj("tree");
+        if(treeNodes == '')
+        {
+            console.log('未创建个人目录 !');
+        }
+        //生成复选框控件
+    /*    layui.use('form', function(){
+            var form = layui.form();
+        });*/
+
+
+    });
+    $("#my_ture").click(function () {
+        var useName=$("#useName").val();
+        $.post("url",{username:useName,use_data:dataArray});
+    })
+</script>
+
+
+
+</body>
+</html>

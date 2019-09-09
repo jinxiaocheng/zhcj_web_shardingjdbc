@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.escst.hook.mapper.HookDataMapper">
+
+    <select id="listHook" parameterType="string" resultType="com.escst.hook.vo.HookDataVo">
+        select
+            id   as hookId,
+            name as hookName
+        from t_hook_equipment
+        where construction_id = #{constructionId} and status = 1
+        order by create_time desc
+    </select>
+
+
+    <select id="getRealTimeData" parameterType="string" resultType="com.escst.hook.vo.HookDataVo">
+        select
+            e.id   as                                            hookId,
+            e.name as                                            hookName,
+            c.name as                                            constructionName,
+            date_format(r.acquisition_time, '%Y-%m-%d %H:%i:%s') acquisitionTime,
+            r.extent,
+            r.height
+        from t_da_hook_realtime r left join t_basic_construction c on r.construction_id = c.id
+            left join t_hook_equipment e on r.equipment_id = e.id
+        where r.equipment_id = #{hookId}
+        order by r.acquisition_time desc
+        limit 0, 1
+    </select>
+
+    <select id="countHistoryData" parameterType="com.escst.hook.vo.HookDataVo"
+            resultType="int">
+        select count(r.id)
+        <include refid="condition"></include>
+    </select>
+
+    <select id="listHistoryData" parameterType="com.escst.hook.vo.HookDataVo" resultType="com.escst.hook.vo.HookDataVo">
+        select
+        r.id as id,
+        e.name as hookName,
+        date_format(r.acquisition_time, '%Y-%m-%d %H:%i:%s') acquisitionTime,
+        ifnull(r.height,0) as height,
+        ifnull(r.extent,0) as extent
+        <include refid="condition"></include>
+        order by r.acquisition_time desc
+        limit #{page},#{rowNum}
+    </select>
+
+    <sql id="condition">
+        FROM
+        t_da_hook_realtime r
+        LEFT JOIN t_hook_equipment e ON r.equipment_id = e.id
+        WHERE r.equipment_id = #{hookId}
+        <if test="startTime != null and startTime != ''">
+            and r.acquisition_time >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and r.acquisition_time <= #{endTime} ]]>
+        </if>
+    </sql>
+
+    <select id="getChartData" parameterType="com.escst.hook.vo.HookDataVo" resultType="com.escst.hook.vo.HookDataVo">
+        SELECT
+        ROUND(AVG(extent)) extent,
+        ROUND(AVG(height)) height,
+        HOUR(acquisition_time) acquisitionTime
+        FROM
+        t_da_hook_realtime
+        WHERE
+        equipment_id = #{hookId}
+        <if test="startTime != null and startTime != ''">
+            and acquisition_time >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and acquisition_time <= #{endTime} ]]>
+        </if>
+        GROUP BY
+        HOUR(acquisition_time)
+    </select>
+
+</mapper>

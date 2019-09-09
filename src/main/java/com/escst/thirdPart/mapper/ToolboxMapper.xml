@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.thirdPart.mapper.ToolboxMapper">
+    <update id="batchInsert" parameterType="list">
+        insert into t_safe_training_depart(
+       	`ID`,
+		`OperDate`,
+		`CreateDate`,
+		`AutoID`,
+		`OperUser`,
+		`CreateUser`,
+		`ParentID`,
+		`DepartCode`,
+		`ParentCode`,
+		`DepartName`,
+		`DepartType`,
+		`DepartShortName`,
+		`DepartOrder`,
+		`State`,
+		`DepartSir`,
+		`DepartTel`,
+		`IsEpiboly`,
+		`Remark`,
+		`Phone`,
+		`Charge`,
+		`AreaCode`,
+		`AreaID`,
+		`Finished`,
+		`ItemType`
+        ) values
+        <foreach collection="list" item="item" index="" separator=",">
+            (
+				#{item.id},
+				#{item.operDate},
+				#{item.createDate},
+				#{item.autoID},
+				#{item.operUser},
+				#{item.createUser},
+				#{item.parentID},
+				#{item.departCode},
+				#{item.parentCode},
+				#{item.departName},
+				#{item.departType},
+				#{item.departShortName},
+				#{item.departOrder},
+				#{item.state},
+				#{item.departSir},
+				#{item.departTel},
+				#{item.isEpiboly},
+				#{item.remark},
+				#{item.phone},
+				#{item.charge},
+				#{item.areaCode},
+				#{item.areaID},
+				#{item.finished},
+				#{item.itemType}
+            )
+        </foreach>
+        on duplicate key update ID = values(ID),operDate=values(operDate),operUser=values(operUser),parentID=values(parentID),
+        departCode=values(departCode),departName=values(departName),departType=values(departType),departShortName=values(departShortName),
+        departOrder=values(departOrder),state=values(state),departSir=values(departSir),departTel=values(departTel),isEpiboly=values(isEpiboly),
+        remark=values(remark),phone=values(phone),charge=values(charge),areaCode=values(areaCode),areaID=values(areaID),finished=values(finished),
+        itemType=values(itemType),DepartName=values(departName)
+    </update>
+    
+    <select id="queryList" resultType="com.escst.thirdPart.entity.DepartEntity">
+    	select ID,
+				OperDate,
+				CreateDate,
+				AutoID,
+				OperUser,
+				CreateUser,
+				ParentID,
+				DepartCode,
+				ParentCode,
+				DepartName,
+				DepartType,
+				DepartShortName,
+				DepartOrder,
+				State,
+				DepartSir,
+				DepartTel,
+				IsEpiboly,
+				Remark,
+				Phone,
+				Charge,
+				AreaCode,
+				AreaID,
+				Finished,
+				ItemType
+		FROM t_safe_training_depart
+    </select>
+    
+    <update id="batchInsertCode" parameterType="list">
+        insert into t_safe_training_code(
+       	`ID`,
+		`OperDate`,
+		`CreateDate`,
+		`AutoID`,
+		`OperUser`,
+		`CreateUser`,
+		`CodeName`,
+		`CodeContent`,
+		`CodeOrder`,
+		`Remark`,
+		`KindID`,
+		type
+        ) values
+        <foreach collection="list" item="item" index="" separator=",">
+            (
+				#{item.id},
+				#{item.operDate},
+				#{item.createDate},
+				#{item.autoID},
+				#{item.operUser},
+				#{item.createUser},
+				#{item.codeName},
+				#{item.codeContent},
+				#{item.codeOrder},
+				#{item.remark},
+				#{item.kindID},
+				#{item.type}
+            )
+        </foreach>
+        on duplicate key update ID = values(ID),operDate=values(operDate),operUser=values(operUser),codeName=values(codeName),
+        codeContent=values(codeContent),codeOrder=values(codeOrder),remark=values(remark),kindId=values(kindID),type=values(type)
+    </update>
+</mapper>

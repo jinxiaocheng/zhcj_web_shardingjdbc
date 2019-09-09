@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.escst.teamTime.mapper.TeamTimeMapper">
+
+    <!--查询班组工时统计条数-->
+    <select id="selectCount" parameterType="com.escst.teamTime.VO.TeamTimeVO" resultType="int">
+        SELECT count(*)
+        FROM
+        (
+        SELECT
+        bar.id,
+        bar.attendance_date,
+        bt.NAME,
+        count(DISTINCT bar.person_id),
+        sum(bar.work_time),
+        bar.construction_id,
+        bar.team_id
+        FROM
+        t_basic_attendance_detail bar
+        LEFT JOIN t_basic_team bt ON bar.team_id = bt.id
+        LEFT JOIN t_basic_construction bc on bar.construction_id = bc.id
+        LEFT JOIN t_sys_territory st on bc.belong_area = st.id
+        <include refid="sql"></include>
+        AND EXISTS(
+        SELECT 1
+        FROM
+        t_sys_user u
+        INNER JOIN t_sys_organization p ON p.id = u.org_id
+        INNER JOIN t_sys_organization s
+        ON locate(p.sys_code, s.sys_code) = 1
+        WHERE
+        s.construction_id = bar.construction_id
+        AND u.id = #{userId}
+        )
+        GROUP BY
+        bar.attendance_date,
+        bar.team_id
+        ORDER BY
+        bar.attendance_date DESC
+        ) bar
+    </select>
+
+    <!--查询班组工时数据-->
+    <select id="selectList" parameterType="com.escst.teamTime.VO.TeamTimeVO"
+            resultType="com.escst.teamTime.VO.TeamTimeVO">
+        SELECT
+        bar.id as id,
+        bar.attendance_date as time,
+        bt.NAME as name,
+        count(DISTINCT bar.person_id) as total,
+        IFNULL(sum(bar.work_time),0) as totalTime,
+        bar.construction_id as constructionId,
+        bar.team_id as teamId
+        FROM
+        t_basic_attendance_detail bar
+        LEFT JOIN t_basic_team bt ON bar.team_id = bt.id
+        LEFT JOIN t_basic_construction bc on bar.construction_id = bc.id
+        LEFT JOIN t_sys_territory st on bc.belong_area = st.id
+        <include refid="sql"></include>
+        AND EXISTS(
+        SELECT 1
+        FROM
+        t_sys_user u
+        INNER JOIN t_sys_organization p ON p.id = u.org_id
+        INNER JOIN t_sys_organization s
+        ON locate(p.sys_code, s.sys_code) = 1
+        WHERE
+        s.construction_id = bar.construction_id
+        AND u.id = #{userId}
+        )
+        GROUP BY
+        bar.attendance_date,
+        bar.team_id
+        ORDER BY
+        bar.attendance_date DESC
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <!--查询条件-->
+    <sql id="sql">
+        <where>
+            1=1
+            <if test="areaId != null and areaId != '' ">
+                and st.id = #{areaId}
+            </if>
+            <if test="constructionId!=null and constructionId!=''">
+                and bar.construction_id = #{constructionId}
+            </if>
+            <if test="correctStartDate != null and correctStartDate != '' ">
+                AND bar.attendance_date &gt;= #{correctStartDate}
+            </if>
+            <if test="correctEndDate != null and correctEndDate != '' ">
+                AND bar.attendance_date &lt;= #{correctEndDate}
+            </if>
+        </where>
+    </sql>
+
+    <!--查询工地下当日此班组里的所有人员工时统计-->
+    <select id="selectPersonTimeData" parameterType="com.escst.teamTime.VO.TeamTimeVO"
+            resultType="com.escst.teamTime.VO.TeamTimeVO">
+        SELECT
+        id as id,
+        person_id as personId,
+        person_name AS personName,
+        construction_id AS constructionId,
+        team_id as teamId,
+        attendance_date AS time,
+        up_time as upTime,
+        down_time as downTime,
+        IFNULL(work_time,0) as workTime
+        FROM
+        `t_basic_attendance_detail`
+        WHERE
+        construction_id = #{constructionId}
+        AND attendance_date = #{time}
+        AND team_id = #{teamId}
+        <if test="personName != null and personName != '' ">
+            and person_name like CONCAT('%',#{personName},'%')
+        </if>
+        ORDER BY attendance_date desc
+        LIMIT #{startIndex},#{rowNum}
+    </select>
+
+    <!--查询工地下当日此班组里的所有人员工时统计条数-->
+    <select id="selectPersonTimeDataCount" parameterType="com.escst.teamTime.VO.TeamTimeVO"
+            resultType="int">
+        SELECT
+        count(id)
+        FROM
+        `t_basic_attendance_detail`
+        WHERE
+        construction_id = #{constructionId}
+        AND attendance_date = #{time}
+        AND team_id = #{teamId}
+        <if test="personName != null and personName != '' ">
+            and person_name like CONCAT('%',#{personName},'%')
+        </if>
+        ORDER BY attendance_date desc
+    </select>
+
+
+    <!--查出班组对应的区域，工地，日期信息-->
+    <select id="query" parameterType="string" resultType="com.escst.teamTime.VO.TeamTimeVO">
+        SELECT
+            bar.attendance_date AS time,
+            bc.NAME             AS constructionName,
+            st.name             AS areaName,
+            bt.name             AS teamName
+        FROM
+            t_basic_attendance_detail bar
+            LEFT JOIN t_basic_team bt ON bar.team_id = bt.id
+            LEFT JOIN t_basic_construction bc ON bar.construction_id = bc.id
+            LEFT JOIN t_sys_territory st ON bc.belong_area = st.id
+        WHERE bar.id = #{id}
+    </select>
+
+    <!--查询出勤人员的详细信息-->
+    <select id="select" parameterType="string" resultType="com.escst.teamTime.VO.TeamTimeVO">
+        SELECT
+            bar.attendance_date AS time,
+            bc.NAME             AS constructionName,
+            st.NAME             AS areaName,
+            bt.NAME             AS teamName,
+            bar.person_name     AS personName
+        FROM
+            t_basic_attendance_detail bar
+            LEFT JOIN t_basic_team bt ON bar.team_id = bt.id
+            LEFT JOIN t_basic_construction bc ON bar.construction_id = bc.id
+            LEFT JOIN t_sys_territory st ON bc.belong_area = st.id
+        WHERE
+            bar.id = #{id}
+    </select>
+
+    <!--查询人员考勤明细-->
+    <select id="selectPersonData" parameterType="com.escst.teamTime.VO.TeamTimeVO"
+            resultType="com.escst.teamTime.VO.TeamTimeVO">
+        SELECT
+            bp.NAME           AS personName,
+            bcp.card_number   AS cardNumber,
+            bacr.clock_minute AS cardTime,
+            bacr.type         AS type
+        FROM
+            `t_basic_attendance_clock_record` bacr
+            LEFT JOIN t_basic_person bp ON bacr.person_id = bp.id
+            LEFT JOIN t_basic_construction_person bcp ON bp.id = bcp.person_id
+        WHERE
+            bacr.person_id = #{personId}
+            AND bacr.construction_id = #{constructionId}
+            AND bacr.clock_date = #{time}
+        LIMIT #{startIndex}, #{rowNum}
+    </select>
+
+    <!--查询人员考勤条数-->
+    <select id="selectPersonCount" parameterType="com.escst.teamTime.VO.TeamTimeVO"
+            resultType="int">
+        SELECT count(1)
+        FROM
+            `t_basic_attendance_clock_record` bacr
+            LEFT JOIN t_basic_person bp ON bacr.person_id = bp.id
+            LEFT JOIN t_basic_construction_person bcp ON bp.id = bcp.person_id
+        WHERE
+            bacr.person_id = #{personId}
+            AND bacr.construction_id = #{constructionId}
+            AND bacr.clock_date = #{time}
+    </select>
+
+</mapper>
